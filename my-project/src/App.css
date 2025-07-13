@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/* Layout styles */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  margin-top: 60px; /* Adjust based on your navbar height */
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 10px;
+    margin-top: 50px;
+  }
+}
