@@ -114,6 +114,7 @@ const getAllSubscriptionPlans = async (req, res) => {
     }
 };
 
+
 const getSubscriptionPlanById = async (req, res) => {
     try {
         const { planId } = req.params;

@@ -12,6 +12,13 @@ const orderSchema = new mongoose.Schema({
         ref:"SubscriptionPlan",
         required:true,
     },
+    // New fields for selected duration
+    selectedDuration: {
+        duration: String, // e.g., "1 Month", "3 Months", etc.
+        description: String,
+        price: Number,
+        originalPrice: Number
+    },
     payment:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Payment",

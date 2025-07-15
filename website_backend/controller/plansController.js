@@ -1,16 +1,37 @@
 const SubscriptionPlan = require('../models/SubscriptionPlan');
 
-const getAllPlans = async (req, res) => {
+
+const getPublicPlans = async (req, res) => {
     try {
-        const plans = await SubscriptionPlan.find();
+        const plans = await SubscriptionPlan.find({ isActive: true });
         res.status(200).json({
             success: true,
-            message: "Plans fetched successfully",
+            message: "Public plans fetched successfully",
             plans
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
+const getPublicPlanById = async (req, res) => {
+    try{
+        const {planId } = req.params;
+        const plan = await SubscriptionPlan.findById(planId);
+        if(!plan){
+            return res.status(404).json({
+                success: false,
+                message: "Plan not found"
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Plan fetched successfully",
+            plan
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+    
+};
 
-module.exports = { getAllPlans };
+module.exports = { getPublicPlans, getPublicPlanById };

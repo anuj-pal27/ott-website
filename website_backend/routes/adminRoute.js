@@ -14,10 +14,19 @@ const {
     updatePlanSchema, 
     createAdminSchema, 
     promoteToAdminSchema, 
-    validateRequest 
+    validateRequest,
+    loginAdminSchema,
+    sendAdminSignupOtpSchema,
+    sendAdminLoginOtpSchema
 } = require("../joi");
 
-const { createAdmin, promoteToAdmin } = require("../controller/authController");
+const { 
+    createAdmin, 
+    promoteToAdmin, 
+    loginAdmin, 
+    sendAdminSignupOtp, 
+    sendAdminLoginOtp 
+} = require("../controller/authController");
 
 // Admin routes for subscription plan management
 // Order: auth (verify JWT) -> isAdmin (check role) -> validateRequest (validate data) -> controller
@@ -27,7 +36,12 @@ router.delete("/plans/:planId", auth, isAdmin, deleteSubscriptionPlan);
 router.get("/plans", auth, isAdmin, getAllSubscriptionPlans);
 router.get("/plans/:planId", auth, isAdmin, getSubscriptionPlanById);
 
+// Admin OTP routes (no auth required - uses secret key)
+router.post("/send-admin-signup-otp", validateRequest(sendAdminSignupOtpSchema), sendAdminSignupOtp);
+router.post("/send-admin-login-otp", validateRequest(sendAdminLoginOtpSchema), sendAdminLoginOtp);
+
 // Admin creation and management routes (no auth required - uses secret key)
+router.post("/login-admin", validateRequest(loginAdminSchema), loginAdmin);
 router.post("/create-admin", validateRequest(createAdminSchema), createAdmin);
 router.post("/promote-to-admin", validateRequest(promoteToAdminSchema), promoteToAdmin);
 

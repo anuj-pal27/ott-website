@@ -11,38 +11,23 @@ const userSchema = Joi.object({
         'string.email': 'Please provide a valid email address',
         'any.required': 'Email is required'
     }),
-    password: Joi.string().min(6).required().messages({
-        'string.min': 'Password must be at least 6 characters long',
-        'any.required': 'Password is required'
+    phone: Joi.string().pattern(/^[0-9]{10}$/).required().messages({
+        'string.pattern.base': 'Phone number must be 10 digits',
+        'any.required': 'Phone number is required'
     }),
-    phone: Joi.string().pattern(/^[0-9]{10}$/).optional().messages({
-        'string.pattern.base': 'Phone number must be 10 digits'
+    otp: Joi.string().length(6).required().messages({
+        'any.required': 'OTP is required'
     }),
-    otp: Joi.string().length(6).required(),
     accountType: Joi.string().valid('user', 'admin').default('user')
 });
 
 const loginSchema = Joi.object({
-    email: Joi.string().email().required().messages({
-        'string.email': 'Please provide a valid email address',
-        'any.required': 'Email is required'
+    phone: Joi.string().pattern(/^[0-9]{10}$/).required().messages({
+        'string.pattern.base': 'Phone number must be 10 digits',
+        'any.required': 'Phone number is required'
     }),
-    password: Joi.string().required().messages({
-        'any.required': 'Password is required'
-    })
-});
-
-const changePasswordSchema = Joi.object({
-    email: Joi.string().email().required().messages({
-        'string.email': 'Please provide a valid email address',
-        'any.required': 'Email is required'
-    }),
-    currentPassword: Joi.string().required().messages({
-        'any.required': 'Current password is required'
-    }),
-    newPassword: Joi.string().min(6).required().messages({
-        'string.min': 'New password must be at least 6 characters long',
-        'any.required': 'New password is required'
+    otp: Joi.string().length(6).required().messages({
+        'any.required': 'OTP is required'
     })
 });
 
@@ -51,6 +36,29 @@ const sendOtpSchema = Joi.object({
     email: Joi.string().email().required().messages({
         'string.email': 'Please provide a valid email address',
         'any.required': 'Email is required'
+    })
+});
+
+const sendPhoneOtpSchema = Joi.object({
+    phone: Joi.string().pattern(/^[0-9]{10}$/).required().messages({
+        'string.pattern.base': 'Phone number must be 10 digits',
+        'any.required': 'Phone number is required'
+    })
+});
+
+const sendSignupOtpSchema = Joi.object({
+    phone: Joi.string().pattern(/^[0-9]{10}$/).required().messages({
+        'string.pattern.base': 'Phone number must be 10 digits',
+        'any.required': 'Phone number is required'
+    }),
+    email: Joi.string().email().required().messages({
+        'string.email': 'Please provide a valid email address',
+        'any.required': 'Email is required'
+    }),
+    name: Joi.string().min(2).max(50).required().messages({
+        'string.min': 'Name must be at least 2 characters long',
+        'string.max': 'Name cannot exceed 50 characters',
+        'any.required': 'Name is required'
     })
 });
 
@@ -86,6 +94,37 @@ const planSchema = Joi.object({
         'number.integer': 'Duration must be a whole number',
         'number.positive': 'Duration must be positive',
         'any.required': 'Duration is required'
+    }),
+    durations: Joi.array().items(Joi.object({
+        duration: Joi.string().valid('1 Month', '3 Months', '6 Months', '1 Year').required().messages({
+            'any.only': 'Duration must be one of: 1 Month, 3 Months, 6 Months, 1 Year',
+            'any.required': 'Duration is required'
+        }),
+        description: Joi.string().min(1).max(200).required().messages({
+            'string.min': 'Duration description must be at least 1 character long',
+            'string.max': 'Duration description cannot exceed 200 characters',
+            'any.required': 'Duration description is required'
+        }),
+        price: Joi.number().positive().required().messages({
+            'number.positive': 'Duration price must be a positive number',
+            'any.required': 'Duration price is required'
+        }),
+        originalPrice: Joi.number().positive().required().messages({
+            'number.positive': 'Duration original price must be a positive number',
+            'any.required': 'Duration original price is required'
+        }),
+        slotsAvailable: Joi.number().integer().min(0).default(0).messages({
+            'number.integer': 'Slots available must be a whole number',
+            'number.min': 'Slots available cannot be negative'
+        }),
+        totalSlots: Joi.number().integer().min(0).default(0).messages({
+            'number.integer': 'Total slots must be a whole number',
+            'number.min': 'Total slots cannot be negative'
+        }),
+        isActive: Joi.boolean().default(true)
+    })).min(1).required().messages({
+        'array.min': 'At least one duration option is required',
+        'any.required': 'Durations are required'
     }),
     planType: Joi.string().valid('basic', 'premium', 'family', 'enterprise').required().messages({
         'any.only': 'Plan type must be one of: basic, premium, family, enterprise',
@@ -123,8 +162,8 @@ const planSchema = Joi.object({
         'any.required': 'End date is required'
     }),
     isActive: Joi.boolean().default(true),
-    createdBy: Joi.string().required().messages({
-        'any.required': 'Created by is required'
+    createdBy: Joi.string().optional().messages({
+        'string.base': 'Created by must be a string'
     })
 });
 
@@ -133,6 +172,15 @@ const updatePlanSchema = Joi.object({
     description: Joi.string().min(10).max(500).optional(),
     price: Joi.number().positive().optional(),
     durationInDays: Joi.number().integer().positive().optional(),
+    durations: Joi.array().items(Joi.object({
+        duration: Joi.string().valid('1 Month', '3 Months', '6 Months', '1 Year').required(),
+        description: Joi.string().min(1).max(200).required(),
+        price: Joi.number().positive().required(),
+        originalPrice: Joi.number().positive().required(),
+        slotsAvailable: Joi.number().integer().min(0).default(0),
+        totalSlots: Joi.number().integer().min(0).default(0),
+        isActive: Joi.boolean().default(true)
+    })).min(1).optional(),
     planType: Joi.string().valid('basic', 'premium', 'family', 'enterprise').optional(),
     originalPrice: Joi.number().positive().optional(),
     slotsAvailable: Joi.number().integer().min(0).optional(),
@@ -166,9 +214,6 @@ const updateUserSchema = Joi.object({
     phone: Joi.string().pattern(/^[0-9]{10}$/).optional().messages({
         'string.pattern.base': 'Phone number must be 10 digits'
     }),
-    profilePicture: Joi.string().uri().optional().messages({
-        'string.uri': 'Profile picture must be a valid URL'
-    })
 });
 
 // Get user details schema
@@ -178,19 +223,7 @@ const getUserDetailsSchema = Joi.object({
     })
 });
 
-// Update user details schema
-const updateUserDetailsSchema = Joi.object({
-    userId: Joi.string().required().messages({
-        'any.required': 'User ID is required'
-    }),
-    name: Joi.string().min(2).max(50).optional(),
-    phone: Joi.string().pattern(/^[0-9]{10}$/).optional().messages({
-        'string.pattern.base': 'Phone number must be 10 digits'
-    }),
-    profilePicture: Joi.string().uri().optional().messages({
-        'string.uri': 'Profile picture must be a valid URL'
-    })
-});
+
 
 // Update account type schema
 const updateAccountTypeSchema = Joi.object({
@@ -200,21 +233,6 @@ const updateAccountTypeSchema = Joi.object({
     newAccountType: Joi.string().valid('user', 'admin').required().messages({
         'any.only': 'Account type must be either "user" or "admin"',
         'any.required': 'New account type is required'
-    })
-});
-
-// Password reset schema
-const resetPasswordSchema = Joi.object({
-    password: Joi.string().min(6).required().messages({
-        'string.min': 'Password must be at least 6 characters long',
-        'any.required': 'Password is required'
-    }),
-    confirmPassword: Joi.string().min(6).required().messages({
-        'string.min': 'Confirm password must be at least 6 characters long',
-        'any.required': 'Confirm password is required'
-    }),
-    token: Joi.string().required().messages({
-        'any.required': 'Token is required'
     })
 });
 
@@ -228,6 +246,17 @@ const reviewAndRatingSchema = Joi.object({
     review: Joi.string().optional()
 });
 
+
+//Admin Login Schema
+const loginAdminSchema = Joi.object({
+    phone: Joi.string().pattern(/^[0-9]{10}$/).required().messages({
+        'string.pattern.base': 'Phone number must be 10 digits',
+        'any.required': 'Phone number is required'
+    }),
+    otp: Joi.string().length(6).required().messages({
+        'any.required': 'OTP is required'
+    })
+});
 // Admin creation schema
 const createAdminSchema = Joi.object({
     name: Joi.string().min(2).max(50).required().messages({
@@ -243,9 +272,8 @@ const createAdminSchema = Joi.object({
         'string.pattern.base': 'Phone number must be 10 digits',
         'any.required': 'Phone number is required'
     }),
-    password: Joi.string().min(6).required().messages({
-        'string.min': 'Password must be at least 6 characters long',
-        'any.required': 'Password is required'
+    otp: Joi.string().length(6).required().messages({
+        'any.required': 'OTP is required'
     }),
     adminSecret: Joi.string().required().messages({
         'any.required': 'Admin secret key is required'
@@ -260,6 +288,32 @@ const promoteToAdminSchema = Joi.object({
     }),
     adminSecret: Joi.string().required().messages({
         'any.required': 'Admin secret key is required'
+    })
+});
+
+const sendAdminSignupOtpSchema = Joi.object({
+    phone: Joi.string().pattern(/^[0-9]{10}$/).required().messages({
+        'string.pattern.base': 'Phone number must be 10 digits',
+        'any.required': 'Phone number is required'
+    }),
+    email: Joi.string().email().required().messages({
+        'string.email': 'Please provide a valid email address',
+        'any.required': 'Email is required'
+    }),
+    name: Joi.string().min(2).max(50).required().messages({
+        'string.min': 'Name must be at least 2 characters long',
+        'string.max': 'Name cannot exceed 50 characters',
+        'any.required': 'Name is required'
+    }),
+    adminSecret: Joi.string().required().messages({
+        'any.required': 'Admin secret is required'
+    })
+});
+
+const sendAdminLoginOtpSchema = Joi.object({
+    phone: Joi.string().pattern(/^[0-9]{10}$/).required().messages({
+        'string.pattern.base': 'Phone number must be 10 digits',
+        'any.required': 'Phone number is required'
     })
 });
 
@@ -297,15 +351,17 @@ module.exports = {
     createOrderSchema,
     updateOrderSchema,
     updateUserSchema,
-    changePasswordSchema,
     sendOtpSchema,
+    sendPhoneOtpSchema,
+    sendSignupOtpSchema,
     verifyOtpSchema,
-    resetPasswordSchema,
     createAdminSchema,
     promoteToAdminSchema,
     validateRequest,
     reviewAndRatingSchema,
     getUserDetailsSchema,
-    updateUserDetailsSchema,
-    updateAccountTypeSchema
+    updateAccountTypeSchema,
+    loginAdminSchema,
+    sendAdminSignupOtpSchema,
+    sendAdminLoginOtpSchema
 };
