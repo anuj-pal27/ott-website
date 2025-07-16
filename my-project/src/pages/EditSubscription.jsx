@@ -5,6 +5,12 @@ import SvgEffect from '../components/SvgEffect';
 import { useAuth } from '../context/AuthContext';
 
 const PLAN_TYPES = ['basic', 'premium', 'family', 'enterprise'];
+const CATEGORY_OPTIONS = [
+  { label: 'Music Premium', value: 'music' },
+  { label: 'OTT Platforms', value: 'ott' },
+  { label: 'Professional Subscriptions', value: 'professional' },
+  { label: 'Others', value: 'others' },
+];
 
 function EditSubscription() {
   const navigate = useNavigate();
@@ -13,8 +19,6 @@ function EditSubscription() {
   const [form, setForm] = useState({
     serviceName: '',
     description: '',
-    price: '',
-    durationInDays: '',
     durations: [
       {
         duration: '1 Month',
@@ -23,18 +27,16 @@ function EditSubscription() {
         originalPrice: '',
         slotsAvailable: 0,
         totalSlots: 0,
-        isActive: true
+        isActive: true,
+        startDate: '',
+        endDate: ''
       }
     ],
     planType: 'basic',
-    originalPrice: '',
-    slotsAvailable: '',
-    totalSlots: '',
     features: [''],
     iconImage: '',
-    startDate: '',
-    endDate: '',
     isActive: true,
+    category: 'others', // Added category field
   });
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
@@ -58,36 +60,37 @@ function EditSubscription() {
       setLoading(true);
       const response = await adminService.getSubscriptionPlanById(planId);
       const plan = response.plan;
-      
-      // Format dates for input fields
-      const startDate = plan.startDate ? new Date(plan.startDate).toISOString().split('T')[0] : '';
-      const endDate = plan.endDate ? new Date(plan.endDate).toISOString().split('T')[0] : '';
-      
       setForm({
         serviceName: plan.serviceName || '',
         description: plan.description || '',
-        price: plan.price || '',
-        durationInDays: plan.durationInDays || '',
-        durations: plan.durations || [
-          {
-            duration: '1 Month',
-            description: '',
-            price: '',
-            originalPrice: '',
-            slotsAvailable: 0,
-            totalSlots: 0,
-            isActive: true
-          }
-        ],
+        durations: plan.durations && plan.durations.length > 0
+          ? plan.durations.map(d => ({
+              duration: d.duration || '1 Month',
+              description: d.description || '',
+              price: d.price || '',
+              originalPrice: d.originalPrice || '',
+              slotsAvailable: d.slotsAvailable || 0,
+              totalSlots: d.totalSlots || 0,
+              isActive: d.isActive !== undefined ? d.isActive : true,
+              startDate: d.startDate ? new Date(d.startDate).toISOString().split('T')[0] : '',
+              endDate: d.endDate ? new Date(d.endDate).toISOString().split('T')[0] : ''
+            }))
+          : [{
+              duration: '1 Month',
+              description: '',
+              price: '',
+              originalPrice: '',
+              slotsAvailable: 0,
+              totalSlots: 0,
+              isActive: true,
+              startDate: '',
+              endDate: ''
+            }],
         planType: plan.planType || 'basic',
-        originalPrice: plan.originalPrice || '',
-        slotsAvailable: plan.slotsAvailable || '',
-        totalSlots: plan.totalSlots || '',
         features: plan.features && plan.features.length > 0 ? plan.features : [''],
         iconImage: plan.iconImage || '',
-        startDate: startDate,
-        endDate: endDate,
         isActive: plan.isActive !== undefined ? plan.isActive : true,
+        category: plan.category || 'others', // Set category from fetched data
       });
     } catch (err) {
       setFormError(err.message || 'Failed to fetch plan data');
@@ -130,7 +133,9 @@ function EditSubscription() {
       originalPrice: '',
       slotsAvailable: 0,
       totalSlots: 0,
-      isActive: true
+      isActive: true,
+      startDate: '',
+      endDate: ''
     };
     setForm({ ...form, durations: [...form.durations, newDuration] });
   };
@@ -150,7 +155,6 @@ function EditSubscription() {
         ...form,
         features: form.features.filter(f => f.trim() !== '')
       };
-      
       await adminService.updateSubscriptionPlan(planId, planData);
       setFormSuccess('Subscription plan updated successfully!');
       setTimeout(() => {
@@ -239,80 +243,33 @@ function EditSubscription() {
                 required
               />
             </div>
-            <div className="dashboard-form-grid">
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Price</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={form.price}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
-              </div>
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Original Price</label>
-                <input
-                  type="number"
-                  name="originalPrice"
-                  value={form.originalPrice}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
-              </div>
+            <div className="dashboard-form-group">
+              <label className="dashboard-form-label">Plan Type</label>
+              <select
+                name="planType"
+                value={form.planType}
+                onChange={handleFormChange}
+                className="dashboard-select"
+                required
+              >
+                {PLAN_TYPES.map(type => (
+                  <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
+                ))}
+              </select>
             </div>
-            <div className="dashboard-form-grid">
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Duration (days)</label>
-                <input
-                  type="number"
-                  name="durationInDays"
-                  value={form.durationInDays}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
-              </div>
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Plan Type</label>
-                <select
-                  name="planType"
-                  value={form.planType}
-                  onChange={handleFormChange}
-                  className="dashboard-select"
-                  required
-                >
-                  {PLAN_TYPES.map(type => (
-                    <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="dashboard-form-grid">
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Slots Available</label>
-                <input
-                  type="number"
-                  name="slotsAvailable"
-                  value={form.slotsAvailable}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
-              </div>
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Total Slots</label>
-                <input
-                  type="number"
-                  name="totalSlots"
-                  value={form.totalSlots}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
-              </div>
+            <div className="dashboard-form-group">
+              <label className="dashboard-form-label">Category</label>
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleFormChange}
+                className="dashboard-select"
+                required
+              >
+                {CATEGORY_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value} className='text-black'>{opt.label}</option>
+                ))}
+              </select>
             </div>
             <div className="dashboard-form-group">
               <label className="dashboard-form-label">Icon Image URL</label>
@@ -329,7 +286,6 @@ function EditSubscription() {
                 Enter a valid image URL (e.g., https://picsum.photos/300/200)
               </p>
             </div>
-            
             {/* Duration Options Section */}
             <div className="dashboard-form-group">
               <label className="dashboard-form-label">Duration Options</label>
@@ -417,6 +373,26 @@ function EditSubscription() {
                           min="0"
                         />
                       </div>
+                      <div>
+                        <label className="text-white/80 text-sm mb-1 block">Start Date</label>
+                        <input
+                          type="date"
+                          value={duration.startDate}
+                          onChange={e => handleDurationChange(idx, 'startDate', e.target.value)}
+                          className="dashboard-input"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-white/80 text-sm mb-1 block">End Date</label>
+                        <input
+                          type="date"
+                          value={duration.endDate}
+                          onChange={e => handleDurationChange(idx, 'endDate', e.target.value)}
+                          className="dashboard-input"
+                          required
+                        />
+                      </div>
                     </div>
                     <div className="mt-3">
                       <label className="flex items-center">
@@ -438,30 +414,6 @@ function EditSubscription() {
                 >
                   + Add Duration Option
                 </button>
-              </div>
-            </div>
-            <div className="dashboard-form-grid">
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Start Date</label>
-                <input
-                  type="date"
-                  name="startDate"
-                  value={form.startDate}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
-              </div>
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">End Date</label>
-                <input
-                  type="date"
-                  name="endDate"
-                  value={form.endDate}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
               </div>
             </div>
             <div className="dashboard-form-group">

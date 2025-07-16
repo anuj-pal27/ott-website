@@ -1,25 +1,30 @@
 const SubscriptionPlan = require("../models/SubscriptionPlan");
 
+const VALID_CATEGORIES = ['music', 'ott', 'professional', 'others'];
+
 const addSubscriptionPlan = async (req, res) => {
     try {
-        const subscriptionData = req.body; 
-        
-        const existingPlan = await SubscriptionPlan.findOne({ 
-            serviceName: subscriptionData.serviceName 
+        const subscriptionData = req.body;
+        // Validate category
+        if (!subscriptionData.category || !VALID_CATEGORIES.includes(subscriptionData.category)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or missing category. Allowed: music, ott, professional, others."
+            });
+        }
+        const existingPlan = await SubscriptionPlan.findOne({
+            serviceName: subscriptionData.serviceName
         });
-        
         if (existingPlan) {
             return res.status(400).json({
                 success: false,
                 message: "Subscription plan already exists"
             });
         }
-        
         const subscriptionPlan = await SubscriptionPlan.create(subscriptionData);
-        
         return res.status(200).json({
             success: true,
-            message: "Subscription plan created successfully",   
+            message: "Subscription plan created successfully",
             subscriptionPlan
         });
     } catch (error) {
@@ -34,8 +39,14 @@ const addSubscriptionPlan = async (req, res) => {
 const updateSubscriptionPlan = async (req, res) => {
     try {
         const { planId } = req.params;
-        const updateData = req.body; 
-        
+        const updateData = req.body;
+        // Validate category if present
+        if (updateData.category && !VALID_CATEGORIES.includes(updateData.category)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid category. Allowed: music, ott, professional, others."
+            });
+        }
         const existingPlan = await SubscriptionPlan.findById(planId);
         if (!existingPlan) {
             return res.status(404).json({
@@ -43,13 +54,11 @@ const updateSubscriptionPlan = async (req, res) => {
                 message: "Subscription plan not found"
             });
         }
-        
         const updatedPlan = await SubscriptionPlan.findByIdAndUpdate(
             planId,
             { ...updateData, updatedAt: new Date() },
             { new: true, runValidators: true }
         );
-        
         return res.status(200).json({
             success: true,
             message: "Subscription plan updated successfully",

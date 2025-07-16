@@ -86,15 +86,6 @@ const planSchema = Joi.object({
         'string.max': 'Description cannot exceed 500 characters',
         'any.required': 'Description is required'
     }),
-    price: Joi.number().positive().required().messages({
-        'number.positive': 'Price must be a positive number',
-        'any.required': 'Price is required'
-    }),
-    durationInDays: Joi.number().integer().positive().required().messages({
-        'number.integer': 'Duration must be a whole number',
-        'number.positive': 'Duration must be positive',
-        'any.required': 'Duration is required'
-    }),
     durations: Joi.array().items(Joi.object({
         duration: Joi.string().valid('1 Month', '3 Months', '6 Months', '1 Year').required().messages({
             'any.only': 'Duration must be one of: 1 Month, 3 Months, 6 Months, 1 Year',
@@ -121,7 +112,16 @@ const planSchema = Joi.object({
             'number.integer': 'Total slots must be a whole number',
             'number.min': 'Total slots cannot be negative'
         }),
-        isActive: Joi.boolean().default(true)
+        isActive: Joi.boolean().default(true),
+        startDate: Joi.date().iso().required().messages({
+            'date.format': 'Start date must be a valid date',
+            'any.required': 'Start date is required'
+        }),
+        endDate: Joi.date().iso().greater(Joi.ref('startDate')).required().messages({
+            'date.format': 'End date must be a valid date',
+            'date.greater': 'End date must be after start date',
+            'any.required': 'End date is required'
+        })
     })).min(1).required().messages({
         'array.min': 'At least one duration option is required',
         'any.required': 'Durations are required'
@@ -130,19 +130,9 @@ const planSchema = Joi.object({
         'any.only': 'Plan type must be one of: basic, premium, family, enterprise',
         'any.required': 'Plan type is required'
     }),
-    originalPrice: Joi.number().positive().required().messages({
-        'number.positive': 'Original price must be a positive number',
-        'any.required': 'Original price is required'
-    }),
-    slotsAvailable: Joi.number().integer().min(0).required().messages({
-        'number.integer': 'Slots available must be a whole number',
-        'number.min': 'Slots available cannot be negative',
-        'any.required': 'Slots available is required'
-    }),
-    totalSlots: Joi.number().integer().positive().required().messages({
-        'number.integer': 'Total slots must be a whole number',
-        'number.positive': 'Total slots must be positive',
-        'any.required': 'Total slots is required'
+    category: Joi.string().valid('music', 'ott', 'professional', 'others').required().messages({
+        'any.only': 'Category must be one of: music, ott, professional, others',
+        'any.required': 'Category is required'
     }),
     features: Joi.array().items(Joi.string().min(1)).min(1).required().messages({
         'array.min': 'At least one feature is required',
@@ -151,15 +141,6 @@ const planSchema = Joi.object({
     iconImage: Joi.string().uri().required().messages({
         'string.uri': 'Icon image must be a valid URL',
         'any.required': 'Icon image is required'
-    }),
-    startDate: Joi.date().iso().required().messages({
-        'date.format': 'Start date must be a valid date',
-        'any.required': 'Start date is required'
-    }),
-    endDate: Joi.date().iso().greater(Joi.ref('startDate')).required().messages({
-        'date.format': 'End date must be a valid date',
-        'date.greater': 'End date must be after start date',
-        'any.required': 'End date is required'
     }),
     isActive: Joi.boolean().default(true),
     createdBy: Joi.string().optional().messages({
@@ -170,8 +151,6 @@ const planSchema = Joi.object({
 const updatePlanSchema = Joi.object({
     serviceName: Joi.string().min(2).max(100).optional(),
     description: Joi.string().min(10).max(500).optional(),
-    price: Joi.number().positive().optional(),
-    durationInDays: Joi.number().integer().positive().optional(),
     durations: Joi.array().items(Joi.object({
         duration: Joi.string().valid('1 Month', '3 Months', '6 Months', '1 Year').required(),
         description: Joi.string().min(1).max(200).required(),
@@ -179,16 +158,16 @@ const updatePlanSchema = Joi.object({
         originalPrice: Joi.number().positive().required(),
         slotsAvailable: Joi.number().integer().min(0).default(0),
         totalSlots: Joi.number().integer().min(0).default(0),
-        isActive: Joi.boolean().default(true)
+        isActive: Joi.boolean().default(true),
+        startDate: Joi.date().iso().required(),
+        endDate: Joi.date().iso().greater(Joi.ref('startDate')).required()
     })).min(1).optional(),
     planType: Joi.string().valid('basic', 'premium', 'family', 'enterprise').optional(),
-    originalPrice: Joi.number().positive().optional(),
-    slotsAvailable: Joi.number().integer().min(0).optional(),
-    totalSlots: Joi.number().integer().positive().optional(),
+    category: Joi.string().valid('music', 'ott', 'professional', 'others').optional().messages({
+        'any.only': 'Category must be one of: music, ott, professional, others'
+    }),
     features: Joi.array().items(Joi.string().min(1)).min(1).optional(),
     iconImage: Joi.string().uri().optional(),
-    startDate: Joi.date().iso().optional(),
-    endDate: Joi.date().iso().optional(),
     isActive: Joi.boolean().optional()
 });
 
@@ -317,6 +296,16 @@ const sendAdminLoginOtpSchema = Joi.object({
     })
 });
 
+const cartAddSchema = Joi.object({
+    subscriptionPlan: Joi.string().required().messages({
+        'any.required': 'Subscription plan is required'
+    }),
+    duration: Joi.string().valid('1 Month', '3 Months', '6 Months', '1 Year').required().messages({
+        'any.only': 'Duration must be one of: 1 Month, 3 Months, 6 Months, 1 Year',
+        'any.required': 'Duration is required'
+    })
+});
+
 // Validation middleware function
 const validateRequest = (schema) => {
     return (req, res, next) => {
@@ -363,5 +352,6 @@ module.exports = {
     updateAccountTypeSchema,
     loginAdminSchema,
     sendAdminSignupOtpSchema,
-    sendAdminLoginOtpSchema
+    sendAdminLoginOtpSchema,
+    cartAddSchema
 };

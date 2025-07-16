@@ -3,7 +3,11 @@ const SubscriptionPlan = require('../models/SubscriptionPlan');
 
 const getPublicPlans = async (req, res) => {
     try {
-        const plans = await SubscriptionPlan.find({ isActive: true });
+        const filter = { isActive: true };
+        if (req.query.category) {
+            filter.category = req.query.category;
+        }
+        const plans = await SubscriptionPlan.find(filter);
         res.status(200).json({
             success: true,
             message: "Public plans fetched successfully",

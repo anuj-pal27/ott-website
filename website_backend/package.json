@@ -24,7 +24,9 @@
     "mongoose": "^8.16.2",
     "nodemailer": "^7.0.5",
     "otp-generator": "^4.0.1",
+    "pg-sdk-node": "https://phonepe.mycloudrepo.io/public/repositories/phonepe-pg-sdk-node/releases/v2/phonepe-pg-sdk-node.tgz",
     "razorpay": "^2.9.6",
-    "twilio": "^5.7.3"
+    "twilio": "^5.7.3",
+    "uuid": "^11.1.0"
   }
 }

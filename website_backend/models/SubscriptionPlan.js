@@ -8,13 +8,7 @@ const subscriptionSchema = new mongoose.Schema({
     description:{
         type:String,
     },
-    price:{
-        type:Number,
-        required:true,
-    },
-    durationInDays:{
-        type:Number,
-    },
+
     // New field for multiple duration options
     durations: [{
         duration: {
@@ -44,32 +38,29 @@ const subscriptionSchema = new mongoose.Schema({
         },
         isActive: {
             type: Boolean,
-            default: true
-        }
+            default: true 
+        },
+        startDate:{
+            type:Date,
+        },
+        endDate:{
+            type:Date,
+        },
     }],
     planType:{
         type:String,
         required:true,
     },
-    originalPrice:{
-        type:Number,
-    },
-    slotsAvailable:{
-        type:Number,
-    },
-    totalSlots:{
-        type:Number,
+    category: {
+        type: String,
+        enum: ['music', 'ott', 'professional', 'others'],
+        required: true,
     },
     features: [String],
     iconImage: {
         type:String,
     },
-    startDate:{
-        type:Date,
-    },
-    endDate:{
-        type:Date,
-    },
+
     isActive: { type: Boolean, default: true },
     createdBy:{
         type:mongoose.Schema.Types.ObjectId,

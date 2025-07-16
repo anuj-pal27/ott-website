@@ -44,21 +44,55 @@ const netflixPlan = {
 
 const ServiceCard = ({ plan, onAddToCart, showCartButton = true }) => {
   const [imageError, setImageError] = useState(false);
-  const [selectedDuration, setSelectedDuration] = useState(0); // Index of selected duration
 
   const handleImageError = () => {
     console.error('Image failed to load:', plan.iconImage);
     setImageError(true);
   };
 
-  // Debug logging
-  console.log('ServiceCard plan data:', plan);
-  console.log('Icon image URL:', plan.iconImage);
+  // Calculate price range from durations
+  const calculatePriceRange = () => {
+    if (!plan.durations || plan.durations.length === 0) {
+      return { min: 0, max: 0, hasDiscount: false };
+    }
 
-  // Get the selected duration object
-  const selectedDurationObj = plan.durations && plan.durations[selectedDuration] 
-    ? plan.durations[selectedDuration] 
-    : null;
+    const activeDurations = plan.durations.filter(d => d.isActive);
+    if (activeDurations.length === 0) {
+      return { min: 0, max: 0, hasDiscount: false };
+    }
+
+    const prices = activeDurations.map(d => d.price);
+    const originalPrices = activeDurations.map(d => d.originalPrice);
+    
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    const minOriginalPrice = Math.min(...originalPrices);
+    const maxOriginalPrice = Math.max(...originalPrices);
+    
+    const hasDiscount = minOriginalPrice > minPrice || maxOriginalPrice > maxPrice;
+    
+    return {
+      min: minPrice,
+      max: maxPrice,
+      minOriginal: minOriginalPrice,
+      maxOriginal: maxOriginalPrice,
+      hasDiscount
+    };
+  };
+
+  // Check if any duration is in stock
+  const hasStock = () => {
+    if (!plan.durations || plan.durations.length === 0) return false;
+    return plan.durations.some(d => d.isActive && d.slotsAvailable > 0);
+  };
+
+  const priceRange = calculatePriceRange();
+  const inStock = hasStock();
+
+  const handleAddToCart = () => {
+    // Pass the plan with all durations to let the parent component handle selection
+    onAddToCart(plan);
+  };
 
   return (
     <div className="bg-white rounded-2xl border-2 border-primary/30 shadow-lg p-4 flex flex-col items-center transition-transform duration-200 hover:scale-105 max-w-xs w-full mx-auto">
@@ -89,44 +123,21 @@ const ServiceCard = ({ plan, onAddToCart, showCartButton = true }) => {
             <span className="text-gray-500">(0)</span>
           </div>
           
-          {/* Duration Options */}
+          {/* Price Range Display */}
           {plan.durations && plan.durations.length > 0 && (
             <div className="mb-3">
-              <label className="text-sm font-medium text-gray-700 mb-2 block">Select Duration:</label>
-              <div className="space-y-2">
-                {plan.durations.map((duration, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`border rounded-lg p-2 cursor-pointer transition-all ${
-                      selectedDuration === idx 
-                        ? 'border-primary bg-primary/10' 
-                        : 'border-gray-200 hover:border-primary/50'
-                    }`}
-                    onClick={() => setSelectedDuration(idx)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="font-medium text-sm text-gray-900">{duration.duration}</div>
-                        <div className="text-xs text-gray-600">{duration.description}</div>
-                      </div>
-                      <div className="text-right">
-                        {duration.originalPrice && duration.originalPrice !== duration.price && (
-                          <div className="line-through text-gray-400 text-xs">₹{duration.originalPrice}</div>
-                        )}
-                        <div className="font-bold text-primary text-sm">₹{duration.price}</div>
-                      </div>
-                    </div>
-                    {duration.slotsAvailable !== undefined && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        {duration.slotsAvailable > 0 ? (
-                          <span className="text-green-600">In Stock ({duration.slotsAvailable} available)</span>
-                        ) : (
-                          <span className="text-red-600">Out of Stock</span>
-                        )}
-                      </div>
-                    )}
+              <div className="text-center">
+                {priceRange.hasDiscount && (
+                  <div className="text-xs text-gray-400 line-through mb-1">
+                    ₹{priceRange.minOriginal} - ₹{priceRange.maxOriginal}
                   </div>
-                ))}
+                )}
+                <div className="font-bold text-primary text-lg">
+                  ₹{priceRange.min} - ₹{priceRange.max}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {plan.durations.length} duration options available
+                </div>
               </div>
             </div>
           )}
@@ -141,17 +152,29 @@ const ServiceCard = ({ plan, onAddToCart, showCartButton = true }) => {
             </div>
           )}
           
-          <div className="text-xs text-gray-500 mb-2">
-            Duration: {plan.durationInDays} days
-          </div>
+          {/* Features Preview */}
+          {plan.features && plan.features.length > 0 && (
+            <div className="mb-2">
+              <div className="text-xs text-gray-600">
+                {plan.features.slice(0, 2).join(' • ')}
+                {plan.features.length > 2 && ' • ...'}
+              </div>
+            </div>
+          )}
         </div>
-        {showCartButton && selectedDurationObj && (
+        
+        {/* Add to Cart Button */}
+        {showCartButton && (
           <button
-            className="w-full mt-2 bg-primary hover:bg-secondary text-white py-2 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2"
-            onClick={() => onAddToCart({ ...plan, selectedDuration: selectedDurationObj })}
-            disabled={selectedDurationObj.slotsAvailable === 0}
+            className={`w-full mt-2 py-2 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
+              inStock 
+                ? 'bg-primary hover:bg-secondary text-white' 
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+            onClick={handleAddToCart}
+            disabled={!inStock}
           >
-            {selectedDurationObj.slotsAvailable === 0 ? 'Out of Stock' : 'Add to Cart'} 
+            {inStock ? 'Add to Cart' : 'Out of Stock'} 
             <span className='text-base ml-[10px] '> <FaCartPlus /></span>
           </button>
         )}

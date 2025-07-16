@@ -6,10 +6,10 @@ const cartItemSchema = new mongoose.Schema({
         ref: "SubscriptionPlan",
         required: true
     },
-    quantity: {
-        type: Number,
-        default: 1,
-        min: 1
+    duration: {
+        type: String,
+        enum: ['1 Month', '3 Months', '6 Months', '1 Year'],
+        required: true
     },
     addedAt: {
         type: Date,
@@ -41,17 +41,7 @@ cartSchema.pre('save', function(next) {
     next();
 });
 
-// Virtual for total items count
-cartSchema.virtual('totalItems').get(function() {
-    return this.items.reduce((total, item) => total + item.quantity, 0);
-});
-
-// Virtual for total price
-cartSchema.virtual('totalPrice').get(function() {
-    return this.items.reduce((total, item) => {
-        return total + (item.subscriptionPlan.price * item.quantity);
-    }, 0);
-});
+// Remove totalItems and totalPrice virtuals since quantity is gone
 
 // Ensure virtuals are serialized
 cartSchema.set('toJSON', { virtuals: true });

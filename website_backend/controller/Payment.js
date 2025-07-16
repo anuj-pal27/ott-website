@@ -1,59 +1,62 @@
-const razorpay = require("../config/razorpay");
+const phonepe = require("../config/PhonePe");
 const Payment = require("../models/Payment");
 const Order = require("../models/Order");
 const User = require("../models/User");
 const Cart = require("../models/Cart");
 const sendEmailOtp = require("../utils/sendEmailOtp");
 const orderPlacedEmailTemplate = require("../utils/orderPlacedEmailTemplate");
-const crypto = require('crypto');
 
-// Create checkout session
+// Create checkout session (PhonePe)
 const checkout = async (req, res) => {
     try {
         const userId = req.user.userId;
-        
         const cart = await Cart.findOne({ user: userId }).populate("items.subscriptionPlan");
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ message: "Cart is empty" });
         }
 
+        // For each cart item, find the selected duration details
         const items = cart.items.map(item => {
+            const plan = item.subscriptionPlan;
+            const selectedDuration = plan.durations.find(d => d.duration === item.duration);
             return {
-                subscriptionPlan: item.subscriptionPlan._id,
-                priceAtPurchase: item.subscriptionPlan.price, 
-                quantity: item.quantity,
-            }
+                subscriptionPlan: plan._id,
+                selectedDuration: selectedDuration ? {
+                    duration: selectedDuration.duration,
+                    description: selectedDuration.description,
+                    price: selectedDuration.price,
+                    originalPrice: selectedDuration.originalPrice
+                } : null,
+                priceAtPurchase: selectedDuration ? selectedDuration.price : 0
+            };
         });
 
-        const totalAmount = items.reduce((sum, item) => sum + (item.priceAtPurchase * item.quantity), 0);
+        const totalAmount = items.reduce((sum, item) => sum + item.priceAtPurchase, 0);
 
-        // Create Order in database first
+        // For simplicity, create one order for the first item (or loop for all if you want multiple orders)
+        const firstItem = items[0];
         const order = new Order({
             userId: userId,
-            subscriptionId: items[0].subscriptionPlan,
+            subscriptionId: firstItem.subscriptionPlan,
+            selectedDuration: firstItem.selectedDuration,
             payment: [],
             startDate: new Date(),
         });
         await order.save();
 
-        // Create Razorpay Order
-        const razorpayOrder = await razorpay.orders.create({
-            amount: totalAmount * 100, // Razorpay expects amount in paise
-            currency: "INR",
-            receipt: `order_${Date.now()}`,
-            notes: {
-                userId: userId.toString(),
-                orderId: order._id.toString(),
-            }
-        });
+        // Create PhonePe Order
+        const phonepeOrder = await phonepe.createPhonePeOrder(order._id.toString(), totalAmount, userId);
+        if (!phonepeOrder.success) {
+            return res.status(500).json({ success: false, message: "Failed to create PhonePe order", details: phonepeOrder });
+        }
 
         // Create Payment record
         const payment = new Payment({
             order: order._id,
             paymentAmount: totalAmount,
-            paymentId: razorpayOrder.id, // Use Razorpay order ID as payment ID
+            paymentId: order._id.toString(), // Use order ID as payment ID for PhonePe
             paymentStatus: "pending",
-            paymentMethod: "card", // Default, can be updated based on user selection
+            paymentMethod: "phonepe",
         });
         await payment.save();
 
@@ -68,10 +71,9 @@ const checkout = async (req, res) => {
             success: true,
             message: "Order created successfully",
             orderId: order._id,
-            razorpayOrderId: razorpayOrder.id,
+            phonepeOrder,
             amount: totalAmount,
             currency: "INR",
-            key: process.env.RAZORPAY_KEY_ID, // Frontend needs this for payment
         });
 
     } catch (error) {
@@ -83,38 +85,30 @@ const checkout = async (req, res) => {
     }
 };
 
-// Verify payment
+// Verify payment (PhonePe)
 const verifyPayment = async (req, res) => {
     try {
-        const razorpaySignature = req.headers['x-razorpay-signature'];
-        const expectedSignature = crypto.createHmac('sha256', process.env.WEBHOOK_SECRET)
-            .update(JSON.stringify(req.body))
-            .digest('hex');
-
-        if (expectedSignature !== razorpaySignature) {
-            return res.status(400).json({
-                success: false,
-                message: "Payment verification failed"
-            });
+        const { orderId } = req.body;
+        if (!orderId) {
+            return res.status(400).json({ success: false, message: "Missing orderId" });
         }
-        
-        const {userId, orderId} = req.body.payload.payment.entity.notes;
-        const paymentId = req.body.payload.payment.entity.id;
-        
+        // Check payment status with PhonePe
+        const statusResponse = await phonepe.checkPhonePePaymentStatus(orderId);
+        if (!statusResponse.success) {
+            return res.status(400).json({ success: false, message: "Payment verification failed", details: statusResponse });
+        }
+        const paymentStatus = statusResponse.data && statusResponse.data.paymentInstrumentResponseData && statusResponse.data.paymentInstrumentResponseData.status;
+        if (paymentStatus !== 'SUCCESS') {
+            return res.status(400).json({ success: false, message: "Payment not successful", status: paymentStatus });
+        }
         // Find and update payment
-        const payment = await Payment.findOne({ paymentId: paymentId});
+        const payment = await Payment.findOne({ paymentId: orderId });
         if (!payment) {
-            return res.status(404).json({
-                success: false,
-                message: "Payment not found"
-            });
+            return res.status(404).json({ success: false, message: "Payment not found" });
         }
-
-        // Update payment status
         payment.paymentStatus = "success";
         payment.paymentDate = new Date();
         await payment.save();
-
         // Update order
         const order = await Order.findById(payment.order);
         if (order) {
@@ -124,10 +118,8 @@ const verifyPayment = async (req, res) => {
                 order.endDate = new Date(order.startDate.getTime() + (subscriptionPlan.durationInDays * 24 * 60 * 60 * 1000));
             }
             await order.save();
-            
             // Add subscription to user
-            const user = await User.findByIdAndUpdate(userId, {$push: {subscriptionPlan: order.subscriptionId}}, {new: true});
-            
+            const user = await User.findByIdAndUpdate(order.userId, { $push: { subscriptionPlan: order.subscriptionId } }, { new: true });
             // Send confirmation email
             if (user) {
                 const emailHtml = orderPlacedEmailTemplate({
@@ -136,17 +128,14 @@ const verifyPayment = async (req, res) => {
                     orderDetails: `Subscription: ${subscriptionPlan?.serviceName || 'N/A'}`,
                     orderDate: order.createdAt
                 });
-
                 await sendEmailOtp(user.email, "Order Confirmation", emailHtml);
             }
         }
-
         res.status(200).json({
             success: true,
             message: "Payment verified successfully",
-            paymentId: paymentId
+            paymentId: orderId
         });
-
     } catch (error) {
         console.error("Error in verifyPayment:", error);
         res.status(500).json({

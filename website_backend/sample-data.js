@@ -1,12 +1,16 @@
 // Sample data for testing the new subscription plan structure
 // You can use this to populate your database with test data
 
+const mongoose = require('mongoose');
+const SubscriptionPlan = require('./models/SubscriptionPlan');
+require('dotenv').config();
+
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/platform_website';
+
 const sampleSubscriptionPlans = [
   {
     serviceName: "Netflix Premium",
     description: "Premium 4K+UHD streaming service with unlimited movies and TV shows",
-    price: 1.55, // This will be the base price, individual durations have their own prices
-    durationInDays: 30, // Base duration in days
     durations: [
       {
         duration: "1 Month",
@@ -15,7 +19,9 @@ const sampleSubscriptionPlans = [
         originalPrice: 2.00,
         slotsAvailable: 10,
         totalSlots: 10,
-        isActive: true
+        isActive: true,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
       },
       {
         duration: "6 Months",
@@ -24,7 +30,9 @@ const sampleSubscriptionPlans = [
         originalPrice: 12.00,
         slotsAvailable: 5,
         totalSlots: 5,
-        isActive: true
+        isActive: true,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000) // 180 days
       },
       {
         duration: "1 Year",
@@ -33,13 +41,12 @@ const sampleSubscriptionPlans = [
         originalPrice: 72.00,
         slotsAvailable: 0,
         totalSlots: 0,
-        isActive: false
+        isActive: false,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 365 days
       }
     ],
     planType: "premium",
-    originalPrice: 2.00,
-    slotsAvailable: 15,
-    totalSlots: 15,
     features: [
       "Premium 4K+UHD Quality",
       "Warranted Service",
@@ -48,15 +55,11 @@ const sampleSubscriptionPlans = [
       "Ad-Free Experience"
     ],
     iconImage: "https://picsum.photos/300/200?random=1",
-    startDate: new Date(),
-    endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
     isActive: true
   },
   {
     serviceName: "Amazon Prime",
     description: "Premium streaming service with fast delivery and exclusive content",
-    price: 1.99,
-    durationInDays: 30,
     durations: [
       {
         duration: "1 Month",
@@ -65,7 +68,9 @@ const sampleSubscriptionPlans = [
         originalPrice: 2.50,
         slotsAvailable: 8,
         totalSlots: 8,
-        isActive: true
+        isActive: true,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       },
       {
         duration: "3 Months",
@@ -74,7 +79,9 @@ const sampleSubscriptionPlans = [
         originalPrice: 7.50,
         slotsAvailable: 6,
         totalSlots: 6,
-        isActive: true
+        isActive: true,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
       },
       {
         duration: "1 Year",
@@ -83,13 +90,12 @@ const sampleSubscriptionPlans = [
         originalPrice: 30.00,
         slotsAvailable: 3,
         totalSlots: 3,
-        isActive: true
+        isActive: true,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
       }
     ],
     planType: "premium",
-    originalPrice: 2.50,
-    slotsAvailable: 17,
-    totalSlots: 17,
     features: [
       "Prime Video Streaming",
       "Fast Free Delivery",
@@ -98,15 +104,11 @@ const sampleSubscriptionPlans = [
       "Photo Storage"
     ],
     iconImage: "https://picsum.photos/300/200?random=2",
-    startDate: new Date(),
-    endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
     isActive: true
   },
   {
     serviceName: "YouTube Premium",
     description: "Ad-free YouTube experience with background play and YouTube Music",
-    price: 2.49,
-    durationInDays: 30,
     durations: [
       {
         duration: "1 Month",
@@ -115,7 +117,9 @@ const sampleSubscriptionPlans = [
         originalPrice: 3.00,
         slotsAvailable: 12,
         totalSlots: 12,
-        isActive: true
+        isActive: true,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       },
       {
         duration: "6 Months",
@@ -124,7 +128,9 @@ const sampleSubscriptionPlans = [
         originalPrice: 18.00,
         slotsAvailable: 7,
         totalSlots: 7,
-        isActive: true
+        isActive: true,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)
       },
       {
         duration: "1 Year",
@@ -133,13 +139,12 @@ const sampleSubscriptionPlans = [
         originalPrice: 36.00,
         slotsAvailable: 4,
         totalSlots: 4,
-        isActive: true
+        isActive: true,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
       }
     ],
     planType: "premium",
-    originalPrice: 3.00,
-    slotsAvailable: 23,
-    totalSlots: 23,
     features: [
       "Ad-Free YouTube",
       "Background Play",
@@ -148,10 +153,25 @@ const sampleSubscriptionPlans = [
       "Premium Content"
     ],
     iconImage: "https://picsum.photos/300/200?random=3",
-    startDate: new Date(),
-    endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
     isActive: true
   }
 ];
 
-module.exports = { sampleSubscriptionPlans }; 
+async function main() {
+  try {
+    await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log('Connected to MongoDB');
+    await SubscriptionPlan.deleteMany({});
+    await SubscriptionPlan.insertMany(sampleSubscriptionPlans);
+    console.log('Sample subscription plans inserted successfully!');
+  } catch (err) {
+    console.error('Error inserting sample data:', err);
+  } finally {
+    await mongoose.disconnect();
+    process.exit(0);
+  }
+}
+
+if (require.main === module) {
+  main();
+} 

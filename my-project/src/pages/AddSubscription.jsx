@@ -4,11 +4,16 @@ import adminService from '../services/adminService';
 import SvgEffect from '../components/SvgEffect';
 import { useAuth } from '../context/AuthContext';
 
+const CATEGORY_OPTIONS = [
+  { label: 'Music Premium', value: 'music' },
+  { label: 'OTT Platforms', value: 'ott' },
+  { label: 'Professional Subscriptions', value: 'professional' },
+  { label: 'Others', value: 'others' },
+];
+
 const initialForm = {
   serviceName: '',
   description: '',
-  price: '',
-  durationInDays: '',
   durations: [
     {
       duration: '1 Month',
@@ -17,18 +22,16 @@ const initialForm = {
       originalPrice: '',
       slotsAvailable: 0,
       totalSlots: 0,
-      isActive: true
+      isActive: true,
+      startDate: '',
+      endDate: ''
     }
   ],
   planType: 'basic',
-  originalPrice: '',
-  slotsAvailable: '',
-  totalSlots: '',
   features: [''],
   iconImage: '',
-  startDate: '',
-  endDate: '',
   isActive: true,
+  category: 'music',
 };
 
 const PLAN_TYPES = ['basic', 'premium', 'family', 'enterprise'];
@@ -82,7 +85,9 @@ function AddSubscription() {
       originalPrice: '',
       slotsAvailable: 0,
       totalSlots: 0,
-      isActive: true
+      isActive: true,
+      startDate: '',
+      endDate: ''
     };
     setForm({ ...form, durations: [...form.durations, newDuration] });
   };
@@ -102,7 +107,6 @@ function AddSubscription() {
         ...form,
         features: form.features.filter(f => f.trim() !== '')
       };
-      
       await adminService.addSubscriptionPlan(planData);
       setFormSuccess('Subscription plan added successfully!');
       setTimeout(() => {
@@ -175,80 +179,33 @@ function AddSubscription() {
                 required
               />
             </div>
-            <div className="dashboard-form-grid">
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Price</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={form.price}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
-              </div>
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Original Price</label>
-                <input
-                  type="number"
-                  name="originalPrice"
-                  value={form.originalPrice}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
-              </div>
+            <div className="dashboard-form-group">
+              <label className="dashboard-form-label">Plan Type</label>
+              <select
+                name="planType"
+                value={form.planType}
+                onChange={handleFormChange}
+                className="dashboard-select"
+                required
+              >
+                {PLAN_TYPES.map(type => (
+                  <option className='text-black' key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
+                ))}
+              </select>
             </div>
-            <div className="dashboard-form-grid">
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Duration (days)</label>
-                <input
-                  type="number"
-                  name="durationInDays"
-                  value={form.durationInDays}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
-              </div>
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Plan Type</label>
-                <select
-                  name="planType"
-                  value={form.planType}
-                  onChange={handleFormChange}
-                  className="dashboard-select"
-                  required
-                >
-                  {PLAN_TYPES.map(type => (
-                    <option className='text-black' key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="dashboard-form-grid">
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Slots Available</label>
-                <input
-                  type="number"
-                  name="slotsAvailable"
-                  value={form.slotsAvailable}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
-              </div>
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Total Slots</label>
-                <input
-                  type="number"
-                  name="totalSlots"
-                  value={form.totalSlots}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
-              </div>
+            <div className="dashboard-form-group">
+              <label className="dashboard-form-label">Category</label>
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleFormChange}
+                className="dashboard-select"
+                required
+              >
+                {CATEGORY_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
             </div>
             <div className="dashboard-form-group">
               <label className="dashboard-form-label">Icon Image URL</label>
@@ -265,7 +222,6 @@ function AddSubscription() {
                 Enter a valid image URL (e.g., https://picsum.photos/300/200)
               </p>
             </div>
-            
             {/* Duration Options Section */}
             <div className="dashboard-form-group">
               <label className="dashboard-form-label">Duration Options</label>
@@ -353,6 +309,26 @@ function AddSubscription() {
                           min="0"
                         />
                       </div>
+                      <div>
+                        <label className="text-white/80 text-sm mb-1 block">Start Date</label>
+                        <input
+                          type="date"
+                          value={duration.startDate}
+                          onChange={e => handleDurationChange(idx, 'startDate', e.target.value)}
+                          className="dashboard-input"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-white/80 text-sm mb-1 block">End Date</label>
+                        <input
+                          type="date"
+                          value={duration.endDate}
+                          onChange={e => handleDurationChange(idx, 'endDate', e.target.value)}
+                          className="dashboard-input"
+                          required
+                        />
+                      </div>
                     </div>
                     <div className="mt-3">
                       <label className="flex items-center">
@@ -374,30 +350,6 @@ function AddSubscription() {
                 >
                   + Add Duration Option
                 </button>
-              </div>
-            </div>
-            <div className="dashboard-form-grid">
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">Start Date</label>
-                <input
-                  type="date"
-                  name="startDate"
-                  value={form.startDate}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
-              </div>
-              <div className="dashboard-form-group">
-                <label className="dashboard-form-label">End Date</label>
-                <input
-                  type="date"
-                  name="endDate"
-                  value={form.endDate}
-                  onChange={handleFormChange}
-                  className="dashboard-input"
-                  required
-                />
               </div>
             </div>
             <div className="dashboard-form-group">
