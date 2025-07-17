@@ -36,7 +36,7 @@
 }
 
 .dashboard-content-scrollable {
-    @apply relative z-10 max-w-7xl mx-auto px-4 py-12 overflow-y-auto;
+    @apply relative z-10 max-w-7xl mx-auto overflow-y-auto;
 }
 
 .dashboard-card {
@@ -148,7 +148,7 @@
 
 /* Responsive utilities */
 .dashboard-responsive-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8;
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8;
 }
 
 .dashboard-responsive-text {

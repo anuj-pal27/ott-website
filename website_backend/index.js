@@ -11,6 +11,7 @@ const adminRoutes = require("./routes/adminRoute");
 const paymentRoutes = require("./routes/paymentRoute");
 const cartRoutes = require("./routes/cartRoute");
 const plansRoutes = require("./routes/plansRoute");
+const chatbotRoutes = require("./routes/chatbotRoute");
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/plans", plansRoutes);
+app.use("/api/chatbot", chatbotRoutes);
 
 // Global error handling middleware
 app.use((error, req, res, next) => {

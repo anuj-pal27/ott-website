@@ -14,7 +14,7 @@ function About() {
       {/* Glassmorphism Overlay */}
       <div className="absolute inset-0 bg-white/5 backdrop-blur-sm"></div>
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-8">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-8" id="about-section">
         <div className="w-full max-w-3xl bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl p-8">
           <h1 className="dashboard-heading mb-2 text-center">About Us</h1>
           <p className="dashboard-subheading mb-8 text-center">Learn more about our platform, our mission, and the team behind the vision.</p>

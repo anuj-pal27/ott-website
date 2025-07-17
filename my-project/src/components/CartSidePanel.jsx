@@ -37,7 +37,7 @@ const CartSidePanel = ({ isOpen, onClose }) => {
         onClick={onClose}
       />
       {/* Side Panel */}
-      <div className={`fixed right-0 top-0 h-full w-96 max-w-full bg-white shadow-2xl transform transition-transform ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed right-0 top-0 h-full w-full sm:w-96 bg-white shadow-2xl transform transition-transform ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-bold">Your Cart</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>

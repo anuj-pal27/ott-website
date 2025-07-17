@@ -48,8 +48,9 @@ function Checkout() {
     setPaying(true);
     setSuccess('');
     try {
-    
-      navigate(`/payment-status`);
+      const response = await paymentService.checkout();
+      const paymentId = response.orderId; // orderId is used as paymentId in backend
+      navigate(`/payment-status?paymentId=${paymentId}`);
       setSuccess('Order created! Proceed to payment.');
       console.log(response);
     } catch (err) {

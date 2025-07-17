@@ -66,7 +66,7 @@ function Dashboard() {
       {/* Glassmorphism Overlay */}
       <div className="dashboard-glassmorphism"></div>
       {/* Content */}
-      <div className="dashboard-content">
+      <div className="dashboard-content" id="products-section">
         <div className="text-center mb-10">
           <span className="dashboard-badge mb-2">🌟 Top-Rated Subscriptions</span>
           <h1 className="dashboard-heading mb-2">Customer Favorites, Just for You!</h1>

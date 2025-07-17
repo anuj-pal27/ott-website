@@ -70,7 +70,7 @@ function Navbar() {
                 Categories <KeyboardArrowDownIcon style={{ fontSize: 20 }} />
               </button>
               {categoriesOpen && (
-                <div className='absolute left-0 mt-2 w-56 bg-white/95 rounded-xl shadow-lg py-2 z-50 border border-white/30'>
+                <div className='absolute left-0 mt-2 w-56 bg-white/95 rounded-xl shadow-lg py-4 z-50 border border-white/30'>
                   {categories.map((cat) => (
                     <Link
                       key={cat.to}
@@ -193,34 +193,59 @@ function Navbar() {
               </div>
               {/* Other mobile nav links */}
               {navLinks.map((link, index) => (
-                <Link key={link.to} to={link.to} className='text-primary-700 hover:text-primary-900 transition-all duration-300 font-medium text-lg text-center flex items-center justify-center gap-2' onClick={() => setMobileOpen(false)}>
-                  {link.isAvatar ? (
-                    <div className='flex items-center gap-3'>
-                      <div className='w-10 h-10 rounded-full overflow-hidden border-2 border-primary-300'>
-                        {user?.profilePicture ? (
-                          <img 
-                            src={user.profilePicture} 
-                            alt={user.name}
-                            className='w-full h-full object-cover'
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              e.target.nextSibling.style.display = 'flex';
-                            }}
-                          />
-                        ) : null}
-                        <div className='w-full h-full bg-primary-100 flex items-center justify-center text-primary-700 font-semibold text-lg'>
-                          {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                        </div>
-                      </div>
-                      <span className='text-primary-700 font-medium'>{user?.name}</span>
+                link.to === '/cart' ? (
+                  <button
+                    key="mobile-cart-btn"
+                    onClick={() => {
+                      setCartOpen(true);
+                      setMobileOpen(false);
+                    }}
+                    className='text-primary-700 hover:text-primary-900 transition-all duration-300 font-medium text-lg text-center flex items-center justify-center gap-2 w-full'
+                  >
+                    <div className="flex items-center gap-2">
+                      <ShoppingCartIcon className="text-primary-700" />
+                      {cart && cart.items && cart.items.length > 0 && (
+                        <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                          {cart.items.length}
+                        </span>
+                      )}
                     </div>
-                  ) : (
-                    <>
-                      {link.icon}
-                      {link.label && <span>{link.label}</span>}
-                    </>
-                  )}
-                </Link>
+                    <span>Cart</span>
+                  </button>
+                ) : (
+                  <Link key={link.to} to={link.to} className='text-primary-700  hover:text-primary-900 transition-all duration-300 font-medium text-lg text-center flex items-center justify-center gap-2' onClick={() => setMobileOpen(false)}>
+                    {link.isAvatar ? (
+                      <div className='flex items-center gap-3'>
+                        <div className='w-10 h-10 rounded-full overflow-hidden border-2 border-primary-300 '>
+                          {user?.profilePicture ? (
+                            <img 
+                              src={user.profilePicture} 
+                              alt={user.name}
+                              className='w-full  h-full object-cover'
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div className='w-full h-full bg-primary-100 flex items-center justify-center text-primary-700 font-semibold text-lg'>
+                            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                          </div>
+                        </div>
+                        <span className='text-primary-700 font-medium'>{user?.name}</span>
+                      </div>
+                    ) : (
+                      <>
+                        {link.to === '/admin-dashboard' ? (
+                          <DashboardIcon className="text-primary-700" />
+                        ) : link.to === '/auth' ? (
+                          <PersonIcon className="text-primary-700" />
+                        ) : null}
+                        {link.label && <span>{link.label}</span>}
+                      </>
+                    )}
+                  </Link>
+                )
               ))}
               
               {/* Logout Button for Mobile - Only show when user is logged in */}

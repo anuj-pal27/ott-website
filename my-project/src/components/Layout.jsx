@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import Navbar from './Navbar'
 import HeroSection from './HeroSection'
-
+import Chatbot from './Chatbot'
 
 const Layout = () => {
   const location = useLocation();
@@ -14,6 +14,7 @@ const Layout = () => {
         {isHomePage && <HeroSection />}
         <Outlet />
       </main>
+      <Chatbot />
     </div>
   )
 }

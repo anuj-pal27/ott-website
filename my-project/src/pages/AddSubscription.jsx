@@ -141,7 +141,7 @@ function AddSubscription() {
             >
               ← Back to Dashboard
             </button>
-            <h1 className="dashboard-form-title">Add Subscription Plan</h1>
+            <h1 className="dashboard-form-title ml-4">Add Subscription Plan</h1>
             <div className="w-32"></div> {/* Spacer for centering */}
           </div>
           {formError && (
@@ -203,7 +203,7 @@ function AddSubscription() {
                 required
               >
                 {CATEGORY_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  <option className='text-black' key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
             </div>
@@ -248,10 +248,10 @@ function AddSubscription() {
                           className="dashboard-select"
                           required
                         >
-                          <option value="1 Month">1 Month</option>
-                          <option value="3 Months">3 Months</option>
-                          <option value="6 Months">6 Months</option>
-                          <option value="1 Year">1 Year</option>
+                          <option className='text-black' value="1 Month">1 Month</option>
+                          <option className='text-black' value="3 Months">3 Months</option>
+                          <option className='text-black' value="6 Months">6 Months</option>
+                          <option className='text-black' value="1 Year">1 Year</option>
                         </select>
                       </div>
                       <div>

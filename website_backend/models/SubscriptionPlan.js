@@ -13,7 +13,7 @@ const subscriptionSchema = new mongoose.Schema({
     durations: [{
         duration: {
             type: String,
-            enum: ['1 Month', '3 Months', '6 Months', '1 Year'],
+            enum: ['1 Month', '3 Months', '6 Months', '1 Year', 'Lifetime', 'One-time'],
             required: true
         },
         description: {
@@ -51,9 +51,38 @@ const subscriptionSchema = new mongoose.Schema({
         type:String,
         required:true,
     },
+    // Updated categories to include new service types
     category: {
         type: String,
-        enum: ['music', 'ott', 'professional', 'others'],
+        enum: [
+            'subscriptions',    // Netflix, Prime, etc.
+            'software',         // Adobe, Office, etc.
+            'websites',         // Instant websites, templates
+            'tools',           // Development tools, utilities
+            'courses',         // Online courses, tutorials
+            'design',          // Design resources, templates
+            'marketing',       // Marketing tools, analytics
+            'hosting',         // Web hosting, domains
+            'other'            // Miscellaneous services
+        ],
+        required: true,
+    },
+    // New field for service type
+    serviceType: {
+        type: String,
+        enum: [
+            'streaming',       // Netflix, Prime, etc.
+            'music',           // Spotify, Apple Music
+            'software',        // Adobe, Office, etc.
+            'website',         // Instant websites
+            'template',        // Website templates
+            'course',          // Online courses
+            'tool',            // Development tools
+            'design',          // Design resources
+            'hosting',         // Web hosting
+            'domain',          // Domain names
+            'other'            // Other services
+        ],
         required: true,
     },
     features: [String],

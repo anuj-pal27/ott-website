@@ -134,29 +134,6 @@ class AuthService {
     }
   }
 
-  // Legacy email-based login (for backward compatibility)
-  async loginWithEmail(credentials) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/user/login-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
   // Update user details
   async updateUserDetails(userData) {
     try {

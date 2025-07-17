@@ -75,25 +75,25 @@ function AdminDashboard() {
       {/* Glassmorphism Overlay */}
       <div className="dashboard-glassmorphism"></div>
       {/* Content */}
-      <div className="dashboard-content-scrollable">
-        <div className="flex justify-between items-center mb-8">
+      <div className="dashboard-content-scrollable px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-8">
           <h1 className="dashboard-heading">Admin Dashboard</h1>
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">
             <button
-              className="dashboard-button-primary"
+              className="dashboard-button-primary text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3"
               onClick={() => navigate('/admin-dashboard/add')}
             >
               + Add Subscription
             </button>
             <button
-              className="dashboard-button-danger"
+              className="dashboard-button-danger text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3"
               onClick={handleLogout}
             >
               Logout
             </button>
             <button
               onClick={() => navigate('/')}
-              className="dashboard-button-back"
+              className="dashboard-button-back text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3"
             >
               ← Back to Home
             </button>
@@ -108,15 +108,15 @@ function AdminDashboard() {
             {plans.map(plan => (
               <div key={plan._id} className="relative group">
                 <ServiceCard plan={plan} onAddToCart={() => {}} showCartButton={false} />
-                <div className="absolute top-2 right-2 flex gap-2 opacity-90 group-hover:opacity-100">
+                <div className="absolute top-2 right-2 flex gap-1 sm:gap-2 opacity-90 group-hover:opacity-100">
                   <button
-                    className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg text-xs font-bold shadow"
+                    className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 sm:px-3 py-1 rounded-lg text-xs font-bold shadow transition-all duration-200"
                     onClick={() => handleEditPlan(plan)}
                   >
                     Edit
                   </button>
                   <button
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-xs font-bold shadow"
+                    className="bg-red-500 hover:bg-red-600 text-white px-2 sm:px-3 py-1 rounded-lg text-xs font-bold shadow transition-all duration-200"
                     onClick={() => handleDeletePlan(plan._id)}
                   >
                     Delete

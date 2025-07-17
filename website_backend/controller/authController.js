@@ -350,7 +350,7 @@ const signup = async (req, res) => {
                 message: "User already exists" 
             });
         }
-        
+
         // Verify OTP
         const recentOtp = await Otp.findOne({ phone, type: 'phone' }).sort({createdAt:-1}).limit(1);
         
@@ -463,7 +463,7 @@ const login = async (req, res) => {
                 message: "User not found" 
             });
         }
-        
+
         // Check if phone is verified
         if (!user.isPhoneVerified) {
             return res.status(400).json({ 
@@ -632,7 +632,7 @@ const createAdmin = async (req, res) => {
         };
         
         const adminUser = await User.create(adminPayload);    
-        console.log("Admin user created successfully:", adminUser._id);
+        console.log("Admin user created successfully:", adminUser._id);     
         
         // Automatically log the admin in after successful signup
         const payload = {

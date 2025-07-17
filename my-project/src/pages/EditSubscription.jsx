@@ -205,7 +205,7 @@ function EditSubscription() {
             >
               ← Back to Dashboard
             </button>
-            <h1 className="dashboard-form-title">Edit Subscription Plan</h1>
+            <h1 className="dashboard-form-title ml-4">Edit Subscription Plan</h1>
             <div className="w-32"></div> {/* Spacer for centering */}
           </div>
           {formError && (
@@ -253,7 +253,7 @@ function EditSubscription() {
                 required
               >
                 {PLAN_TYPES.map(type => (
-                  <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
+                  <option className='text-black' key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
                 ))}
               </select>
             </div>
@@ -312,10 +312,10 @@ function EditSubscription() {
                           className="dashboard-select"
                           required
                         >
-                          <option value="1 Month">1 Month</option>
-                          <option value="3 Months">3 Months</option>
-                          <option value="6 Months">6 Months</option>
-                          <option value="1 Year">1 Year</option>
+                          <option className='text-black' value="1 Month">1 Month</option>
+                          <option className='text-black' value="3 Months">3 Months</option>
+                          <option className='text-black' value="6 Months">6 Months</option>
+                          <option className='text-black' value="1 Year">1 Year</option>
                         </select>
                       </div>
                       <div>

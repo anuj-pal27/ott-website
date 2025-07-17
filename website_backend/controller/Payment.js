@@ -1,10 +1,19 @@
-const phonepe = require("../config/PhonePe");
 const Payment = require("../models/Payment");
 const Order = require("../models/Order");
 const User = require("../models/User");
 const Cart = require("../models/Cart");
 const sendEmailOtp = require("../utils/sendEmailOtp");
 const orderPlacedEmailTemplate = require("../utils/orderPlacedEmailTemplate");
+const PhonePe = require("../config/PhonePe");
+// const { StandardCheckoutClient, Env, StandardCheckoutPayRequest } = require('pg-sdk-node');
+// const { randomUUID } = require('crypto');
+
+// const clientId = 'TEST-M23IDUHMGXY2Q_25070';
+// const clientVersion = 1;
+// const clientSecret = 'NDZINTczNWYtZGEzMiOOZmEwLTk2NDItZGNINzRkZTFjMDM1';
+// const env = Env.SANDBOX;
+
+// const client = StandardCheckoutClient.getInstance(clientId, clientSecret, clientVersion, env);
 
 // Create checkout session (PhonePe)
 const checkout = async (req, res) => {
@@ -43,18 +52,38 @@ const checkout = async (req, res) => {
             startDate: new Date(),
         });
         await order.save();
+        // const merchantOrderId = randomUUID();
+        // const redirectUrl = `http://localhost:8080/api/payment/check-status?merchantOrderId=${merchantOrderId}`;
 
-        // Create PhonePe Order
-        const phonepeOrder = await phonepe.createPhonePeOrder(order._id.toString(), totalAmount, userId);
-        if (!phonepeOrder.success) {
-            return res.status(500).json({ success: false, message: "Failed to create PhonePe order", details: phonepeOrder });
-        }
+        // // Build the Standard Checkout request
+        // const request = StandardCheckoutPayRequest.builder()
+        //     .merchantOrderId(merchantOrderId)
+        //     .amount(totalAmount)
+        //     .redirectUrl(redirectUrl)
+        //     .build();
+        // console.log('StandardCheckoutPayRequest:', request);
 
+        // // Create PhonePe Order using SDK
+        // const response = await client.pay(request);
+        // console.log('PhonePe SDK pay response:', response);
+
+        // // Extract payment URL from SDK response
+        // const paymentUrl = response?.data?.instrumentResponse?.redirectInfo?.url;
+        // if (!paymentUrl) {
+        //     return res.status(500).json({ success: false, message: "Failed to get payment URL from PhonePe", details: response });
+        // }
+         const response = await PhonePe.createPhonePeOrder(order._id, totalAmount, userId);
+         console.log('PhonePe Order Creation Response:', response);
+         const paymentUrl = response?.data?.instrumentResponse?.redirectInfo?.url;
+         if (!paymentUrl) {
+            return res.status(500).json({ success: false, message: "Failed to get payment URL from PhonePe", details: response });
+         }
         // Create Payment record
         const payment = new Payment({
             order: order._id,
             paymentAmount: totalAmount,
-            paymentId: order._id.toString(), // Use order ID as payment ID for PhonePe
+            // paymentId: merchantOrderId, // Use merchantOrderId as payment ID for PhonePe
+            paymentId: response?.data?.instrumentResponse?.redirectInfo?.url,
             paymentStatus: "pending",
             paymentMethod: "phonepe",
         });
@@ -71,16 +100,17 @@ const checkout = async (req, res) => {
             success: true,
             message: "Order created successfully",
             orderId: order._id,
-            phonepeOrder,
+            // merchantOrderId,
+            paymentId: response?.data?.instrumentResponse?.redirectInfo?.url,
+            paymentUrl,
             amount: totalAmount,
             currency: "INR",
         });
-
     } catch (error) {
         console.error("Error in checkout:", error);
-        res.status(500).json({ 
-            success: false, 
-            message: "Error in checkout" 
+        res.status(500).json({
+            success: false,
+            message: "Error in checkout"
         });
     }
 };
@@ -88,17 +118,23 @@ const checkout = async (req, res) => {
 // Verify payment (PhonePe)
 const verifyPayment = async (req, res) => {
     try {
+        // // For Standard Checkout, merchantOrderId is used
+        // const { merchantOrderId } = req.body;
+        // if (!merchantOrderId) {
+        //     return res.status(400).json({ success: false, message: "Missing merchantOrderId" });
+        // }
+        // // Check payment status with PhonePe SDK
+        // const statusResponse = await client.getPaymentStatus(merchantOrderId);
+        // console.log('PhonePe SDK status response:', statusResponse);
+        // const paymentStatus = statusResponse?.data?.state;
+        // if (paymentStatus !== 'COMPLETED') {
+        //     return res.status(400).json({ success: false, message: "Payment not successful", status: paymentStatus });
+        // }
         const { orderId } = req.body;
-        if (!orderId) {
-            return res.status(400).json({ success: false, message: "Missing orderId" });
-        }
-        // Check payment status with PhonePe
-        const statusResponse = await phonepe.checkPhonePePaymentStatus(orderId);
-        if (!statusResponse.success) {
-            return res.status(400).json({ success: false, message: "Payment verification failed", details: statusResponse });
-        }
-        const paymentStatus = statusResponse.data && statusResponse.data.paymentInstrumentResponseData && statusResponse.data.paymentInstrumentResponseData.status;
-        if (paymentStatus !== 'SUCCESS') {
+        const response = await PhonePe.checkPhonePePaymentStatus(orderId);
+        console.log('PhonePe Payment Status Response:', response);
+        const paymentStatus = response?.data?.state;
+        if (paymentStatus !== 'COMPLETED') {
             return res.status(400).json({ success: false, message: "Payment not successful", status: paymentStatus });
         }
         // Find and update payment
