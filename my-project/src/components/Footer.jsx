@@ -31,12 +31,12 @@ const Footer = () => (
       <div>
         <h3 className="dashboard-heading text-xl mb-3">USEFUL LINKS</h3>
         <ul className="space-y-2">
-          <li><a href="#" className="hover:text-emerald-200 text-white transition">About Us</a></li>
-          <li><a href="#" className="hover:text-emerald-200 text-white transition">Contact Us</a></li>
-          <li><a href="#" className="hover:text-emerald-200 text-white transition">Disclaimer</a></li>
-          <li><a href="#" className="hover:text-emerald-200 text-white transition">Privacy Policy</a></li>
-          <li><a href="#" className="hover:text-emerald-200 text-white transition">Refunds Policy</a></li>
-          <li><a href="#" className="hover:text-emerald-200 text-white transition">Terms & Conditions</a></li>
+          <li><a href="/about" className="hover:text-emerald-200 text-white transition">About Us</a></li>
+          <li><a href="/contact" className="hover:text-emerald-200 text-white transition">Contact Us</a></li>
+          <li><a href="/disclaimer" className="hover:text-emerald-200 text-white transition">Disclaimer</a></li>
+          <li><a href="/privacy-policy" className="hover:text-emerald-200 text-white transition">Privacy Policy</a></li>
+          <li><a href="/refund-policy" className="hover:text-emerald-200 text-white transition">Refunds Policy</a></li>
+          <li><a href="/terms-and-conditions" className="hover:text-emerald-200 text-white transition">Terms & Conditions</a></li>
         </ul>
       </div>
     </div>

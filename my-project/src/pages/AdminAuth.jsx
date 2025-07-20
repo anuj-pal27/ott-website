@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SvgEffect from '../components/SvgEffect';
 import PersonIcon from '@mui/icons-material/Person';
@@ -25,11 +25,20 @@ function AdminAuth() {
     adminSecret: '',
     otp: ''
   });
+  const [resendTimer, setResendTimer] = useState(0);
+  const RESEND_INTERVAL = 60; // seconds
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (error) setError('');
   };
+
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timerId = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+      return () => clearTimeout(timerId);
+    }
+  }, [resendTimer]);
 
   const handleSendSignupOtp = async () => {
     if (!formData.phone || !formData.email || !formData.name || !formData.adminSecret) {
@@ -45,6 +54,7 @@ function AdminAuth() {
       setOtpSent(true);
       setSuccess('OTP sent successfully to your phone!');
       setTimeout(() => setSuccess(''), 5000);
+      setResendTimer(RESEND_INTERVAL);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -66,6 +76,7 @@ function AdminAuth() {
       setOtpSent(true);
       setSuccess('OTP sent successfully to your phone!');
       setTimeout(() => setSuccess(''), 5000);
+      setResendTimer(RESEND_INTERVAL);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -290,10 +301,10 @@ function AdminAuth() {
                     <button
                       type="button"
                       onClick={isLogin ? handleSendLoginOtp : handleSendSignupOtp}
-                      disabled={otpLoading}
+                      disabled={otpLoading || resendTimer > 0}
                       className="bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-xl font-medium transition-all duration-300 backdrop-blur-sm border border-white/30"
                     >
-                      {otpLoading ? '...' : 'Resend'}
+                      {otpLoading ? '...' : resendTimer > 0 ? `Resend (${resendTimer}s)` : 'Resend'}
                     </button>
                   </div>
                 </div>

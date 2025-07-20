@@ -230,8 +230,8 @@ function Navbar() {
                           ) : null}
                           <div className='w-full h-full bg-primary-100 flex items-center justify-center text-primary-700 font-semibold text-lg'>
                             {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                          </div>
-                        </div>
+        </div>
+    </div>
                         <span className='text-primary-700 font-medium'>{user?.name}</span>
                       </div>
                     ) : (
