@@ -10,6 +10,7 @@ const PaymentStatus = () => {
     const [verifyMsg, setVerifyMsg] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
+    const [redirectCountdown, setRedirectCountdown] = useState(3);
 
     const fetchPayment = async (paymentId) => {
         setLoading(true);
@@ -35,6 +36,32 @@ const PaymentStatus = () => {
         fetchPayment(paymentId);
     }, [location.search]);
 
+    // Auto-verify if payment is pending after fetching payment details
+    useEffect(() => {
+        if (payment && payment.paymentStatus === 'pending' && !verifying) {
+            handleVerifyPayment();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [payment]);
+
+    // Show countdown and redirect for failed/cancelled payments
+    useEffect(() => {
+        if (payment && payment.paymentStatus && payment.paymentStatus !== 'pending' && payment.paymentStatus !== 'success') {
+            setRedirectCountdown(3);
+            const interval = setInterval(() => {
+                setRedirectCountdown((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(interval);
+                        navigate('/');
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [payment, navigate]);
+
     const handleVerifyPayment = async () => {
         setVerifying(true);
         setVerifyMsg('');
@@ -43,6 +70,7 @@ const PaymentStatus = () => {
         const paymentId = params.get('paymentId');
         try {
             const result = await paymentService.verifyPayment(paymentId);
+            console.log('📥 Verify result:', result);
             setVerifyMsg(result.message || 'Payment verified!');
             // Refresh payment details
             await fetchPayment(paymentId);
@@ -54,10 +82,16 @@ const PaymentStatus = () => {
     };
 
     if (loading) return <div className="dashboard-theme min-h-screen flex items-center justify-center"><div>Loading payment status...</div></div>;
-    if (error) return <div className="dashboard-theme min-h-screen flex items-center justify-center text-red-500">{error}</div>;
+    if (error && (!payment || !payment.paymentStatus || payment.paymentStatus === 'pending')) {
+        return <div className="dashboard-theme min-h-screen flex items-center justify-center text-red-500">{error}</div>;
+    }
     if (!payment) return <div className="dashboard-theme min-h-screen flex items-center justify-center">No payment details found.</div>;
 
     const { paymentStatus, paymentAmount, paymentMethod, paymentDate, order } = payment;
+    console.log('📥 Payment status:', paymentStatus);
+    console.log('📥 Payment:', payment);
+    const isFailed = paymentStatus && paymentStatus !== 'pending' && paymentStatus !== 'success';
+    console.log('📥 Is failed:', isFailed);
     return (
         <div className="dashboard-theme min-h-screen flex flex-col items-center justify-center p-4">
             <button
@@ -70,27 +104,28 @@ const PaymentStatus = () => {
             <div className="dashboard-card max-w-lg w-full p-8 text-center">
                 <h1 className="dashboard-heading mb-4">Payment Status</h1>
                 <div className={`text-2xl font-bold mb-2 ${paymentStatus === 'success' ? 'text-green-500' : paymentStatus === 'pending' ? 'text-yellow-500' : 'text-red-500'}`}>{paymentStatus?.toUpperCase()}</div>
-                <div className="mb-4">Amount Paid: <span className="font-semibold">₹{paymentAmount}</span></div>
-                <div className="mb-4">Payment Method: <span className="font-semibold">{paymentMethod}</span></div>
-                {paymentDate && <div className="mb-4">Payment Date: <span className="font-semibold">{new Date(paymentDate).toLocaleString()}</span></div>}
+                {isFailed && (
+                    <div className="bg-red-100 text-red-700 rounded-xl p-4 mb-4 border border-red-300">
+                        <div className="text-lg font-semibold mb-2">Payment Failed or Cancelled</div>
+                        <div className="mb-2">You will be redirected to the dashboard in <span className="font-bold">{redirectCountdown}</span> second{redirectCountdown !== 1 ? 's' : ''}.</div>
+                        <div>If you believe this is a mistake, please try again or contact support.</div>
+                    </div>
+                )}
+                <div className="mb-4 text-white">Amount Paid: <span className="font-semibold text-white">₹{paymentAmount}</span></div>
+                <div className="mb-4 text-white">Payment Method: <span className="font-semibold text-white">{paymentMethod}</span></div>
+                {paymentDate && <div className="mb-4 text-white">Payment Date: <span className="font-semibold text-white">{new Date(paymentDate).toLocaleString()}</span></div>}
                 {order && (
                     <div className="bg-white/10 rounded-xl p-4 mt-4">
-                        <div className="font-semibold mb-2">Order Details</div>
-                        <div>Order ID: {order._id}</div>
-                        <div>Subscription: {order.subscriptionId?.serviceName || 'N/A'}</div>
-                        <div>Duration: {order.selectedDuration?.duration || 'N/A'}</div>
-                        <div>Start Date: {order.startDate ? new Date(order.startDate).toLocaleDateString() : 'N/A'}</div>
+                        <div className="font-semibold mb-2 text-white">Order Details</div>
+                        <div className="text-white">Order ID: <span className="font-semibold text-white">{order._id}</span></div>
+                        <div className="text-white">Subscription: <span className="font-semibold text-white">{order.subscriptionId?.serviceName || 'N/A'}</span></div>
+                        <div className="text-white">Duration: <span className="font-semibold text-white">{order.selectedDuration?.duration || 'N/A'}</span></div>
+                        <div className="text-white">Start Date: <span className="font-semibold text-white">{order.startDate ? new Date(order.startDate).toLocaleDateString() : 'N/A'}</span></div>
                         {order.endDate && <div>End Date: {new Date(order.endDate).toLocaleDateString()}</div>}
                     </div>
                 )}
                 {paymentStatus === 'pending' && (
-                    <button
-                        className="dashboard-button-primary w-full mt-6"
-                        onClick={handleVerifyPayment}
-                        disabled={verifying}
-                    >
-                        {verifying ? 'Verifying...' : 'Verify Payment'}
-                    </button>
+                    <div className="dashboard-button-primary w-full mt-6 opacity-50 cursor-not-allowed">Verifying Payment...</div>
                 )}
                 {verifyMsg && <div className="dashboard-success mt-4">{verifyMsg}</div>}
             </div>

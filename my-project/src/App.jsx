@@ -19,6 +19,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsAndConditions from './pages/TermsAndConditions';
 import Disclaimer from './pages/Disclaimer';
 import RefundPolicy from './pages/RefundPolicy';
+import PaymentHistory from './pages/PaymentHistory';
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
           <Route path="/admin-dashboard/edit/:planId" element={<EditSubscription />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/payment-status" element={<PaymentStatus />} />
+          <Route path="/payment-history" element={<PaymentHistory />} />
         </Routes>
       </CartProvider>
     </AuthProvider>

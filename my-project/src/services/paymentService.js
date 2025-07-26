@@ -34,7 +34,7 @@ const paymentService = {
         const response = await fetchWithAuth(`${API_BASE_URL}/payment/verify-payment`, {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ orderId: paymentId })
+            body: JSON.stringify({ paymentId })
         });
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || 'Failed to verify payment');

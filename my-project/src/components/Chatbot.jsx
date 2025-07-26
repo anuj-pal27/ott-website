@@ -38,9 +38,8 @@ const Chatbot = () => {
     setInputMessage('');
     setIsTyping(true);
 
-    // Get response from service
-    const response = chatbotService.findResponse(userMessage);
-    
+    // Get response from service (await the async function)
+    const response = await chatbotService.findResponse(userMessage);
     // Simulate typing delay
     setTimeout(() => {
       addBotMessage(response.response);
@@ -145,13 +144,13 @@ const Chatbot = () => {
                 {quickQuestions.slice(0, 4).map((question, index) => (
                   <button
                     key={index}
-                    onClick={() => {
+                    onClick={async () => {
                       addUserMessage(question);
                       setInputMessage('');
                       setIsTyping(true);
+                      const botResponseObj = await chatbotService.findResponse(question);
                       setTimeout(() => {
-                        const botResponse = chatbotService.findResponse(question).response;
-                        addBotMessage(botResponse);
+                        addBotMessage(botResponseObj.response);
                         setIsTyping(false);
                       }, 1000);
                     }}

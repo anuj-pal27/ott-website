@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SvgEffect from './SvgEffect';
 import HeroSection from './HeroSection';
@@ -11,6 +11,24 @@ import logo from '../assets/logo.jpg';
 import CartSidePanel from './CartSidePanel';
 import { useCart } from '../context/CartContext';
 
+const CATEGORY_ICON_MAP = {
+  'AI TOOLS': { name: 'AI Tools', icon: '🤖' },
+  'GRAPHICS AND VIDEO EDITING SERVICES': { name: 'Graphics & Video', icon: '🎬' },
+  'WRITING TOOLS SERVICES': { name: 'Writing Tools', icon: '✍️' },
+  'PRODUCTIVITY AND OFFICE MANAGEMENT SERVICES': { name: 'Productivity & Office', icon: '📈' },
+  'ONLINE MARKETING And SOFTWARE': { name: 'Marketing & Software', icon: '📢' },
+  'DATA EXTRACTER SERVICES': { name: 'Data Extractor', icon: '📊' },
+  'DATING SUBSCRIPTION': { name: 'Dating', icon: '💖' },
+  'ONLINE ENTERTAINMENT SERVICES': { name: 'Entertainment', icon: '🎥' },
+  'subscriptions': { name: 'Streaming', icon: '📺' },
+  'software': { name: 'Software', icon: '💻' },
+  'websites': { name: 'Websites', icon: '🌐' },
+  'tools': { name: 'Tools', icon: '🛠️' },
+  'music': { name: 'Music', icon: '🎵' },
+  'other': { name: 'Other', icon: '📦' },
+  'featured': { name: 'Featured', icon: '⭐' },
+};
+
 function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -18,13 +36,30 @@ function Navbar() {
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
   const { user, logout } = useAuth();
   const { cart, clearCart } = useCart();
+  const [categories, setCategories] = useState([]);
 
-  const categories = [
-    { label: 'Music Premium', to: '/categories/music' },
-    { label: 'OTT Platforms', to: '/categories/ott' },
-    { label: 'Professional Subscriptions', to: '/categories/professional' },
-    { label: 'Others', to: '/categories/others' },
-  ];
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('http://localhost:8080/api/plans/categories');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.categories)) {
+          setCategories(data.categories);
+        } else {
+          setCategories([]);
+        }
+      } catch (err) {
+        setCategories([]);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Remove 'All Services' from allCategories
+  const allCategories = categories.map(cat => ({
+    label: CATEGORY_ICON_MAP[cat]?.name || cat,
+    to: `/categories/${encodeURIComponent(cat)}`
+  }));
 
   const navLinks = [
     { to: '/', label: 'Home' },
@@ -71,7 +106,7 @@ function Navbar() {
               </button>
               {categoriesOpen && (
                 <div className='absolute left-0 mt-2 w-56 bg-white/95 rounded-xl shadow-lg py-4 z-50 border border-white/30'>
-                  {categories.map((cat) => (
+                  {allCategories.map((cat) => (
                     <Link
                       key={cat.to}
                       to={cat.to}
@@ -130,6 +165,12 @@ function Navbar() {
                 </Link>
               )
             ))}
+            {/* Payment History & Orders link */}
+            {user && (
+              <Link to="/payment-history" className='text-white hover:text-gray-200 transition-all duration-300 font-medium relative group flex items-center gap-2'>
+                <span>Payment History & Orders</span>
+              </Link>
+            )}
             
             {/* Logout Button - Only show when user is logged in */}
             {user && (
@@ -175,7 +216,7 @@ function Navbar() {
                 </button>
                 {mobileCategoriesOpen && (
                   <div className='mt-1 bg-white/95 rounded-xl shadow-lg py-2 border border-primary/20'>
-                    {categories.map((cat) => (
+                    {allCategories.map((cat) => (
                       <Link
                         key={cat.to}
                         to={cat.to}
@@ -247,6 +288,12 @@ function Navbar() {
                   </Link>
                 )
               ))}
+              {/* Payment History & Orders link */}
+              {user && (
+                <Link to="/payment-history" className='text-primary-700 hover:text-primary-900 transition-all duration-300 font-medium text-lg text-center flex items-center justify-center gap-2' onClick={() => setMobileOpen(false)}>
+                  Payment History & Orders
+                </Link>
+              )}
               
               {/* Logout Button for Mobile - Only show when user is logged in */}
               {user && (

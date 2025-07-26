@@ -59,14 +59,14 @@ const CartSidePanel = ({ isOpen, onClose }) => {
                 return (
                   <div key={item._id} className="flex items-center gap-4 border-b pb-4">
                     <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden">
-                      {plan.iconImage ? (
-                        <img src={plan.iconImage} alt={plan.serviceName} className="object-contain w-full h-full" />
+                      {plan && plan.iconImage ? (
+                        <img src={plan.iconImage} alt={plan.serviceName || 'Service'} className="object-contain w-full h-full" />
                       ) : (
-                        <div className="text-2xl font-bold text-primary">{plan.serviceName ? plan.serviceName.charAt(0).toUpperCase() : 'S'}</div>
+                        <div className="text-2xl font-bold text-primary">{plan && plan.serviceName ? plan.serviceName.charAt(0).toUpperCase() : 'S'}</div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-gray-900 truncate">{plan.serviceName}</div>
+                      <div className="font-semibold text-gray-900 truncate">{plan && plan.serviceName ? plan.serviceName : 'Service'}</div>
                       {duration && (
                         <div className="text-xs text-gray-700 mt-1">{duration.duration} &bull; ₹{duration.price}</div>
                       )}

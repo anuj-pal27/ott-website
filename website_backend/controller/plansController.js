@@ -1,22 +1,42 @@
 const SubscriptionPlan = require('../models/SubscriptionPlan');
 
-
 const getPublicPlans = async (req, res) => {
     try {
         const filter = { isActive: true };
-        if (req.query.category) {
+        
+        // Filter by category
+        if (req.query.category && req.query.category !== 'all') {
             filter.category = req.query.category;
         }
-        const plans = await SubscriptionPlan.find(filter);
+        
+        // Filter by service type
+        if (req.query.serviceType) {
+            filter.serviceType = req.query.serviceType;
+        }
+        
+        // Filter by plan type
+        if (req.query.planType) {
+            filter.planType = req.query.planType;
+        }
+        
+        const plans = await SubscriptionPlan.find(filter).sort({ createdAt: -1 });
+        
         res.status(200).json({
             success: true,
             message: "Public plans fetched successfully",
-            plans
+            plans,
+            total: plans.length
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error fetching public plans:', error);
+        res.status(500).json({ 
+            success: false,
+            message: "Failed to fetch plans",
+            error: error.message 
+        });
     }
 };
+
 const getPublicPlanById = async (req, res) => {
     try{
         const {planId } = req.params;
@@ -33,9 +53,35 @@ const getPublicPlanById = async (req, res) => {
             plan
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error fetching plan by ID:', error);
+        res.status(500).json({ 
+            success: false,
+            message: "Failed to fetch plan",
+            error: error.message 
+        });
     }
-    
 };
 
-module.exports = { getPublicPlans, getPublicPlanById };
+// Get all unique categories
+const getAllCategories = async (req, res) => {
+    try {
+        const categories = await SubscriptionPlan.distinct('category', { isActive: true });
+        res.status(200).json({
+            success: true,
+            categories
+        });
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch categories',
+            error: error.message
+        });
+    }
+};
+
+module.exports = {
+    getPublicPlans,
+    getPublicPlanById,
+    getAllCategories
+};

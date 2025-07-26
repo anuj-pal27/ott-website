@@ -81,19 +81,17 @@ const planSchema = Joi.object({
         'string.max': 'Service name cannot exceed 100 characters',
         'any.required': 'Service name is required'
     }),
-    description: Joi.string().min(10).max(500).required().messages({
-        'string.min': 'Description must be at least 10 characters long',
-        'string.max': 'Description cannot exceed 500 characters',
+    description: Joi.string().min(1).required().messages({
+        'string.min': 'Description must be at least 1 character long',
         'any.required': 'Description is required'
     }),
     durations: Joi.array().items(Joi.object({
-        duration: Joi.string().valid('1 Month', '3 Months', '6 Months', '1 Year').required().messages({
-            'any.only': 'Duration must be one of: 1 Month, 3 Months, 6 Months, 1 Year',
+        duration: Joi.string().valid('1 Month', '3 Months', '6 Months', '1 Year', 'Lifetime', 'One-time').required().messages({
+            'any.only': 'Duration must be one of: 1 Month, 3 Months, 6 Months, 1 Year, Lifetime, One-time',
             'any.required': 'Duration is required'
         }),
-        description: Joi.string().min(1).max(200).required().messages({
+        description: Joi.string().min(1).required().messages({
             'string.min': 'Duration description must be at least 1 character long',
-            'string.max': 'Duration description cannot exceed 200 characters',
             'any.required': 'Duration description is required'
         }),
         price: Joi.number().positive().required().messages({
@@ -130,10 +128,30 @@ const planSchema = Joi.object({
         'any.only': 'Plan type must be one of: basic, premium, family, enterprise',
         'any.required': 'Plan type is required'
     }),
-    category: Joi.string().valid('music', 'ott', 'professional', 'others').required().messages({
-        'any.only': 'Category must be one of: music, ott, professional, others',
+    category: Joi.string().valid(
+        'subscriptions',
+        'software',
+        'websites',
+        'tools',
+        'music',
+        'design',
+        'marketing',
+        'hosting',
+        'other',
+        'AI TOOLS',
+        'GRAPHICS AND VIDEO EDITING SERVICES',
+        'WRITING TOOLS SERVICES',
+        'PRODUCTIVITY AND OFFICE MANAGEMENT SERVICES',
+        'ONLINE MARKETING And SOFTWARE',
+        'DATA EXTRACTER SERVICES',
+        'DATING SUBSCRIPTION',
+        'ONLINE ENTERTAINMENT SERVICES',
+        'featured' // Added featured as a category
+    ).required().messages({
+        'any.only': 'Category must be one of: subscriptions, software, websites, tools, music, design, marketing, hosting, other, AI TOOLS, GRAPHICS AND VIDEO EDITING SERVICES, WRITING TOOLS SERVICES, PRODUCTIVITY AND OFFICE MANAGEMENT SERVICES, ONLINE MARKETING And SOFTWARE, DATA EXTRACTER SERVICES, DATING SUBSCRIPTION, ONLINE ENTERTAINMENT SERVICES, featured',
         'any.required': 'Category is required'
     }),
+
     features: Joi.array().items(Joi.string().min(1)).min(1).required().messages({
         'array.min': 'At least one feature is required',
         'any.required': 'Features are required'
@@ -141,6 +159,9 @@ const planSchema = Joi.object({
     iconImage: Joi.string().uri().required().messages({
         'string.uri': 'Icon image must be a valid URL',
         'any.required': 'Icon image is required'
+    }),
+    sampleLink: Joi.string().uri().optional().messages({
+        'string.uri': 'Sample link must be a valid URL'
     }),
     isActive: Joi.boolean().default(true),
     createdBy: Joi.string().optional().messages({
@@ -150,10 +171,10 @@ const planSchema = Joi.object({
 
 const updatePlanSchema = Joi.object({
     serviceName: Joi.string().min(2).max(100).optional(),
-    description: Joi.string().min(10).max(500).optional(),
+    description: Joi.string().min(1).optional(),
     durations: Joi.array().items(Joi.object({
-        duration: Joi.string().valid('1 Month', '3 Months', '6 Months', '1 Year').required(),
-        description: Joi.string().min(1).max(200).required(),
+        duration: Joi.string().valid('1 Month', '3 Months', '6 Months', '1 Year', 'Lifetime', 'One-time').required(),
+        description: Joi.string().min(1).required(),
         price: Joi.number().positive().required(),
         originalPrice: Joi.number().positive().required(),
         slotsAvailable: Joi.number().integer().min(0).default(0),
@@ -163,11 +184,36 @@ const updatePlanSchema = Joi.object({
         endDate: Joi.date().iso().greater(Joi.ref('startDate')).required()
     })).min(1).optional(),
     planType: Joi.string().valid('basic', 'premium', 'family', 'enterprise').optional(),
-    category: Joi.string().valid('music', 'ott', 'professional', 'others').optional().messages({
-        'any.only': 'Category must be one of: music, ott, professional, others'
+    category: Joi.string().valid(
+        'subscriptions',
+        'software',
+        'websites',
+        'tools',
+        'music',
+        'design',
+        'marketing',
+        'hosting',
+        'other',
+        'AI TOOLS',
+        'GRAPHICS AND VIDEO EDITING SERVICES',
+        'WRITING TOOLS SERVICES',
+        'PRODUCTIVITY AND OFFICE MANAGEMENT SERVICES',
+        'ONLINE MARKETING And SOFTWARE',
+        'DATA EXTRACTER SERVICES',
+        'DATING SUBSCRIPTION',
+        'ONLINE ENTERTAINMENT SERVICES',
+        'featured' // Added featured as a category
+    ).optional().messages({
+        'any.only': 'Category must be one of: subscriptions, software, websites, tools, music, design, marketing, hosting, other, AI TOOLS, GRAPHICS AND VIDEO EDITING SERVICES, WRITING TOOLS SERVICES, PRODUCTIVITY AND OFFICE MANAGEMENT SERVICES, ONLINE MARKETING And SOFTWARE, DATA EXTRACTER SERVICES, DATING SUBSCRIPTION, ONLINE ENTERTAINMENT SERVICES, featured'
     }),
     features: Joi.array().items(Joi.string().min(1)).min(1).optional(),
     iconImage: Joi.string().uri().optional(),
+    sampleLink: Joi.string().uri().optional().messages({
+        'string.uri': 'Sample link must be a valid URL'
+    }),
+    sampleImages: Joi.array().items(Joi.string().uri()).optional().messages({
+        'string.uri': 'Sample image must be a valid URL'
+    }),
     isActive: Joi.boolean().optional()
 });
 
@@ -300,8 +346,8 @@ const cartAddSchema = Joi.object({
     subscriptionPlan: Joi.string().required().messages({
         'any.required': 'Subscription plan is required'
     }),
-    duration: Joi.string().valid('1 Month', '3 Months', '6 Months', '1 Year').required().messages({
-        'any.only': 'Duration must be one of: 1 Month, 3 Months, 6 Months, 1 Year',
+    duration: Joi.string().valid('1 Month', '3 Months', '6 Months', '1 Year', 'Lifetime', 'One-time').required().messages({
+        'any.only': 'Duration must be one of: 1 Month, 3 Months, 6 Months, 1 Year, Lifetime, One-time',
         'any.required': 'Duration is required'
     })
 });

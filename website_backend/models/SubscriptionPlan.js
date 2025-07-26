@@ -46,6 +46,10 @@ const subscriptionSchema = new mongoose.Schema({
         endDate:{
             type:Date,
         },
+        durationInDays: {
+            type: Number,
+            default: null
+        },
     }],
     planType:{
         type:String,
@@ -55,39 +59,33 @@ const subscriptionSchema = new mongoose.Schema({
     category: {
         type: String,
         enum: [
-            'subscriptions',    // Netflix, Prime, etc.
-            'software',         // Adobe, Office, etc.
-            'websites',         // Instant websites, templates
-            'tools',           // Development tools, utilities
-            'courses',         // Online courses, tutorials
-            'design',          // Design resources, templates
-            'marketing',       // Marketing tools, analytics
-            'hosting',         // Web hosting, domains
-            'other'            // Miscellaneous services
-        ],
-        required: true,
-    },
-    // New field for service type
-    serviceType: {
-        type: String,
-        enum: [
-            'streaming',       // Netflix, Prime, etc.
-            'music',           // Spotify, Apple Music
-            'software',        // Adobe, Office, etc.
-            'website',         // Instant websites
-            'template',        // Website templates
-            'course',          // Online courses
-            'tool',            // Development tools
-            'design',          // Design resources
-            'hosting',         // Web hosting
-            'domain',          // Domain names
-            'other'            // Other services
+            'subscriptions',
+            'software',
+            'websites',
+            'tools',
+            'music',
+            'design',
+            'marketing',
+            'hosting',
+            'other',
+            'AI TOOLS',
+            'GRAPHICS AND VIDEO EDITING SERVICES',
+            'WRITING TOOLS SERVICES',
+            'PRODUCTIVITY AND OFFICE MANAGEMENT SERVICES',
+            'ONLINE MARKETING And SOFTWARE',
+            'DATA EXTRACTER SERVICES',
+            'DATING SUBSCRIPTION',
+            'ONLINE ENTERTAINMENT SERVICES',
+            'featured' // Added featured as a category
         ],
         required: true,
     },
     features: [String],
     iconImage: {
         type:String,
+    },
+    sampleLink: {
+        type: String
     },
 
     isActive: { type: Boolean, default: true },

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { FaTimes, FaCheck } from 'react-icons/fa';
+import { FaTimes, FaCheck, FaExternalLinkAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
-const DurationSelectionModal = ({ plan, isOpen, onClose }) => {
+const DurationSelectionModal = React.memo(({ plan, isOpen, onClose }) => {
+  if (!isOpen || !plan) return null;
   const [selectedDuration, setSelectedDuration] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -13,7 +14,8 @@ const DurationSelectionModal = ({ plan, isOpen, onClose }) => {
   const { addToCart } = useCart();
   const { user } = useAuth();
 
-  if (!isOpen || !plan) return null;
+  // Reset carousel index when plan changes
+  React.useEffect(() => { }, [plan]);
 
   const activeDurations = plan.durations ? plan.durations.filter(d => d.isActive) : [];
 
@@ -55,6 +57,21 @@ const DurationSelectionModal = ({ plan, isOpen, onClose }) => {
         <div className="flex items-center justify-between p-6 border-b">
           <div>
             <h2 className="text-xl font-bold text-gray-900">{plan.serviceName}</h2>
+            {plan.sampleLink && (
+              <div className="mt-3 flex items-center gap-2">
+                <a
+                  href={plan.sampleLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold border-2 border-primary text-primary bg-white hover:bg-primary hover:text-white transition-all shadow focus:outline-none focus:ring-2 focus:ring-primary"
+                  title="Open sample link in a new tab"
+                >
+                  <FaExternalLinkAlt className="text-base" />
+                  <span>View Sample</span>
+                </a>
+                <span className="text-xs text-gray-500">(Google Drive, etc.)</span>
+              </div>
+            )}
             <p className="text-sm text-gray-600 mt-1">Select Duration Option</p>
           </div>
           <button
@@ -65,7 +82,6 @@ const DurationSelectionModal = ({ plan, isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* Plan Image */}
         <div className="p-6 border-b">
           <div className="w-full h-32 flex items-center justify-center bg-gray-100 rounded-xl overflow-hidden">
             {plan.iconImage ? (
@@ -154,7 +170,17 @@ const DurationSelectionModal = ({ plan, isOpen, onClose }) => {
               </div>
             ))}
           </div>
-
+          {plan.description && (
+              <div className="mt-4 mb-2">
+                <h3 className="font-bold text-primary text-lg mb-2 tracking-wide text-center">Description</h3>
+                <ul className="list-disc list-inside text-gray-800 text-base leading-relaxed space-y-1 text-left pl-4">
+                  {plan.description.split(/[\n\r\.]|\u2022/).map((desc, idx) => {
+                    const trimmed = desc.trim();
+                    return trimmed ? <li key={idx}>{trimmed}</li> : null;
+                  })}
+                </ul>
+              </div>
+            )}
           {/* Features */}
           {plan.features && plan.features.length > 0 && (
             <div className="mt-6">
@@ -224,6 +250,6 @@ const DurationSelectionModal = ({ plan, isOpen, onClose }) => {
       </div>
     </div>
   );
-};
+});
 
 export default DurationSelectionModal; 

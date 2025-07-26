@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaCartPlus } from "react-icons/fa";
+import { FaExternalLinkAlt } from "react-icons/fa";
 
 /*
 Example of how the new durations structure should be used:
@@ -42,7 +43,7 @@ const netflixPlan = {
 };
 */
 
-const ServiceCard = ({ plan, onAddToCart, showCartButton = true }) => {
+const ServiceCard = React.memo(({ plan, onAddToCart, showCartButton = true }) => {
   const [imageError, setImageError] = useState(false);
 
   const handleImageError = () => {
@@ -113,6 +114,22 @@ const ServiceCard = ({ plan, onAddToCart, showCartButton = true }) => {
           </div>
         )}
       </div>
+      {/* Sample Link Button */}
+      {plan.sampleLink && (
+        <div className="w-full flex flex-col items-center mt-2 mb-2">
+          <a
+            href={plan.sampleLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold border-2 border-primary text-primary bg-white hover:bg-primary hover:text-white transition-all shadow focus:outline-none focus:ring-2 focus:ring-primary"
+            title="Open sample link in a new tab"
+          >
+            <FaExternalLinkAlt className="text-base" />
+            <span>View Sample</span>
+          </a>
+          <span className="text-xs text-gray-500 mt-1">(Google Drive, etc.)</span>
+        </div>
+      )}
       <div className="w-full flex-1 flex flex-col justify-between">
         <div>
           <h3 className="font-semibold text-lg text-gray-900 mb-1 truncate">{plan.serviceName}</h3>
@@ -181,6 +198,6 @@ const ServiceCard = ({ plan, onAddToCart, showCartButton = true }) => {
       </div>
     </div>
   );
-};
+});
 
 export default ServiceCard; 

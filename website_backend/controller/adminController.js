@@ -1,6 +1,23 @@
 const SubscriptionPlan = require("../models/SubscriptionPlan");
 
-const VALID_CATEGORIES = ['music', 'ott', 'professional', 'others'];
+const VALID_CATEGORIES = ['SUBSCRIPTIONS',    
+            'SOFTWARE',         
+            'WEBSITES',         
+            'TOOLS',           
+            'COURSES',         
+            'DESIGN',         
+            'HOSTING',         
+            'OTHER',           
+            'AI TOOLS',
+            'GRAPHICS AND VIDEO EDITING SERVICES',
+            'WRITING TOOLS SERVICES',
+            'PRODUCTIVITY AND OFFICE MANAGEMENT SERVICES',
+            'ONLINE MARKETING And SOFTWARE',
+            'DATA EXTRACTER SERVICES',
+            'DATING SUBSCRIPTION',
+            'ONLINE ENTERTAINMENT SERVICES',
+            'featured' // Added featured as a category
+];
 
 const addSubscriptionPlan = async (req, res) => {
     try {
@@ -9,7 +26,7 @@ const addSubscriptionPlan = async (req, res) => {
         if (!subscriptionData.category || !VALID_CATEGORIES.includes(subscriptionData.category)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid or missing category. Allowed: music, ott, professional, others."
+                message: "Invalid or missing category. Allowed: subscriptions, software, websites, tools, music, design, marketing, hosting, other."
             });
         }
         const existingPlan = await SubscriptionPlan.findOne({
@@ -44,7 +61,7 @@ const updateSubscriptionPlan = async (req, res) => {
         if (updateData.category && !VALID_CATEGORIES.includes(updateData.category)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid category. Allowed: music, ott, professional, others."
+                message: "Invalid category. Allowed: subscriptions, software, websites, tools, music, design, marketing, hosting, other."
             });
         }
         const existingPlan = await SubscriptionPlan.findById(planId);

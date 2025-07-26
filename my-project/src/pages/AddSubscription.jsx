@@ -4,12 +4,22 @@ import adminService from '../services/adminService';
 import SvgEffect from '../components/SvgEffect';
 import { useAuth } from '../context/AuthContext';
 
-const CATEGORY_OPTIONS = [
-  { label: 'Music Premium', value: 'music' },
-  { label: 'OTT Platforms', value: 'ott' },
-  { label: 'Professional Subscriptions', value: 'professional' },
-  { label: 'Others', value: 'others' },
-];
+const CATEGORY_ICON_MAP = {
+  'AI TOOLS': { name: 'AI Tools' },
+  'GRAPHICS AND VIDEO EDITING SERVICES': { name: 'Graphics & Video' },
+  'WRITING TOOLS SERVICES': { name: 'Writing Tools' },
+  'PRODUCTIVITY AND OFFICE MANAGEMENT SERVICES': { name: 'Productivity & Office' },
+  'ONLINE MARKETING And SOFTWARE': { name: 'Marketing & Software' },
+  'DATA EXTRACTER SERVICES': { name: 'Data Extractor' },
+  'DATING SUBSCRIPTION': { name: 'Dating' },
+  'ONLINE ENTERTAINMENT SERVICES': { name: 'Entertainment' },
+  'subscriptions': { name: 'Streaming' },
+  'software': { name: 'Software' },
+  'websites': { name: 'Websites' },
+  'tools': { name: 'Tools' },
+  'music': { name: 'Music' },
+  'other': { name: 'Other', icon: '📦' },
+};
 
 const initialForm = {
   serviceName: '',
@@ -23,15 +33,16 @@ const initialForm = {
       slotsAvailable: 0,
       totalSlots: 0,
       isActive: true,
-      startDate: '',
-      endDate: ''
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]
     }
   ],
   planType: 'basic',
+  category: '',
   features: [''],
   iconImage: '',
+  sampleLink: '',
   isActive: true,
-  category: 'music',
 };
 
 const PLAN_TYPES = ['basic', 'premium', 'family', 'enterprise'];
@@ -43,6 +54,33 @@ function AddSubscription() {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [serviceTypes, setServiceTypes] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('http://localhost:8080/api/plans/categories');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.categories)) {
+          setCategories(data.categories);
+        } else {
+          setCategories([]);
+        }
+      } catch (err) {
+        setCategories([]);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Optionally, fetch service types dynamically if you have an endpoint, or map them based on category
+  // For now, just use category as serviceType for new categories
+  useEffect(() => {
+    if (form.category) {
+      setForm(f => ({ ...f, serviceType: f.category }));
+    }
+  }, [form.category]);
 
   // Check authentication on component mount
   useEffect(() => {
@@ -74,10 +112,65 @@ function AddSubscription() {
   const handleDurationChange = (idx, field, value) => {
     const updated = [...form.durations];
     updated[idx] = { ...updated[idx], [field]: value };
+    
+    // Auto-calculate end date when duration changes
+    if (field === 'duration') {
+      const startDate = updated[idx].startDate ? new Date(updated[idx].startDate) : new Date();
+      const endDate = calculateEndDate(startDate, value);
+      updated[idx] = {
+        ...updated[idx],
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0]
+      };
+    }
+    
+    // Auto-calculate end date when start date changes
+    if (field === 'startDate') {
+      const startDate = new Date(value);
+      const endDate = calculateEndDate(startDate, updated[idx].duration);
+      updated[idx] = {
+        ...updated[idx],
+        endDate: endDate.toISOString().split('T')[0]
+      };
+    }
+    
     setForm({ ...form, durations: updated });
+  };
+
+  // Calculate end date based on duration
+  const calculateEndDate = (startDate, duration) => {
+    const endDate = new Date(startDate);
+    
+    switch (duration) {
+      case '1 Month':
+        endDate.setMonth(endDate.getMonth() + 1);
+        break;
+      case '3 Months':
+        endDate.setMonth(endDate.getMonth() + 3);
+        break;
+      case '6 Months':
+        endDate.setMonth(endDate.getMonth() + 6);
+        break;
+      case '1 Year':
+        endDate.setFullYear(endDate.getFullYear() + 1);
+        break;
+      case 'Lifetime':
+        // Set to a far future date (50 years from now)
+        endDate.setFullYear(endDate.getFullYear() + 50);
+        break;
+      case 'One-time':
+        // For one-time, set end date to same as start date
+        break;
+      default:
+        endDate.setMonth(endDate.getMonth() + 1);
+    }
+    
+    return endDate;
   };
   
   const addDurationField = () => {
+    const today = new Date();
+    const endDate = calculateEndDate(today, '1 Month');
     const newDuration = {
       duration: '1 Month',
       description: '',
@@ -86,8 +179,8 @@ function AddSubscription() {
       slotsAvailable: 0,
       totalSlots: 0,
       isActive: true,
-      startDate: '',
-      endDate: ''
+      startDate: today.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0]
     };
     setForm({ ...form, durations: [...form.durations, newDuration] });
   };
@@ -118,6 +211,10 @@ function AddSubscription() {
       setFormLoading(false);
     }
   };
+
+  // Ensure 'other' and 'featured' are always present in the categories list for the dropdown
+  let categoriesWithFeatured = categories.includes('featured') ? categories : [...categories, 'featured'];
+  const categoriesWithOtherAndFeatured = categoriesWithFeatured.includes('other') ? categoriesWithFeatured : [...categoriesWithFeatured, 'other'];
 
   return (
     <div className="dashboard-theme">
@@ -174,8 +271,6 @@ function AddSubscription() {
                 onChange={handleFormChange}
                 className="dashboard-textarea"
                 rows={2}
-                minLength={10}
-                maxLength={500}
                 required
               />
             </div>
@@ -202,8 +297,8 @@ function AddSubscription() {
                 className="dashboard-select"
                 required
               >
-                {CATEGORY_OPTIONS.map(opt => (
-                  <option className='text-black' key={opt.value} value={opt.value}>{opt.label}</option>
+                {categoriesWithOtherAndFeatured.map(cat => (
+                  <option key={cat} value={cat} className='text-black'>{CATEGORY_ICON_MAP[cat]?.name || cat}</option>
                 ))}
               </select>
             </div>
@@ -221,6 +316,19 @@ function AddSubscription() {
               <p className="text-xs text-white/60 mt-1">
                 Enter a valid image URL (e.g., https://picsum.photos/300/200)
               </p>
+            </div>
+            {/* Sample Link Section */}
+            <div className="dashboard-form-group">
+              <label className="dashboard-form-label">Sample Link (Google Drive, etc.)</label>
+              <input
+                type="text"
+                name="sampleLink"
+                value={form.sampleLink}
+                onChange={handleFormChange}
+                className="dashboard-input"
+                placeholder="https://drive.google.com/drive/folders/..."
+              />
+              <p className="text-xs text-white/60 mt-1">Provide a link to a folder or file (e.g., Google Drive) for clients to view samples.</p>
             </div>
             {/* Duration Options Section */}
             <div className="dashboard-form-group">
@@ -252,6 +360,8 @@ function AddSubscription() {
                           <option className='text-black' value="3 Months">3 Months</option>
                           <option className='text-black' value="6 Months">6 Months</option>
                           <option className='text-black' value="1 Year">1 Year</option>
+                          <option className='text-black' value="Lifetime">Lifetime</option>
+                          <option className='text-black' value="One-time">One-time</option>
                         </select>
                       </div>
                       <div>
@@ -324,10 +434,12 @@ function AddSubscription() {
                         <input
                           type="date"
                           value={duration.endDate}
-                          onChange={e => handleDurationChange(idx, 'endDate', e.target.value)}
-                          className="dashboard-input"
-                          required
+                          className="dashboard-input bg-gray-100 cursor-not-allowed"
+                          readOnly
                         />
+                        <p className="text-xs text-white/60 mt-1">
+                          Automatically calculated based on duration and start date
+                        </p>
                       </div>
                     </div>
                     <div className="mt-3">

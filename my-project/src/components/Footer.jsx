@@ -7,7 +7,11 @@ const Footer = () => (
       {/* Left: Why We Are Best */}
       <div>
         <h3 className="dashboard-heading text-2xl mb-3">Why We Are Best?</h3>
-        <p className="dashboard-subheading mb-4 max-w-xs">At our platform, we provide a vast collection of premium digital subscriptions tailored to meet all your needs. Whatever you’re looking for, we’ve got you covered with quality, affordability, and reliability—all in one place! 🚀</p>
+        <p className="dashboard-subheading mb-4 max-w-xs">
+          Your ultimate digital services platform! From streaming subscriptions to professional software, 
+          instant websites to development tools - we provide everything you need at unbeatable prices. 
+          Quality, affordability, and reliability all in one place! 🚀
+        </p>
         <div className="flex gap-3 mt-4">
           <a href="#" className="bg-emerald-600 hover:bg-emerald-500 rounded-full p-2 transition" aria-label="Facebook"><FaFacebookF className="text-white text-xl" /></a>
           <a href="#" className="bg-emerald-600 hover:bg-emerald-500 rounded-full p-2 transition" aria-label="Twitter"><FaTwitter className="text-white text-xl" /></a>

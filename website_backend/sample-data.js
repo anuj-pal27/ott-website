@@ -47,6 +47,8 @@ const sampleSubscriptionPlans = [
       }
     ],
     planType: "premium",
+    category: "subscriptions",
+    serviceType: "streaming",
     features: [
       "Premium 4K+UHD Quality",
       "Warranted Service",
@@ -96,6 +98,8 @@ const sampleSubscriptionPlans = [
       }
     ],
     planType: "premium",
+    category: "subscriptions",
+    serviceType: "streaming",
     features: [
       "Prime Video Streaming",
       "Fast Free Delivery",
@@ -145,6 +149,8 @@ const sampleSubscriptionPlans = [
       }
     ],
     planType: "premium",
+    category: "subscriptions",
+    serviceType: "streaming",
     features: [
       "Ad-Free YouTube",
       "Background Play",

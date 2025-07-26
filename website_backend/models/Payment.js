@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const paymentSchema = new mongoose.Schema({
     paymentMethod:{
         type:String,
-        enum:["card","upi","cash"],
+        enum:["card","upi","cash","phonepe"],
         default:"card",
     },
     paymentStatus:{

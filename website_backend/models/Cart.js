@@ -8,7 +8,7 @@ const cartItemSchema = new mongoose.Schema({
     },
     duration: {
         type: String,
-        enum: ['1 Month', '3 Months', '6 Months', '1 Year'],
+        enum: ['1 Month', '3 Months', '6 Months', '1 Year', 'Lifetime', 'One-time'],
         required: true
     },
     addedAt: {

@@ -1,49 +1,85 @@
 // Chatbot Service - Can be easily upgraded to AI integration
+const API_BASE_URL = 'http://localhost:8080/api';
+
 class ChatbotService {
   constructor() {
     this.faqDatabase = {
       'subscription': {
-        keywords: ['subscription', 'plan', 'package', 'service', 'netflix', 'prime', 'youtube', 'spotify', 'disney'],
-        response: 'We offer various subscription plans including Netflix, Amazon Prime, YouTube Premium, Spotify, Disney+, and more. All plans are shared accounts at affordable prices. Would you like to see our current offerings?'
+        keywords: ['subscription', 'subscriptions', 'plan', 'plans', 'package', 'packages', 'service', 'services', 'offerings', 'available'],
+        response: 'We offer a wide range of digital services and subscriptions, including software, websites, tools, and more. Browse our dashboard to see all available options!'
+      },
+      'category': {
+        keywords: ['category', 'categories', 'type', 'section', 'filter', 'filters'],
+        response: 'You can explore our services by category, such as AI Tools, Graphics & Video, Writing Tools, Productivity, Marketing, Data Extractor, Dating, Entertainment, Streaming, Software, Websites, Tools, Music, and more. Use the filters on our dashboard!'
       },
       'price': {
-        keywords: ['price', 'cost', 'fee', 'payment', 'money', 'cheap', 'expensive', 'how much'],
-        response: 'Our subscription prices start from ₹99/month. Each plan offers different durations (1 month, 3 months, 6 months, 1 year) with discounts for longer commitments. Check our dashboard for current pricing!'
+        keywords: ['price', 'cost', 'fee', 'pricing', 'how much', 'rate', 'charges', 'amount'],
+        response: 'Our prices start from just ₹99. Each service or subscription has its own pricing and duration options. Check the dashboard for details!'
       },
       'payment': {
-        keywords: ['payment', 'pay', 'card', 'upi', 'phonepe', 'gpay', 'bank', 'transfer'],
-        response: 'We accept all major payment methods including UPI, PhonePe, Google Pay, credit/debit cards, and net banking. All payments are secure and encrypted. You can also pay via PhonePe integration on our checkout page.'
+        keywords: ['payment', 'pay', 'payments', 'card', 'upi', 'phonepe', 'gpay', 'google pay', 'net banking', 'bank transfer', 'credit card', 'debit card', 'checkout', 'transaction'],
+        response: 'We accept UPI, PhonePe, Google Pay, credit/debit cards, and net banking. All payments are secure and encrypted. Use the checkout page to pay easily!'
       },
       'support': {
-        keywords: ['support', 'help', 'issue', 'problem', 'contact', 'assist', 'trouble'],
-        response: 'Our support team is available 24/7! You can contact us via WhatsApp at +91 93536 90229, email at support@vyapaar360.com, or use this chat. We typically respond within 5 minutes.'
+        keywords: ['support', 'help', 'issue', 'problem', 'contact', 'assist', 'trouble', 'customer care', 'service desk'],
+        response: 'Need help? Our support team is available 24/7 via WhatsApp (+91 93536 90229), email (support@vyapaar360.com), or this chat. We respond quickly!'
       },
       'refund': {
-        keywords: ['refund', 'return', 'cancel', 'money back', 'replacement', 'not working'],
-        response: 'We offer a 7-day money-back guarantee if you\'re not satisfied. For technical issues, we provide immediate replacements. Contact our support team for any refund requests.'
+        keywords: ['refund', 'return', 'cancel', 'money back', 'replacement', 'not working', 'cancel order', 'refund policy'],
+        response: 'We offer a 7-day money-back guarantee if you are not satisfied. For technical issues, we provide immediate replacements. Contact support for any refund or cancellation requests.'
       },
       'setup': {
-        keywords: ['setup', 'install', 'how to', 'guide', 'instructions', 'activate', 'login'],
-        response: 'Setup is super easy! After payment, you\'ll receive login credentials within 5 minutes. Just use the provided username/password to access your subscription. Need help? We\'re here!'
+        keywords: ['setup', 'install', 'installation', 'how to', 'guide', 'instructions', 'activate', 'activation', 'login', 'access'],
+        response: 'After payment, you will receive setup instructions and login credentials within 30 minutes. Just follow the steps provided. Need help? Contact support!'
       },
       'security': {
-        keywords: ['security', 'safe', 'trust', 'legit', 'real', 'fake', 'scam'],
-        response: 'We are a trusted platform with 50,000+ satisfied customers. All payments are secure, and we use industry-standard encryption. We\'re verified and trusted by thousands of users.'
+        keywords: ['security', 'safe', 'trust', 'trusted', 'legit', 'real', 'fake', 'scam', 'secure', 'privacy'],
+        response: 'We are a trusted platform with thousands of happy customers. All payments and data are secure and encrypted. Your privacy is our priority.'
       },
       'delivery': {
-        keywords: ['delivery', 'time', 'when', 'how long', 'instant', 'fast'],
-        response: 'We provide instant delivery! You\'ll receive your login credentials within 5 minutes of payment confirmation. No waiting, no delays - instant access to your subscriptions.'
+        keywords: ['delivery', 'deliver', 'time', 'when', 'how long', 'instant', 'fast', 'receive', 'receiving', 'access time'],
+        response: 'We deliver all digital services via WhatsApp or SMS to your registered number, usually within 30 minutes of payment. You will be notified as soon as your order is ready!'
       },
       'multiple': {
-        keywords: ['multiple', 'many', 'several', 'more than one', 'family', 'friends'],
-        response: 'Yes! You can purchase multiple subscriptions. We offer family plans and bulk discounts for multiple accounts. Contact us for special pricing on multiple subscriptions.'
+        keywords: ['multiple', 'many', 'several', 'more than one', 'family', 'friends', 'bulk', 'group'],
+        response: 'Yes, you can purchase multiple services or subscriptions. We offer group and family plans, as well as bulk discounts. Contact us for special pricing!'
       }
     };
   }
 
+  // Fetch categories from backend
+  async fetchCategories() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/plans/categories`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.categories)) {
+        return data.categories;
+      }
+      return [];
+    } catch (err) {
+      return [];
+    }
+  }
+
   // Find the best response based on user input
-  findResponse(userMessage) {
+  async findResponse(userMessage) {
     const lowerMessage = userMessage.toLowerCase();
+    
+    // Check for category-related queries
+    if (['category', 'categories', 'type', 'section', 'filter'].some(word => lowerMessage.includes(word))) {
+      const categories = await this.fetchCategories();
+      if (categories.length > 0) {
+        return {
+          type: 'categories',
+          response: `We currently offer services in these categories: ${categories.join(', ')}. You can use the filters on our dashboard to explore each category.`
+        };
+      } else {
+        return {
+          type: 'categories',
+          response: 'Sorry, I could not fetch the categories right now. Please check the dashboard for the latest categories.'
+        };
+      }
+    }
     
     // Check for exact matches first
     for (const [category, data] of Object.entries(this.faqDatabase)) {
@@ -83,43 +119,13 @@ class ChatbotService {
   getQuickQuestions() {
     return [
       'What subscriptions do you offer?',
+      'What categories do you have?',
       'How much do plans cost?',
       'What payment methods do you accept?',
       'How do I get support?',
       'Is it safe to use?',
       'How fast is delivery?'
     ];
-  }
-
-  // Future: AI Integration method
-  async getAIResponse(userMessage, conversationHistory = []) {
-    // This can be easily upgraded to use OpenAI or other AI services
-    // For now, it falls back to FAQ responses
-    
-    // Example AI integration structure:
-    /*
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          history: conversationHistory,
-          context: 'subscription_services'
-        })
-      });
-      
-      const data = await response.json();
-      return data.response;
-    } catch (error) {
-      // Fallback to FAQ
-      return this.findResponse(userMessage).response;
-    }
-    */
-    
-    return this.findResponse(userMessage).response;
   }
 }
 

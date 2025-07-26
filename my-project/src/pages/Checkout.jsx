@@ -49,10 +49,10 @@ function Checkout() {
     setSuccess('');
     try {
       const response = await paymentService.checkout();
-      const paymentId = response.orderId; // orderId is used as paymentId in backend
-      navigate(`/payment-status?paymentId=${paymentId}`);
-      setSuccess('Order created! Proceed to payment.');
-      console.log(response);
+      window.location.href = response.paymentUrl; // Redirect to PhonePe payment page
+      // Optionally, you can store paymentId/orderId in localStorage or state if you want to check status later
+      // setSuccess('Order created! Proceed to payment.');
+      // console.log(response);
     } catch (err) {
       // handle error if needed
     } finally {

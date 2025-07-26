@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, Suspense, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import SvgEffect from '../components/SvgEffect';
 import ServiceCard from '../components/ServiceCard';
@@ -41,15 +41,15 @@ function Category() {
     fetchPlans();
   }, [category]);
 
-  const handleAddToCart = (plan) => {
+  const handleAddToCart = useCallback((plan) => {
     setSelectedPlan(plan);
     setShowDurationModal(true);
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setShowDurationModal(false);
     setSelectedPlan(null);
-  };
+  }, []);
 
   return (
     <div className="dashboard-theme">

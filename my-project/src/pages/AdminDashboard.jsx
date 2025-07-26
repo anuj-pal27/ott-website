@@ -4,6 +4,7 @@ import adminService from '../services/adminService';
 import ServiceCard from '../components/ServiceCard';
 import SvgEffect from '../components/SvgEffect';
 import { useAuth } from '../context/AuthContext';
+import CategoryFilter from '../components/CategoryFilter';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -16,6 +17,9 @@ function AdminDashboard() {
   const [editId, setEditId] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [filteredPlans, setFilteredPlans] = useState([]);
 
   // Check authentication on component mount
   useEffect(() => {
@@ -27,6 +31,29 @@ function AdminDashboard() {
     
     fetchPlans();
   }, [navigate, isAuthenticated, user]);
+
+  useEffect(() => {
+    setFilteredPlans(plans);
+  }, [plans]);
+
+  useEffect(() => {
+    let filtered = plans;
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(plan => plan.category === selectedCategory);
+    }
+    if (searchTerm.trim() !== '') {
+      filtered = filtered.filter(plan => plan.serviceName.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+    setFilteredPlans(filtered);
+  }, [selectedCategory, plans, searchTerm]);
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
   const fetchPlans = async () => {
     setLoading(true);
@@ -99,13 +126,26 @@ function AdminDashboard() {
             </button>
           </div>
         </div>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <input
+            type="text"
+            className="dashboard-input w-full max-w-md"
+            placeholder="Search subscriptions..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+          <CategoryFilter
+            selectedCategory={selectedCategory}
+            onCategoryChange={handleCategoryChange}
+          />
+        </div>
         {loading ? (
           <div className="dashboard-loading">Loading subscriptions...</div>
         ) : error ? (
           <div className="dashboard-error-message">{error}</div>
         ) : (
           <div className="dashboard-responsive-grid">
-            {plans.map(plan => (
+            {filteredPlans.map(plan => (
               <div key={plan._id} className="relative group">
                 <ServiceCard plan={plan} onAddToCart={() => {}} showCartButton={false} />
                 <div className="absolute top-2 right-2 flex gap-1 sm:gap-2 opacity-90 group-hover:opacity-100">
