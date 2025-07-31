@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import SvgEffect from '../components/SvgEffect';
+import Navbar from '../components/Navbar';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -12,6 +13,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 
 import LockIcon from '@mui/icons-material/Lock';
 import authService from '../services/authService';
+const Footer = React.lazy(() => import('../components/Footer'));
 
 function Profile() {
   const navigate = useNavigate();
@@ -104,6 +106,9 @@ function Profile() {
 
       return (
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-primary">
+        {/* Navbar */}
+        <Navbar />
+        
         {/* SVG Background */}
         <div className="absolute inset-0 w-full h-full">
           <SvgEffect />
@@ -301,6 +306,11 @@ function Profile() {
           </div>
         </div>
       </div>
+      
+      {/* Footer */}
+      <Suspense fallback={<div className="dashboard-loading">Loading footer...</div>}>
+        <Footer />
+      </Suspense>
     </div>
   );
 }

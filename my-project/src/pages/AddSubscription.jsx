@@ -38,7 +38,7 @@ const initialForm = {
     }
   ],
   planType: 'basic',
-  category: '',
+  category: 'other', // Set a default category
   features: [''],
   iconImage: '',
   sampleLink: '',
@@ -319,7 +319,7 @@ function AddSubscription() {
             </div>
             {/* Sample Link Section */}
             <div className="dashboard-form-group">
-              <label className="dashboard-form-label">Sample Link (Google Drive, etc.)</label>
+              <label className="dashboard-form-label">Sample Link (Google Drive, etc.) - Optional</label>
               <input
                 type="text"
                 name="sampleLink"
@@ -328,7 +328,7 @@ function AddSubscription() {
                 className="dashboard-input"
                 placeholder="https://drive.google.com/drive/folders/..."
               />
-              <p className="text-xs text-white/60 mt-1">Provide a link to a folder or file (e.g., Google Drive) for clients to view samples.</p>
+              <p className="text-xs text-white/60 mt-1">Provide a link to a folder or file (e.g., Google Drive) for clients to view samples. This field is optional.</p>
             </div>
             {/* Duration Options Section */}
             <div className="dashboard-form-group">

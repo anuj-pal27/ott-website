@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import SvgEffect from '../components/SvgEffect';
 import { FaWhatsapp } from 'react-icons/fa';
+const Footer = React.lazy(() => import('../components/Footer'));
 
 function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
@@ -166,6 +167,11 @@ function Contact() {
           <FaWhatsapp className="text-3xl" />
         </button>
       </div>
+      
+      {/* Footer */}
+      <Suspense fallback={<div className="dashboard-loading">Loading footer...</div>}>
+        <Footer />
+      </Suspense>
     </div>
   );
 }

@@ -40,7 +40,13 @@ const CartSidePanel = ({ isOpen, onClose }) => {
       <div className={`fixed right-0 top-0 h-full w-full sm:w-96 bg-white shadow-2xl transform transition-transform ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-bold">Your Cart</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+          <button 
+            onClick={onClose} 
+            className="w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xl font-bold transition-all duration-200 hover:scale-110 shadow-lg"
+            aria-label="Close cart"
+          >
+            ×
+          </button>
         </div>
         <div className="p-6 flex-1 overflow-y-auto">
           {!user ? (

@@ -188,15 +188,21 @@ function Navbar() {
               </button>
             )}
           </div>
-          {/* Hamburger Icon */}
+          {/* Hamburger/Close Icon */}
           <button
             className='md:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-white/20 hover:bg-white/30 border border-white/30 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50'
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label='Open menu'
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           >
-            <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
-              <path strokeLinecap='round' strokeLinejoin='round' d='M4 6h16M4 12h16M4 18h16' />
-            </svg>
+            {mobileOpen ? (
+              <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
+              </svg>
+            ) : (
+              <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' d='M4 6h16M4 12h16M4 18h16' />
+              </svg>
+            )}
           </button>
         </div>
         {/* Mobile Menu Overlay */}
@@ -212,7 +218,14 @@ function Navbar() {
                   aria-expanded={mobileCategoriesOpen}
                   type='button'
                 >
-                  Categories <KeyboardArrowDownIcon style={{ fontSize: 22 }} />
+                  Categories 
+                  <KeyboardArrowDownIcon 
+                    style={{ 
+                      fontSize: 22,
+                      transform: mobileCategoriesOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.3s ease-in-out'
+                    }} 
+                  />
                 </button>
                 {mobileCategoriesOpen && (
                   <div className='mt-1 bg-white/95 rounded-xl shadow-lg py-2 border border-primary/20'>
@@ -312,7 +325,14 @@ function Navbar() {
                 </button>
               )}
             </div>
-            <button className='mt-8 text-white text-2xl' onClick={() => setMobileOpen(false)} aria-label='Close menu'>×</button>
+            {/* Bottom Close Button - More Visible */}
+            <button 
+              className='mt-6 w-12 h-12 bg-white/20 hover:bg-white/30 text-white rounded-full flex items-center justify-center text-2xl font-bold transition-all duration-200 hover:scale-110 backdrop-blur-sm border border-white/30 shadow-lg' 
+              onClick={() => setMobileOpen(false)} 
+              aria-label='Close menu'
+            >
+              ×
+            </button>
           </div>
         )}
       </div>

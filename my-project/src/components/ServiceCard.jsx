@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaCartPlus } from "react-icons/fa";
 import { FaExternalLinkAlt } from "react-icons/fa";
 
@@ -43,8 +44,9 @@ const netflixPlan = {
 };
 */
 
-const ServiceCard = React.memo(({ plan, onAddToCart, showCartButton = true }) => {
+const ServiceCard = React.memo(({ plan, showCartButton = true }) => {
   const [imageError, setImageError] = useState(false);
+  const navigate = useNavigate();
 
   const handleImageError = () => {
     console.error('Image failed to load:', plan.iconImage);
@@ -91,8 +93,8 @@ const ServiceCard = React.memo(({ plan, onAddToCart, showCartButton = true }) =>
   const inStock = hasStock();
 
   const handleAddToCart = () => {
-    // Pass the plan with all durations to let the parent component handle selection
-    onAddToCart(plan);
+    // Navigate to checkout page with plan data
+    navigate('/checkout', { state: { plan } });
   };
 
   return (
@@ -146,14 +148,23 @@ const ServiceCard = React.memo(({ plan, onAddToCart, showCartButton = true }) =>
               <div className="text-center">
                 {priceRange.hasDiscount && (
                   <div className="text-xs text-gray-400 line-through mb-1">
-                    ₹{priceRange.minOriginal} - ₹{priceRange.maxOriginal}
+                    {priceRange.minOriginal === priceRange.maxOriginal 
+                      ? `₹${priceRange.minOriginal}`
+                      : `₹${priceRange.minOriginal} - ₹${priceRange.maxOriginal}`
+                    }
                   </div>
                 )}
                 <div className="font-bold text-primary text-lg">
-                  ₹{priceRange.min} - ₹{priceRange.max}
+                  {priceRange.min === priceRange.max 
+                    ? `₹${priceRange.min}`
+                    : `₹${priceRange.min} - ₹${priceRange.max}`
+                  }
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
-                  {plan.durations.length} duration options available
+                  {plan.durations.length === 1 
+                    ? '1 duration option available'
+                    : `${plan.durations.length} duration options available`
+                  }
                 </div>
               </div>
             </div>
@@ -161,11 +172,15 @@ const ServiceCard = React.memo(({ plan, onAddToCart, showCartButton = true }) =>
           
           {/* Fallback for old format */}
           {(!plan.durations || plan.durations.length === 0) && (
-            <div className="flex items-center gap-2 mb-2">
+            <div className="text-center mb-3">
               {plan.originalPrice && plan.originalPrice !== plan.price && (
-                <span className="line-through text-gray-400 text-sm">₹{plan.originalPrice}</span>
+                <div className="text-xs text-gray-400 line-through mb-1">
+                  ₹{plan.originalPrice}
+                </div>
               )}
-              <span className="font-bold text-primary text-lg">₹{plan.price}</span>
+              <div className="font-bold text-primary text-lg">
+                ₹{plan.price}
+              </div>
             </div>
           )}
           

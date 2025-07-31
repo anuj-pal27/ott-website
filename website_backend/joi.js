@@ -160,7 +160,7 @@ const planSchema = Joi.object({
         'string.uri': 'Icon image must be a valid URL',
         'any.required': 'Icon image is required'
     }),
-    sampleLink: Joi.string().uri().optional().messages({
+    sampleLink: Joi.string().uri().allow('').optional().messages({
         'string.uri': 'Sample link must be a valid URL'
     }),
     isActive: Joi.boolean().default(true),
@@ -208,7 +208,7 @@ const updatePlanSchema = Joi.object({
     }),
     features: Joi.array().items(Joi.string().min(1)).min(1).optional(),
     iconImage: Joi.string().uri().optional(),
-    sampleLink: Joi.string().uri().optional().messages({
+    sampleLink: Joi.string().uri().allow('').optional().messages({
         'string.uri': 'Sample link must be a valid URL'
     }),
     sampleImages: Joi.array().items(Joi.string().uri()).optional().messages({

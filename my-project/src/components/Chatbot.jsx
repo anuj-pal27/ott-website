@@ -66,54 +66,54 @@ const Chatbot = () => {
   return (
     <>
       {/* Chatbot Toggle Button */}
-      <div className="fixed bottom-6 left-6 z-50">
+      <div className="fixed bottom-4 left-4 md:bottom-6 md:left-6 z-50">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`bg-gradient-to-r from-primary to-secondary text-white p-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 active:scale-95 ${
+          className={`bg-gradient-to-r from-primary to-secondary text-white p-3 md:p-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 active:scale-95 ${
             isOpen ? 'rotate-180' : ''
           }`}
           aria-label="Open chatbot"
           title="Chat with us"
         >
-          {isOpen ? <FaTimes className="text-2xl" /> : <FaRobot className="text-2xl" />}
+          {isOpen ? <FaTimes className="text-xl md:text-2xl" /> : <FaRobot className="text-xl md:text-2xl" />}
         </button>
       </div>
 
       {/* Chatbot Window */}
       {isOpen && (
-        <div className="fixed bottom-24 left-6 w-96 h-[500px] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/30 z-50 flex flex-col">
+        <div className="fixed inset-4 md:bottom-24 md:left-6 md:w-96 md:h-[500px] md:inset-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/30 z-50 flex flex-col max-h-[calc(100vh-2rem)] md:max-h-[500px]">
           {/* Header */}
-          <div className="bg-gradient-to-r from-primary to-secondary text-white p-4 rounded-t-2xl flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <FaRobot className="text-2xl" />
+          <div className="bg-gradient-to-r from-primary to-secondary text-white p-3 md:p-4 rounded-t-2xl flex items-center justify-between">
+            <div className="flex items-center gap-2 md:gap-3">
+              <FaRobot className="text-xl md:text-2xl" />
               <div>
-                <h3 className="font-bold text-lg">Vyapaar360 Assistant</h3>
-                <p className="text-sm opacity-90">Online • Usually responds instantly</p>
+                <h3 className="font-bold text-base md:text-lg">Vyapaar360 Assistant</h3>
+                <p className="text-xs md:text-sm opacity-90">Online • Usually responds instantly</p>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-white/80 hover:text-white transition-colors"
+              className="text-white/80 hover:text-white transition-colors p-1"
             >
-              <FaTimes className="text-xl" />
+              <FaTimes className="text-lg md:text-xl" />
             </button>
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
             {messages.map((message, index) => (
               <div
                 key={index}
                 className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] p-3 rounded-2xl ${
+                  className={`max-w-[85%] md:max-w-[80%] p-2 md:p-3 rounded-2xl ${
                     message.type === 'user'
                       ? 'bg-gradient-to-r from-primary to-secondary text-white'
                       : 'bg-gray-100 text-gray-800'
                   }`}
                 >
-                  <p className="text-sm">{message.text}</p>
+                  <p className="text-xs md:text-sm leading-relaxed">{message.text}</p>
                   <p className="text-xs opacity-70 mt-1">
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
@@ -123,7 +123,7 @@ const Chatbot = () => {
             
             {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 text-gray-800 p-3 rounded-2xl">
+                <div className="bg-gray-100 text-gray-800 p-2 md:p-3 rounded-2xl">
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
@@ -138,7 +138,7 @@ const Chatbot = () => {
 
           {/* Quick Questions - always show unless bot is typing */}
           {!isTyping && (
-            <div className="px-4 pb-2">
+            <div className="px-3 md:px-4 pb-2">
               <p className="text-xs text-gray-600 mb-2">Quick questions:</p>
               <div className="flex flex-wrap gap-1">
                 {quickQuestions.slice(0, 4).map((question, index) => (
@@ -154,7 +154,7 @@ const Chatbot = () => {
                         setIsTyping(false);
                       }, 1000);
                     }}
-                    className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded-full transition-colors max-w-[45%] truncate"
+                    className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded-full transition-colors max-w-[48%] md:max-w-[45%] truncate"
                     title={question}
                   >
                     {question}
@@ -165,7 +165,7 @@ const Chatbot = () => {
           )}
 
           {/* Input Area */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-3 md:p-4 border-t border-gray-200">
             <div className="flex gap-2">
               <div className="flex-1 relative">
                 <textarea
@@ -174,27 +174,27 @@ const Chatbot = () => {
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Type your message..."
-                  className="w-full p-3 pr-12 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="w-full p-2 md:p-3 pr-10 md:pr-12 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm md:text-base"
                   rows="1"
-                  style={{ minHeight: '44px', maxHeight: '120px' }}
+                  style={{ minHeight: '40px', maxHeight: '100px' }}
                 />
                 <button
                   onClick={handleSendMessage}
                   disabled={!inputMessage.trim()}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary text-white p-2 rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="absolute right-1 md:right-2 top-1/2 transform -translate-y-1/2 bg-primary text-white p-1.5 md:p-2 rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <FaPaperPlane className="text-sm" />
+                  <FaPaperPlane className="text-xs md:text-sm" />
                 </button>
               </div>
             </div>
             
             {/* Human Support Button */}
-            <div className="mt-3 text-center">
+            <div className="mt-2 md:mt-3 text-center">
               <button
                 onClick={openWhatsApp}
-                className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                className="inline-flex items-center gap-1 md:gap-2 bg-green-500 hover:bg-green-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm transition-colors"
               >
-                <FaWhatsapp />
+                <FaWhatsapp className="text-xs md:text-sm" />
                 Talk to Human
               </button>
             </div>

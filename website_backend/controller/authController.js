@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const otpGenerator = require('otp-generator');
 const { Otp, sendVerificationSms } = require("../models/Otp");
-const sendEmailOtp = require("../utils/sendEmailOtp");
 
 // Send OTP for phone verification (for login)
 const sendPhoneOtp = async (req, res) => {
@@ -390,7 +389,6 @@ const signup = async (req, res) => {
         };
         
         const userBody = await User.create(userPayload);    
-        console.log("✅ User created successfully:", userBody._id);
         
         // Automatically log the user in after successful signup
         const payload = {
@@ -631,8 +629,7 @@ const createAdmin = async (req, res) => {
             profilePicture: `https://api.dicebear.com/5.x/initials/svg?seed=${name}`
         };
         
-        const adminUser = await User.create(adminPayload);    
-        console.log("Admin user created successfully:", adminUser._id);     
+        const adminUser = await User.create(adminPayload);     
         
         // Automatically log the admin in after successful signup
         const payload = {

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import SvgEffect from '../components/SvgEffect';
+const Footer = React.lazy(() => import('../components/Footer'));
 
 function About() {
   return (
@@ -49,6 +50,11 @@ function About() {
          
         </div>
       </div>
+      
+      {/* Footer */}
+      <Suspense fallback={<div className="dashboard-loading">Loading footer...</div>}>
+        <Footer />
+      </Suspense>
     </div>
   );
 }

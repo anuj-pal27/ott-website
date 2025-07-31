@@ -41,8 +41,22 @@ const CategoryFilter = ({ selectedCategory, onCategoryChange, setCategories }) =
     fetchCategories();
   }, [setCategories]);
 
-  // Remove 'All Services' from allCategories
-  const allCategories = categories.map(cat => ({
+  // Add 'All Services' option and map categories
+  const allCategories = [
+    {
+      id: '',
+      name: 'All Services',
+      icon: '🌟'
+    },
+    ...categories.map(cat => ({
+      id: cat,
+      name: CATEGORY_ICON_MAP[cat]?.name || cat,
+      icon: CATEGORY_ICON_MAP[cat]?.icon || '📦'
+    }))
+  ];
+
+  // Filter out "All Services" on mobile devices
+  const mobileCategories = categories.map(cat => ({
     id: cat,
     name: CATEGORY_ICON_MAP[cat]?.name || cat,
     icon: CATEGORY_ICON_MAP[cat]?.icon || '📦'
@@ -50,7 +64,8 @@ const CategoryFilter = ({ selectedCategory, onCategoryChange, setCategories }) =
 
   return (
     <div className="mb-8">
-      <div className="flex flex-wrap justify-center gap-3">
+      {/* Desktop view - shows "All Services" option */}
+      <div className="hidden md:flex flex-wrap justify-center gap-3">
         {allCategories.map((category) => (
           <button
             key={category.id}
@@ -62,6 +77,24 @@ const CategoryFilter = ({ selectedCategory, onCategoryChange, setCategories }) =
             }`}
           >
             <span className="text-lg">{category.icon}</span>
+            <span>{category.name}</span>
+          </button>
+        ))}
+      </div>
+      
+      {/* Mobile view - hides "All Services" option */}
+      <div className="md:hidden flex flex-wrap justify-center gap-2">
+        {mobileCategories.map((category) => (
+          <button
+            key={category.id}
+            onClick={() => onCategoryChange(category.id)}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center gap-1 text-sm ${
+              selectedCategory === category.id
+                ? 'bg-primary text-white shadow-lg scale-105'
+                : 'bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm border border-white/30'
+            }`}
+          >
+            <span className="text-base">{category.icon}</span>
             <span>{category.name}</span>
           </button>
         ))}

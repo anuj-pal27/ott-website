@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { Suspense } from 'react';
+const Footer = React.lazy(() => import('../components/Footer'));
 
 const PrivacyPolicy = () => (
   <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-primary text-white py-12 px-4 md:px-16">
@@ -27,6 +28,11 @@ const PrivacyPolicy = () => (
       </ul>
       <p className="mt-8">For any questions about this Privacy Policy, please contact us at <span className="text-emerald-300">support@vyapaar360.com</span>.</p>
     </div>
+    
+    {/* Footer */}
+    <Suspense fallback={<div className="dashboard-loading">Loading footer...</div>}>
+      <Footer />
+    </Suspense>
   </div>
 );
 

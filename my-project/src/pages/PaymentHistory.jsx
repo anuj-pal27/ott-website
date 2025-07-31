@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import paymentService from '../services/paymentService';
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
+const Footer = React.lazy(() => import('../components/Footer'));
 
 
 const PaymentHistory = () => {
@@ -197,6 +198,11 @@ const PaymentHistory = () => {
           </div>
         )}
       </div>
+      
+      {/* Footer */}
+      <Suspense fallback={<div className="dashboard-loading">Loading footer...</div>}>
+        <Footer />
+      </Suspense>
     </div>
   );
 };

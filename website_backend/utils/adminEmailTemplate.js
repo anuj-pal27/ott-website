@@ -1,6 +1,6 @@
-// orderPlacedEmailTemplate.js
+// adminEmailTemplate.js
 
-function orderPlacedEmailTemplate({ userName, orderId, orderDetails, orderDate }) {
+function adminEmailTemplate({ orderDetails, orderDate }) {
   return `
     <html>
       <head>
@@ -20,13 +20,13 @@ function orderPlacedEmailTemplate({ userName, orderId, orderDetails, orderDate }
             padding: 32px 24px;
           }
           .header {
-            color: #10b981;
+            color: #dc2626;
             font-size: 28px;
             font-weight: bold;
             margin-bottom: 16px;
           }
-          .success-badge {
-            background: #10b981;
+          .new-order-badge {
+            background: #dc2626;
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -36,8 +36,8 @@ function orderPlacedEmailTemplate({ userName, orderId, orderDetails, orderDate }
             margin-bottom: 16px;
           }
           .order-info {
-            background: #f0f9ff;
-            border: 1px solid #0ea5e9;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
             border-radius: 6px;
             padding: 16px;
             margin-bottom: 24px;
@@ -45,6 +45,13 @@ function orderPlacedEmailTemplate({ userName, orderId, orderDetails, orderDate }
           .order-label {
             font-weight: bold;
             color: #333;
+          }
+          .action-required {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
           }
           .footer {
             margin-top: 32px;
@@ -56,31 +63,37 @@ function orderPlacedEmailTemplate({ userName, orderId, orderDetails, orderDate }
       </head>
       <body>
         <div class="container">
-          <div class="success-badge">✅ Payment Successful!</div>
-          <div class="header">Thank you for your purchase, ${userName}!</div>
+          <div class="new-order-badge">🆕 New Order Received!</div>
+          <div class="header">New Payment Success - Customer Details</div>
+          
+          <div class="action-required">
+            <strong>⚠️ Action Required:</strong><br/>
+            Please contact the customer on WhatsApp to provide subscription access and credentials.
+          </div>
+          
           <div class="order-info">
-            <div><span class="order-label">Order ID:</span> ${orderId}</div>
-            <div><span class="order-label">Payment Date:</span> ${orderDate}</div>
+            <div style="margin-bottom: 12px;">
+              <span class="order-label">Order Date:</span> ${orderDate}
+            </div>
             <div style="margin-top: 12px;">
-              <span class="order-label">Subscription Details:</span>
+              <span class="order-label">Customer & Order Details:</span>
               <div>${orderDetails}</div>
             </div>
           </div>
+          
           <div>
-            <p>Your subscription has been activated successfully! 🎉</p>
-            <p>Our admin team will contact you on WhatsApp shortly to provide your subscription access credentials and setup instructions.</p>
-            <p><strong>What to expect:</strong></p>
+            <p><strong>Next Steps:</strong></p>
             <ul>
-              <li>You'll receive a WhatsApp message from our admin team</li>
-              <li>They'll provide your login credentials and access details</li>
-              <li>Any additional setup instructions will be shared</li>
-              <li>Feel free to ask questions during the setup process</li>
+              <li>Contact customer on WhatsApp using the phone number above</li>
+              <li>Provide subscription access credentials</li>
+              <li>Share any additional setup instructions</li>
+              <li>Confirm customer satisfaction</li>
             </ul>
-            <p>If you don't receive a WhatsApp message within 30 minutes, please contact us at: <strong>+91 8250919483</strong></p>
           </div>
+          
           <div class="footer">
             &copy; ${new Date().getFullYear()} Vyapaar360. All rights reserved.<br/>
-            Contact: support@vyapaar360.com
+            Admin Dashboard: www.vyapaar360.com/admin
           </div>
         </div>
       </body>
@@ -88,4 +101,4 @@ function orderPlacedEmailTemplate({ userName, orderId, orderDetails, orderDate }
   `;
 }
 
-module.exports = orderPlacedEmailTemplate; 
+module.exports = adminEmailTemplate; 

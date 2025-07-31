@@ -2,7 +2,6 @@ import React, { useEffect, useState, Suspense, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import SvgEffect from '../components/SvgEffect';
 import ServiceCard from '../components/ServiceCard';
-import DurationSelectionModal from '../components/DurationSelectionModal';
 const WhyChooseUs = React.lazy(() => import('../components/WhyChooseUs'));
 const CustomerFeedback = React.lazy(() => import('../components/CustomerFeedback'));
 const Footer = React.lazy(() => import('../components/Footer'));
@@ -20,8 +19,7 @@ function Category() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedPlan, setSelectedPlan] = useState(null);
-  const [showDurationModal, setShowDurationModal] = useState(false);
+
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -42,13 +40,8 @@ function Category() {
   }, [category]);
 
   const handleAddToCart = useCallback((plan) => {
-    setSelectedPlan(plan);
-    setShowDurationModal(true);
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setShowDurationModal(false);
-    setSelectedPlan(null);
+    // This function is no longer needed as ServiceCard now navigates directly to checkout
+    console.log('Plan selected:', plan);
   }, []);
 
   return (
@@ -74,16 +67,12 @@ function Category() {
         ) : (
           <div className="dashboard-responsive-grid">
             {plans.map(plan => (
-              <ServiceCard key={plan._id} plan={plan} onAddToCart={handleAddToCart} />
+              <ServiceCard key={plan._id} plan={plan} />
             ))}
           </div>
         )}
       </div>
-      <DurationSelectionModal
-        plan={selectedPlan}
-        isOpen={showDurationModal}
-        onClose={handleCloseModal}
-      />
+
       <Suspense fallback={<div className="dashboard-loading">Loading sections...</div>}>
         <WhyChooseUs />
         <CustomerFeedback />

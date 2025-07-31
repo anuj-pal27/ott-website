@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import paymentService from '../services/paymentService';
+const Footer = React.lazy(() => import('../components/Footer'));
 
 const PaymentStatus = () => {
     const [payment, setPayment] = useState(null);
@@ -129,6 +130,11 @@ const PaymentStatus = () => {
                 )}
                 {verifyMsg && <div className="dashboard-success mt-4">{verifyMsg}</div>}
             </div>
+            
+            {/* Footer */}
+            <Suspense fallback={<div className="dashboard-loading">Loading footer...</div>}>
+                <Footer />
+            </Suspense>
         </div>
     );
 }

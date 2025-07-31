@@ -2,12 +2,12 @@ const Payment = require("../models/Payment");
 const Order = require("../models/Order");
 const User = require("../models/User");
 const Cart = require("../models/Cart");
-const sendEmailOtp = require("../utils/sendEmailOtp");
-const orderPlacedEmailTemplate = require("../utils/orderPlacedEmailTemplate");
+const sendEmail = require("../utils/sendEmail");
 // const PhonePe = require("../config/PhonePe");
 const { StandardCheckoutClient, Env, StandardCheckoutPayRequest } = require('pg-sdk-node');
 const { randomUUID } = require('crypto');
 const dotenv = require('dotenv');
+
 
 dotenv.config();    
 
@@ -162,14 +162,21 @@ const verifyPayment = async (req, res) => {
         if (!payment) {
             return res.status(404).json({ success: false, message: "Payment not found" });
         }
+        
+        let user = null;
+        let order = null;
+        
         if (paymentStatus === 'COMPLETED') {
-        payment.paymentStatus = "success";
-        payment.paymentDate = new Date();
-        // Update order
-        const order = await Order.findById(payment.order);
-        if (order) {
+            payment.paymentStatus = "success";
+            payment.paymentDate = new Date();
+            
+            // Update order
+            order = await Order.findById(payment.order);
+            if (order) {
+                user = await User.findById(order.userId);
+                
                 // Calculate end date based on selected duration
-            const subscriptionPlan = await require("../models/SubscriptionPlan").findById(order.subscriptionId);
+                const subscriptionPlan = await require("../models/SubscriptionPlan").findById(order.subscriptionId);
                 let durationInDays = null;
                 if (subscriptionPlan && order.selectedDuration && order.selectedDuration.duration) {
                     const planDuration = subscriptionPlan.durations.find(
@@ -181,31 +188,92 @@ const verifyPayment = async (req, res) => {
                     order.endDate = new Date(order.startDate.getTime() + (durationInDays * 24 * 60 * 60 * 1000));
                 } else if (order.selectedDuration.duration === 'Lifetime' || order.selectedDuration.duration === 'One-time') {
                     order.endDate = null; // or set to a far-future date if you prefer
+                }
+                await order.save();
+                
+                // Update user's subscription plans
+                user = await User.findByIdAndUpdate(order.userId, { $push: { subscriptionPlan: order.subscriptionId } }, { new: true });
             }
-            await order.save();
-            // Add subscription to user
-            const user = await User.findByIdAndUpdate(order.userId, { $push: { subscriptionPlan: order.subscriptionId } }, { new: true });
-            // Send confirmation email
-            if (user) {
-                const emailHtml = orderPlacedEmailTemplate({
-                    userName: user.name,
-                    orderId: order._id,
-                    orderDetails: `Subscription: ${subscriptionPlan?.serviceName || 'N/A'}`,
-                    orderDate: order.createdAt
-                });
-                await sendEmailOtp(user.email, "Order Confirmation", emailHtml);
-            }
-        }
         } else if (paymentStatus === 'PENDING') {
             payment.paymentStatus = "pending";
         } else {
             payment.paymentStatus = "failed";
         }
+        
         await payment.save();
-        if (payment.paymentStatus === 'success') {
+        
+        if (payment.paymentStatus === 'success' && user && order) {
+            // Create email template for successful payment
+            const orderPlacedEmailTemplate = require("../utils/orderPlacedEmailTemplate");
+            const adminEmailTemplate = require("../utils/adminEmailTemplate");
+            
+            // Populate subscription details
+            const subscriptionPlan = await require("../models/SubscriptionPlan").findById(order.subscriptionId);
+            const subscriptionName = subscriptionPlan ? subscriptionPlan.serviceName : 'N/A';
+            
+            // Customer email details
+            const orderDetails = `
+                <strong>Subscription:</strong> ${subscriptionName}<br/>
+                <strong>Duration:</strong> ${order.selectedDuration?.duration || 'N/A'}<br/>
+                <strong>Amount:</strong> ₹${payment.paymentAmount}<br/>
+                <strong>Start Date:</strong> ${order.startDate ? new Date(order.startDate).toLocaleDateString() : 'N/A'}<br/>
+                <strong>End Date:</strong> ${order.endDate ? new Date(order.endDate).toLocaleDateString() : 'Lifetime/One-time'}
+            `;
+            
+            const customerEmailHtml = orderPlacedEmailTemplate({
+                userName: user.name,
+                orderId: order._id,
+                orderDetails: orderDetails,
+                orderDate: new Date().toLocaleDateString()
+            });
+            
+            // Admin email details
+            const adminOrderDetails = `
+                <strong>Customer Name:</strong> ${user.name}<br/>
+                <strong>Customer Email:</strong> ${user.email}<br/>
+                <strong>Customer Phone:</strong> ${user.phone}<br/>
+                <strong>Subscription:</strong> ${subscriptionName}<br/>
+                <strong>Duration:</strong> ${order.selectedDuration?.duration || 'N/A'}<br/>
+                <strong>Amount:</strong> ₹${payment.paymentAmount}<br/>
+                <strong>Order ID:</strong> ${order._id}<br/>
+                <strong>Payment ID:</strong> ${payment.paymentId}<br/>
+                <strong>Payment Date:</strong> ${new Date().toLocaleDateString()}
+            `;
+            
+            const adminEmailHtml = adminEmailTemplate({
+                orderDetails: adminOrderDetails,
+                orderDate: new Date().toLocaleDateString()
+            });
+            
+            // Send emails
+            try {
+                // Send email to customer
+                await sendEmail(
+                    user.email, 
+                    user.name, 
+                    user.phone, 
+                    customerEmailHtml, 
+                    'Payment Successful - Vyapaar360'
+                );
+                console.log('✅ Success email sent to customer:', user.email);
+                
+                // Send email to admin
+                await sendEmail(
+                    'anujpal27669@gmail.com', 
+                    'Admin', 
+                    '', 
+                    adminEmailHtml, 
+                    '🆕 New Order - Customer Details - Vyapaar360'
+                );
+                console.log('✅ Admin notification email sent to: anujpal27669@gmail.com');
+            } catch (emailError) {
+                console.error('❌ Error sending emails:', emailError);
+                // Don't fail the payment verification if email fails
+            }
+            
             return res.status(200).json({
-            success: true,
-            message: "Payment verified successfully",
+                success: true,
+                message: "Payment verified successfully",
                 paymentId
             });
         } else if (payment.paymentStatus === 'pending') {
@@ -221,7 +289,7 @@ const verifyPayment = async (req, res) => {
                 message: "Payment failed or cancelled",
                 paymentId,
                 status: paymentStatus
-        });
+            });
         }
     } catch (error) {
         console.error("Error in verifyPayment:", error);
