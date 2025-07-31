@@ -1,98 +1,115 @@
-import React, { useEffect, useState, Suspense, useCallback, useRef } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import SvgEffect from '../components/SvgEffect';
-import ServiceCard from '../components/ServiceCard';
-import CategoryFilter from '../components/CategoryFilter';
-// Lazy load heavy/static sections
-const WhyChooseUs = React.lazy(() => import('../components/WhyChooseUs'));
-const CustomerFeedback = React.lazy(() => import('../components/CustomerFeedback'));
+import { FaUsers, FaChartLine, FaShoppingCart, FaStar, FaTruck, FaHeadset, FaShieldAlt, FaClock, FaWhatsapp, FaPhone } from 'react-icons/fa';
+import { MdDashboard, MdAdd, MdLogout, MdHome } from 'react-icons/md';
+// Lazy load footer
 const Footer = React.lazy(() => import('../components/Footer'));
-const API_BASE_URL = 'http://localhost:8080/api';
 
 function Dashboard() {
-  const [plans, setPlans] = useState([]);
-  const [filteredPlans, setFilteredPlans] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categories, setCategories] = useState([]); // New state for categories
-  const [isMobile, setIsMobile] = useState(false);
-  const debounceTimeout = useRef();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const [visitorCount, setVisitorCount] = useState(100000);
+  const [isCounting, setIsCounting] = useState(true);
 
+  // Simulate animated visitor count
   useEffect(() => {
-    const fetchPlans = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const res = await fetch(`${API_BASE_URL}/plans/public`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Failed to fetch plans');
-        setPlans(data.plans || []);
-        setFilteredPlans(data.plans || []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPlans();
+    const interval = setInterval(() => {
+      setVisitorCount(prev => {
+        const increment = Math.floor(Math.random() * 10) + 1;
+        return prev + increment;
+      });
+    }, 2000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  // Check screen size and update mobile state
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-
-  useEffect(() => {
-    // On mobile, set a default category since "All Services" is not available
-    // On desktop, don't auto-select any category by default
-    if (!selectedCategory && categories && categories.length > 0) {
-      if (isMobile) {
-        // Set to first available category on mobile
-        setSelectedCategory(categories[0]);
-      }
-      // On desktop, no auto-selection - users see all services by default
-    }
-  }, [categories, selectedCategory, isMobile]);
-
-  useEffect(() => {
-    let filtered = plans;
-    
-    // If there's a search term, search across ALL plans regardless of category
-    if (searchTerm.trim() !== '') {
-      filtered = filtered.filter(plan => plan.serviceName.toLowerCase().includes(searchTerm.toLowerCase()));
-    } else if (selectedCategory && selectedCategory !== '') {
-      // If no search term but category is selected (and not "All Services"), filter by category
-      filtered = filtered.filter(plan => plan.category === selectedCategory);
-    }
-    // If no search term and no category selected (or "All Services" selected), show all plans
-    
-    setFilteredPlans(filtered);
-  }, [selectedCategory, plans, searchTerm]);
-
-  const handleCategoryChange = useCallback((category) => {
-    setSelectedCategory(category);
-  }, []);
-
-  const handleSearchChange = useCallback((e) => {
-    const value = e.target.value;
-    clearTimeout(debounceTimeout.current);
-    debounceTimeout.current = setTimeout(() => {
-      setSearchTerm(value);
-    }, 300);
-  }, []);
-
-  const handleAddToCart = (plan) => {
-    // This function is no longer needed as ServiceCard now navigates directly to checkout
-    console.log('Plan selected:', plan);
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
+
+  const stats = [
+    {
+      title: 'Total Visitors',
+      value: visitorCount.toLocaleString(),
+      icon: <FaUsers className="text-3xl text-blue-600" />,
+      color: 'bg-blue-50 border-blue-200',
+      textColor: 'text-blue-600'
+    },
+    {
+      title: 'Active Orders',
+      value: '1,247',
+      icon: <FaShoppingCart className="text-3xl text-green-600" />,
+      color: 'bg-green-50 border-green-200',
+      textColor: 'text-green-600'
+    },
+    {
+      title: 'Customer Rating',
+      value: '4.9/5',
+      icon: <FaStar className="text-3xl text-yellow-600" />,
+      color: 'bg-yellow-50 border-yellow-200',
+      textColor: 'text-yellow-600'
+    },
+    {
+      title: 'Revenue This Month',
+      value: '₹2.4M',
+      icon: <FaChartLine className="text-3xl text-purple-600" />,
+      color: 'bg-purple-50 border-purple-200',
+      textColor: 'text-purple-600'
+    }
+  ];
+
+  const deliveryFeatures = [
+    {
+      icon: <FaTruck className="text-2xl text-primary" />,
+      title: 'Instant Processing',
+      description: 'Orders are processed automatically within seconds of payment confirmation.'
+    },
+    {
+      icon: <FaClock className="text-2xl text-primary" />,
+      title: '30-Minute Delivery',
+      description: 'Most orders are delivered via WhatsApp/SMS within 30 minutes.'
+    },
+    {
+      icon: <FaHeadset className="text-2xl text-primary" />,
+      title: '24/7 Support',
+      description: 'Round-the-clock customer support via WhatsApp and phone.'
+    },
+    {
+      icon: <FaShieldAlt className="text-2xl text-primary" />,
+      title: 'Secure & Private',
+      description: 'End-to-end encryption ensures your data remains confidential.'
+    }
+  ];
+
+  const reviews = [
+    {
+      name: 'Rahul Sharma',
+      rating: 5,
+      comment: 'Amazing service! Got my Netflix subscription within 15 minutes. Highly recommended!',
+      date: '2 days ago'
+    },
+    {
+      name: 'Priya Patel',
+      rating: 5,
+      comment: 'Best prices I\'ve found online. Delivery was super fast and customer support is excellent.',
+      date: '1 week ago'
+    },
+    {
+      name: 'Amit Kumar',
+      rating: 5,
+      comment: 'Legitimate service with great prices. Will definitely buy again!',
+      date: '2 weeks ago'
+    },
+    {
+      name: 'Neha Singh',
+      rating: 5,
+      comment: 'Quick delivery and excellent customer service. Very satisfied with my purchase.',
+      date: '3 weeks ago'
+    }
+  ];
 
   return (
     <div className="dashboard-theme">
@@ -105,140 +122,216 @@ function Dashboard() {
       <div className="dashboard-gradient-top"></div>
       {/* Glassmorphism Overlay */}
       <div className="dashboard-glassmorphism"></div>
+      
       {/* Content */}
-      <div className="dashboard-content" id="products-section">
-        <div className="text-center mb-10">
-          <span className="dashboard-badge mb-2">🚀 Digital Services Platform</span>
-          <h1 className="dashboard-heading mb-2">Premium Digital Services at Unbeatable Prices!</h1>
-          <p className="dashboard-subheading max-w-3xl mx-auto">
-            From streaming subscriptions to professional software, instant websites to development tools - 
-            we've got everything you need to boost your digital lifestyle and business at the best prices!
-          </p>
-        </div>
-        <div className="flex justify-center mb-6">
-          <input
-            type="text"
-            className="dashboard-input w-full max-w-md"
-            placeholder="Search all subscriptions..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
-        </div>
-        {/* Category Filter */}
-        <CategoryFilter 
-          selectedCategory={selectedCategory} 
-          onCategoryChange={handleCategoryChange} 
-          setCategories={setCategories} // Pass setCategories to update categories from filter
-        />
-
-        {/* Search indicator */}
-        {searchTerm.trim() !== '' && (
-          <div className="text-center mb-4">
-            <p className="text-white/80 text-sm">
-              🔍 Searching across all categories for "{searchTerm}"
-              {selectedCategory && selectedCategory !== '' && (
-                <span className="ml-2 text-white/60">
-                  (showing results from all categories, not just {selectedCategory})
-                </span>
-              )}
-            </p>
+      <div className="dashboard-content">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-8">
+          <div>
+            <h1 className="dashboard-heading">Digital Services Platform</h1>
+            <p className="dashboard-subheading">Your trusted partner for premium digital subscriptions</p>
           </div>
-        )}
-
-        {loading ? (
-          <div className="dashboard-loading">Loading services...</div>
-        ) : error ? (
-          <div className="dashboard-error-message">{error}</div>
-        ) : (
-          <>
-            {filteredPlans.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  {searchTerm.trim() !== '' ? 'No services found for your search' : 'No services found'}
-                </h3>
-                <p className="text-white/70">
-                  {searchTerm.trim() !== '' 
-                    ? `No services match "${searchTerm}". Try different keywords or browse by category.`
-                    : 'Try selecting a different category or check back later for new services.'
-                  }
-                </p>
-              </div>
-            ) : (
-              <div className="dashboard-responsive-grid">
-                {filteredPlans.map(plan => (
-                  <ServiceCard key={plan._id} plan={plan} />
-                ))}
-              </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              className="dashboard-button-primary flex items-center gap-2"
+              onClick={() => navigate('/services')}
+            >
+              <MdHome />
+              Browse Services
+            </button>
+            {user?.accountType === 'admin' && (
+              <button
+                className="dashboard-button-secondary flex items-center gap-2"
+                onClick={() => navigate('/admin-dashboard')}
+              >
+                <MdDashboard />
+                Admin Panel
+              </button>
             )}
-          </>
-        )}
-        
-        {/* List of Services Info Box */}
-        <div className="max-w-2xl mx-auto mt-12 mb-8 p-6 bg-white/90 rounded-xl shadow-lg border border-primary/20 text-center">
-          <h2 className="text-xl font-bold mb-2 text-primary">LIST OF SERVICES WE DEAL IN ⭐</h2>
-          <p className="mb-2 text-gray-800">Message here : <a href="https://wa.me/918250919483" target="_blank" rel="noopener noreferrer" className="text-green-600 underline">Wa.me/918250919483</a></p>
-          <p className="text-xs text-gray-600 font-semibold mt-2">NOTE : All Our Services Are Genuine And 100% Legal, We Don&apos;t Provide 3rd Party Or Crack Services.</p>
-        </div>
-        
-        {/* Delivery Information Section */}
-        <div className="max-w-4xl mx-auto mb-12 p-8 rounded-3xl shadow-2xl border border-white/30 text-left flex flex-col md:flex-row gap-8 items-center relative overflow-hidden group transition-all duration-300 hover:shadow-white/40 hover:scale-[1.01] backdrop-blur-md bg-white/5 ">
-          <div className="flex-shrink-0 flex flex-col items-center justify-center w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-white/20 to-white/5 border-4 border-white/40 shadow-xl mr-0 md:mr-8 relative z-10">
-            <span className="text-6xl md:text-7xl text-white drop-shadow-lg">🚚</span>
+            {user && (
+              <button
+                className="dashboard-button-danger flex items-center gap-2"
+                onClick={handleLogout}
+              >
+                <MdLogout />
+                Logout
+              </button>
+            )}
           </div>
-          <div className="flex-1">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-white mb-6 tracking-wide drop-shadow-sm text-center md:text-left">How We Deliver Our Services</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-white/15 rounded-xl p-4 border border-white/25 backdrop-blur-sm hover:bg-white/20 transition-all duration-300">
-                <h4 className="font-semibold text-white mb-2 flex items-center gap-2">
-                  <span className="text-xl">⚡</span>
-                  Instant Processing
-                </h4>
-                <p className="text-white/90 text-sm leading-relaxed">As soon as you place your order and complete the payment, our system begins processing your request automatically within seconds.</p>
-              </div>
-              <div className="bg-white/15 rounded-xl p-4 border border-white/25 backdrop-blur-sm hover:bg-white/20 transition-all duration-300">
-                <h4 className="font-semibold text-white mb-2 flex items-center gap-2">
-                  <span className="text-xl">📱</span>
-                  WhatsApp/SMS Delivery
-                </h4>
-                <p className="text-white/90 text-sm leading-relaxed">Your service details, activation codes, or access credentials are delivered directly to your registered mobile number via WhatsApp or SMS—usually within <span className="font-bold text-white">30 minutes</span> of your order.</p>
-              </div>
-              <div className="bg-white/15 rounded-xl p-4 border border-white/25 backdrop-blur-sm hover:bg-white/20 transition-all duration-300">
-                <h4 className="font-semibold text-white mb-2 flex items-center gap-2">
-                  <span className="text-xl">🔔</span>
-                  Real-Time Updates
-                </h4>
-                <p className="text-white/90 text-sm leading-relaxed">You'll receive notifications at every step of the process, so you always know the status of your order and when to expect delivery.</p>
-              </div>
-              <div className="bg-white/15 rounded-xl p-4 border border-white/25 backdrop-blur-sm hover:bg-white/20 transition-all duration-300">
-                <h4 className="font-semibold text-white mb-2 flex items-center gap-2">
-                  <span className="text-xl">🔒</span>
-                  Secure & Private
-                </h4>
-                <p className="text-white/90 text-sm leading-relaxed">All deliveries are handled securely with end-to-end encryption, and your personal information is kept completely confidential.</p>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {stats.map((stat, index) => (
+            <div key={index} className={`dashboard-card ${stat.color} border-2`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                  <p className={`text-2xl font-bold ${stat.textColor}`}>{stat.value}</p>
+                </div>
+                {stat.icon}
               </div>
             </div>
-            <div className="bg-gradient-to-r from-white/20 to-white/10 border-l-4 border-white/50 rounded-lg p-4 text-sm text-white/95 font-semibold backdrop-blur-sm mb-4">
-              <div className="flex items-start gap-3">
-                <span className="text-white font-bold text-lg">💬</span>
-                <div>
-                  <span className="text-white font-bold">24/7 Support:</span> If you have any questions or face any issues, our support team is available round the clock via WhatsApp: <a href="https://wa.me/918250919483" className="text-white hover:text-primary underline font-bold transition-colors">+91 8250919483</a>
+          ))}
+        </div>
+
+        {/* WhatsApp Contact Section */}
+        <div className="dashboard-card mb-12 bg-gradient-to-r from-green-50 to-orange-50 border-green-200">
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500 rounded-full mb-4">
+              <FaWhatsapp className="text-2xl text-white" />
+            </div>
+            <h2 className="dashboard-heading text-2xl mb-2">Get Instant Support</h2>
+            <p className="dashboard-subheading">Connect with us on WhatsApp for quick assistance</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="text-center p-6 bg-white rounded-xl border border-green-200 hover:shadow-lg transition-all duration-300">
+              <FaWhatsapp className="text-3xl text-green-500 mx-auto mb-3" />
+              <h3 className="font-semibold text-gray-900 mb-2">WhatsApp Support</h3>
+              <p className="text-gray-600 text-sm mb-4">Get instant help via WhatsApp</p>
+              <a 
+                href="https://wa.me/918250919483" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+              >
+                <FaWhatsapp className="text-lg" />
+                Chat on WhatsApp
+              </a>
+            </div>
+            
+            <div className="text-center p-6 bg-white rounded-xl border border-orange-200 hover:shadow-lg transition-all duration-300">
+              <FaPhone className="text-3xl text-orange-500 mx-auto mb-3" />
+              <h3 className="font-semibold text-gray-900 mb-2">Phone Support</h3>
+              <p className="text-gray-600 text-sm mb-4">Call us directly for support</p>
+              <a 
+                href="tel:+918250919483"
+                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+              >
+                <FaPhone className="text-lg" />
+                Call Now
+              </a>
+            </div>
+          </div>
+          
+          <div className="mt-6 p-4 bg-white rounded-xl border border-gray-200">
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+              <FaClock className="text-orange-500" />
+              <span className="font-medium">Available 24/7</span>
+              <span>•</span>
+              <span>Instant Response</span>
+              <span>•</span>
+              <span>Multilingual Support</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* How We Deliver Section */}
+        <div className="dashboard-card mb-12">
+          <h2 className="dashboard-heading text-2xl mb-6 text-center">How We Deliver Our Services</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {deliveryFeatures.map((feature, index) => (
+              <div key={index} className="text-center p-6 bg-gray-50 rounded-xl border border-gray-200 hover:shadow-md transition-all duration-300">
+                <div className="flex justify-center mb-4">
+                  {feature.icon}
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-gray-600 text-sm">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+          
+          {/* Enhanced Support Info */}
+          <div className="mt-8 p-8 bg-gradient-to-r from-orange-50 to-green-50 rounded-xl border border-orange-200">
+            <div className="flex items-start gap-6">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-green-500 rounded-full flex items-center justify-center">
+                  <FaHeadset className="text-2xl text-white" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">24/7 Customer Support</h3>
+                <p className="text-gray-600 mb-4 text-lg">
+                  Need help? Our dedicated support team is available round the clock to assist you with any questions, orders, or technical issues. We're here to ensure you have the best experience.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <a 
+                    href="https://wa.me/918250919483" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+                  >
+                    <FaWhatsapp className="text-lg" />
+                    WhatsApp Support
+                  </a>
+                  <a 
+                    href="tel:+918250919483"
+                    className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+                  >
+                    <FaPhone className="text-lg" />
+                    Call: +91 8250919483
+                  </a>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-1">
+                    <FaClock className="text-orange-500" />
+                    <span>24/7 Available</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <FaShieldAlt className="text-green-500" />
+                    <span>Secure Support</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <FaStar className="text-yellow-500" />
+                    <span>Premium Service</span>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="bg-gradient-to-r from-yellow-400/20 to-yellow-300/10 border-l-4 border-yellow-400 rounded-lg p-4 text-sm text-white/95 font-semibold italic shadow-sm backdrop-blur-sm">
-              <span className="text-yellow-300 font-bold">Note:</span> In rare cases, delivery may take slightly longer due to high demand or technical issues, but we strive to fulfill every order as quickly as possible. Most orders are delivered within 30 minutes!
-            </div>
+          </div>
+        </div>
+
+        {/* Customer Reviews */}
+        <div className="dashboard-card">
+          <h2 className="dashboard-heading text-2xl mb-6 text-center">What Our Customers Say</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {reviews.map((review, index) => (
+              <div key={index} className="p-6 bg-gray-50 rounded-xl border border-gray-200">
+                <div className="flex items-center gap-2 mb-3">
+                  {[...Array(review.rating)].map((_, i) => (
+                    <FaStar key={i} className="text-yellow-500" />
+                  ))}
+                </div>
+                <p className="text-gray-700 mb-4 italic">"{review.comment}"</p>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-gray-900">{review.name}</span>
+                  <span className="text-sm text-gray-500">{review.date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Call to Action */}
+        <div className="text-center mt-12">
+          <div className="dashboard-card bg-gradient-to-r from-primary to-secondary text-white">
+            <h2 className="text-2xl font-bold mb-4">Ready to Get Started?</h2>
+            <p className="mb-6 opacity-90">
+              Browse our extensive collection of premium digital services at unbeatable prices.
+            </p>
+            <button
+              className="bg-white text-primary px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-300"
+              onClick={() => navigate('/services')}
+            >
+              Explore Services
+            </button>
           </div>
         </div>
       </div>
       
-
-      
-      {/* Lazy load heavy/static sections */}
-      <Suspense fallback={<div className="dashboard-loading">Loading sections...</div>}>
-        <WhyChooseUs />
-        <CustomerFeedback />
+      {/* Footer */}
+      <Suspense fallback={<div className="dashboard-loading">Loading footer...</div>}>
         <Footer />
       </Suspense>
     </div>

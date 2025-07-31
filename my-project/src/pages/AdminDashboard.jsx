@@ -7,10 +7,11 @@ import { useAuth } from '../context/AuthContext';
 import CategoryFilter from '../components/CategoryFilter';
 
 function AdminDashboard() {
+  // All hooks at the top!
   const navigate = useNavigate();
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, loading } = useAuth();
   const [plans, setPlans] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingPlans, setLoadingPlans] = useState(true);
   const [error, setError] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
   const [form, setForm] = useState(null);
@@ -21,16 +22,10 @@ function AdminDashboard() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [filteredPlans, setFilteredPlans] = useState([]);
 
-  // Check authentication on component mount
   useEffect(() => {
-    if (!isAuthenticated() || !user || user.accountType !== 'admin') {
-      alert('Access denied. Admin privileges required.');
-      navigate('/admin');
-      return;
-    }
-    
     fetchPlans();
-  }, [navigate, isAuthenticated, user]);
+    // eslint-disable-next-line
+  }, []);
 
   useEffect(() => {
     setFilteredPlans(plans);
@@ -56,7 +51,7 @@ function AdminDashboard() {
   };
 
   const fetchPlans = async () => {
-    setLoading(true);
+    setLoadingPlans(true);
     setError('');
     try {
       const data = await adminService.getAllSubscriptionPlans();
@@ -64,16 +59,14 @@ function AdminDashboard() {
     } catch (err) {
       setError(err.message || 'Failed to fetch plans');
     } finally {
-      setLoading(false);
+      setLoadingPlans(false);
     }
   };
 
-  // Edit plan logic
   const handleEditPlan = (plan) => {
     navigate(`/admin-dashboard/edit/${plan._id}`);
   };
 
-  // Delete plan
   const handleDeletePlan = async (planId) => {
     if (!window.confirm('Are you sure you want to delete this plan?')) return;
     try {
@@ -84,11 +77,20 @@ function AdminDashboard() {
     }
   };
 
-  // Logout function
   const handleLogout = () => {
     logout();
     navigate('/admin');
   };
+
+  // AUTH CHECK: Wait for loading, then check user
+  if (loading) {
+    return <div className="dashboard-loading">Loading authentication...</div>;
+  }
+  if (!isAuthenticated() || !user || user.accountType !== 'admin') {
+    alert('Access denied. Admin privileges required.');
+    window.location.href = '/admin';
+    return null;
+  }
 
   return (
     <div className="dashboard-theme">
@@ -139,7 +141,7 @@ function AdminDashboard() {
             onCategoryChange={handleCategoryChange}
           />
         </div>
-        {loading ? (
+        {loadingPlans ? (
           <div className="dashboard-loading">Loading subscriptions...</div>
         ) : error ? (
           <div className="dashboard-error-message">{error}</div>

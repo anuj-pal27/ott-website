@@ -53,6 +53,13 @@ const ServiceCard = React.memo(({ plan, showCartButton = true }) => {
     setImageError(true);
   };
 
+  // Debug: Log plan data
+  console.log('ServiceCard rendering plan:', {
+    serviceName: plan.serviceName,
+    iconImage: plan.iconImage,
+    cloudinaryPublicId: plan.cloudinaryPublicId
+  });
+
   // Calculate price range from durations
   const calculatePriceRange = () => {
     if (!plan.durations || plan.durations.length === 0) {

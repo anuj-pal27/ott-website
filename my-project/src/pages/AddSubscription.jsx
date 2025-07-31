@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import adminService from '../services/adminService';
 import SvgEffect from '../components/SvgEffect';
 import { useAuth } from '../context/AuthContext';
+import { FaUpload, FaImage, FaLink } from 'react-icons/fa';
 
 const CATEGORY_ICON_MAP = {
   'AI TOOLS': { name: 'AI Tools' },
@@ -56,6 +57,9 @@ function AddSubscription() {
   const [formSuccess, setFormSuccess] = useState('');
   const [categories, setCategories] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
+  const [imageUploadLoading, setImageUploadLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -94,6 +98,68 @@ function AddSubscription() {
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setFormError('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setFormError('Image size should be less than 5MB');
+      return;
+    }
+
+    setSelectedImage(file);
+    setImageUploadLoading(true);
+    setFormError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('http://localhost:8080/api/admin/upload-image', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setForm({ ...form, iconImage: data.imageUrl });
+        setImagePreview(data.imageUrl);
+        setFormSuccess(`Image uploaded successfully! Size: ${(data.size / 1024).toFixed(1)}KB`);
+        setTimeout(() => setFormSuccess(''), 3000);
+      } else {
+        setFormError(data.message || 'Failed to upload image');
+      }
+    } catch (error) {
+      setFormError('Error uploading image. Please try again.');
+    } finally {
+      setImageUploadLoading(false);
+    }
+  };
+
+  const handleImageUrlChange = (e) => {
+    const url = e.target.value;
+    setForm({ ...form, iconImage: url });
+    setImagePreview(url);
+    setSelectedImage(null);
+  };
+
+  const clearImage = () => {
+    setForm({ ...form, iconImage: '' });
+    setImagePreview('');
+    setSelectedImage(null);
   };
 
   // Dynamic features list handlers
@@ -303,18 +369,47 @@ function AddSubscription() {
               </select>
             </div>
             <div className="dashboard-form-group">
-              <label className="dashboard-form-label">Icon Image URL</label>
-              <input
-                type="text"
-                name="iconImage"
-                value={form.iconImage}
-                onChange={handleFormChange}
-                className="dashboard-input"
-                placeholder="https://example.com/image.jpg"
-                required
-              />
+              <label className="dashboard-form-label">Icon Image</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  name="iconImage"
+                  value={form.iconImage}
+                  onChange={handleImageUrlChange}
+                  className="flex-1 dashboard-input"
+                  placeholder="https://example.com/image.jpg (optional)"
+                />
+                <label htmlFor="iconImageUpload" className="dashboard-button-secondary cursor-pointer flex items-center gap-1">
+                  <FaImage />
+                  <span>Upload</span>
+                  <input
+                    type="file"
+                    id="iconImageUpload"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={imageUploadLoading}
+                  />
+                </label>
+                {selectedImage && (
+                  <button
+                    type="button"
+                    className="dashboard-button-secondary text-red-500 hover:text-red-600"
+                    onClick={clearImage}
+                    disabled={imageUploadLoading}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              {imagePreview && (
+                <div className="mt-2 flex items-center gap-2">
+                  <img src={imagePreview} alt="Icon Preview" className="w-10 h-10 object-cover rounded-full" />
+                  <p className="text-xs text-white/60">Selected Image: {selectedImage?.name || 'No image selected'}</p>
+                </div>
+              )}
               <p className="text-xs text-white/60 mt-1">
-                Enter a valid image URL (e.g., https://picsum.photos/300/200)
+                Enter a valid image URL (e.g., https://picsum.photos/300/200) or upload an image.
               </p>
             </div>
             {/* Sample Link Section */}

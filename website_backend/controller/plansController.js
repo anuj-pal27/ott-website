@@ -21,6 +21,16 @@ const getPublicPlans = async (req, res) => {
         
         const plans = await SubscriptionPlan.find(filter).sort({ createdAt: -1 });
         
+        // Debug: Log plans data to check iconImage fields
+        console.log('Fetched plans count:', plans.length);
+        plans.forEach((plan, index) => {
+            console.log(`Plan ${index + 1}:`, {
+                serviceName: plan.serviceName,
+                iconImage: plan.iconImage,
+                cloudinaryPublicId: plan.cloudinaryPublicId
+            });
+        });
+        
         res.status(200).json({
             success: true,
             message: "Public plans fetched successfully",

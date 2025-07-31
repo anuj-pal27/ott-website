@@ -188,23 +188,23 @@ function Auth() {
           {/* Logo */}
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
-                <span className="text-white font-bold text-2xl">L</span>
+              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center border border-gray-200">
+                <span className="text-gray-700 font-bold text-2xl">L</span>
               </div>
-              <h2 className="text-3xl font-bold text-white drop-shadow-lg">Logo</h2>
+              <h2 className="text-3xl font-bold text-gray-900">Logo</h2>
             </Link>
           </div>
 
           {/* Auth Card */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl p-8">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-lg p-8">
             {/* Toggle Buttons */}
-            <div className="flex bg-white/20 rounded-xl p-1 mb-8">
+            <div className="flex bg-gray-100 rounded-xl p-1 mb-8">
               <button
                 onClick={() => !isLogin && handleToggleMode()}
                 className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
                   isLogin
                     ? 'bg-white text-primary shadow-lg'
-                    : 'text-white hover:text-gray-200'
+                    : 'text-gray-700 hover:text-gray-900'
                 }`}
               >
                 Login
@@ -214,7 +214,7 @@ function Auth() {
                 className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
                   !isLogin
                     ? 'bg-white text-primary shadow-lg'
-                    : 'text-white hover:text-gray-200'
+                    : 'text-gray-700 hover:text-gray-900'
                 }`}
               >
                 Sign Up
@@ -223,12 +223,12 @@ function Auth() {
 
             {/* Error/Success Messages */}
             {error && (
-              <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-xl text-red-200 text-sm">
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
                 {error}
               </div>
             )}
             {success && (
-              <div className="mb-6 p-4 bg-green-500/20 border border-green-500/30 rounded-xl text-green-200 text-sm">
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
                 {success}
               </div>
             )}

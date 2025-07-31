@@ -52,20 +52,20 @@ function Contact() {
         <SvgEffect />
       </div>
       {/* Additional gradient overlays for depth */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20"></div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
-      {/* Glassmorphism Overlay */}
-      <div className="absolute inset-0 bg-white/5 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-green-50/50"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-gray-50/30 via-transparent to-transparent"></div>
+      {/* Clean Overlay */}
+      <div className="absolute inset-0 bg-white/80"></div>
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-8">
-        <div className="w-full max-w-2xl bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl p-8">
+        <div className="w-full max-w-2xl bg-white rounded-2xl border border-gray-200 shadow-lg p-8">
           <h1 className="dashboard-heading mb-2 text-center">Contact Us</h1>
           <p className="dashboard-subheading mb-8 text-center">We'd love to hear from you! Fill out the form below and our team will get in touch.</p>
           {error && (
-            <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-200 text-sm text-center">{error}</div>
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm text-center">{error}</div>
           )}
           {success && (
-            <div className="mb-4 p-3 bg-green-500/20 border border-green-500/30 rounded-xl text-green-200 text-sm text-center">{success}</div>
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm text-center">{success}</div>
           )}
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
@@ -112,18 +112,18 @@ function Contact() {
             </button>
           </form>
           {/* Contact Info Section */}
-          <div className="mt-8 pt-6 border-t border-white/20">
-            <div className="text-center text-white/80 mb-4">
-              <div className="mb-3 text-lg font-semibold text-white">Or reach us directly:</div>
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <div className="text-center text-gray-600 mb-4">
+              <div className="mb-3 text-lg font-semibold text-gray-900">Or reach us directly:</div>
               <div className="space-y-2">
-                <div className="font-semibold">support@vyapaar360.com</div>
-                <div className="text-lg font-bold text-white">+91 93536 9022</div>
+                <div className="font-semibold text-gray-700">support@vyapaar360.com</div>
+                <div className="text-lg font-bold text-gray-900">+91 93536 9022</div>
               </div>
             </div>
             
             {/* WhatsApp Contact Button */}
             <div className="mt-6 text-center">
-              <div className="mb-3 text-white/80">Quick contact via WhatsApp:</div>
+              <div className="mb-3 text-gray-600">Quick contact via WhatsApp:</div>
               <button
                 onClick={handleWhatsAppClick}
                 className="inline-flex items-center gap-3 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
@@ -136,20 +136,20 @@ function Contact() {
             
             {/* Additional Contact Options */}
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <div className="text-2xl mb-2">📧</div>
-                <div className="text-sm font-semibold text-white">Email</div>
-                <div className="text-xs text-white/70">support@vyapaar360.com</div>
+                <div className="text-sm font-semibold text-gray-900">Email</div>
+                <div className="text-xs text-gray-600">support@vyapaar360.com</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <div className="text-2xl mb-2">📱</div>
-                <div className="text-sm font-semibold text-white">Phone</div>
-                <div className="text-xs text-white/70">+91 93536 90229</div>
+                <div className="text-sm font-semibold text-gray-900">Phone</div>
+                <div className="text-xs text-gray-600">+91 93536 90229</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <div className="text-2xl mb-2">⏰</div>
-                <div className="text-sm font-semibold text-white">Support</div>
-                <div className="text-xs text-white/70">24/7 Available</div>
+                <div className="text-sm font-semibold text-gray-900">Support</div>
+                <div className="text-xs text-gray-600">24/7 Available</div>
               </div>
             </div>
           </div>

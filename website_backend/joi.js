@@ -156,10 +156,10 @@ const planSchema = Joi.object({
         'array.min': 'At least one feature is required',
         'any.required': 'Features are required'
     }),
-    iconImage: Joi.string().uri().required().messages({
-        'string.uri': 'Icon image must be a valid URL',
-        'any.required': 'Icon image is required'
+    iconImage: Joi.string().uri().allow('').optional().messages({
+        'string.uri': 'Icon image must be a valid URL'
     }),
+    cloudinaryPublicId: Joi.string().optional(),
     sampleLink: Joi.string().uri().allow('').optional().messages({
         'string.uri': 'Sample link must be a valid URL'
     }),
@@ -207,7 +207,10 @@ const updatePlanSchema = Joi.object({
         'any.only': 'Category must be one of: subscriptions, software, websites, tools, music, design, marketing, hosting, other, AI TOOLS, GRAPHICS AND VIDEO EDITING SERVICES, WRITING TOOLS SERVICES, PRODUCTIVITY AND OFFICE MANAGEMENT SERVICES, ONLINE MARKETING And SOFTWARE, DATA EXTRACTER SERVICES, DATING SUBSCRIPTION, ONLINE ENTERTAINMENT SERVICES, featured'
     }),
     features: Joi.array().items(Joi.string().min(1)).min(1).optional(),
-    iconImage: Joi.string().uri().optional(),
+    iconImage: Joi.string().uri().allow('').optional().messages({
+        'string.uri': 'Icon image must be a valid URL'
+    }),
+    cloudinaryPublicId: Joi.string().optional(),
     sampleLink: Joi.string().uri().allow('').optional().messages({
         'string.uri': 'Sample link must be a valid URL'
     }),

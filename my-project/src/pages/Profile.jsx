@@ -104,204 +104,205 @@ function Profile() {
     return null; // Will redirect to auth
   }
 
-      return (
-      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-primary">
-        {/* Navbar */}
-        <Navbar />
-        
-        {/* SVG Background */}
-        <div className="absolute inset-0 w-full h-full">
-          <SvgEffect />
-        </div>
-        
-        {/* Additional gradient overlays for depth */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
-        
-        {/* Glassmorphism Overlay */}
-        <div className="absolute inset-0 bg-white/5 backdrop-blur-sm"></div>
+  return (
+    <div className="dashboard-theme">
+      {/* Navbar */}
+      <Navbar />
       
+      {/* SVG Background */}
+      <div className="dashboard-background">
+        <SvgEffect />
+      </div>
+      {/* Additional gradient overlays for depth */}
+      <div className="dashboard-gradient-overlay"></div>
+      <div className="dashboard-gradient-top"></div>
+      {/* Glassmorphism Overlay */}
+      <div className="dashboard-glassmorphism"></div>
+    
       {/* Content */}
-      <div className="relative z-10 flex items-center justify-center min-h-screen px-4 py-8">
-        <div className="w-full max-w-4xl">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-2">Profile</h1>
-            <p className="text-white/80">Manage your account information</p>
+      <div className="dashboard-content py-16">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="dashboard-heading">Profile</h1>
+          <div className="flex items-center justify-center gap-3 mt-4">
+            <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
+              <PersonIcon className="w-5 h-5 text-white" />
+            </div>
+            <p className="dashboard-subheading text-lg font-medium">Manage your account information and preferences</p>
           </div>
+        </div>
 
-          {/* Error/Success Messages */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-xl text-red-200 text-sm">
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="mb-6 p-4 bg-green-500/20 border border-green-500/30 rounded-xl text-green-200 text-sm">
-              {success}
-            </div>
-          )}
+        {/* Error/Success Messages */}
+        {error && (
+          <div className="dashboard-error mb-8">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="dashboard-success mb-8">
+            {success}
+          </div>
+        )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Profile Picture Section */}
-            <div className="lg:col-span-1">
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl p-8">
-                <div className="text-center">
-                  <div className="relative inline-block">
-                    <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/30 mx-auto mb-4">
-                      {user.profilePicture ? (
-                        <img 
-                          src={user.profilePicture} 
-                          alt={user.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div className="w-full h-full bg-white/20 flex items-center justify-center text-white font-bold text-4xl">
-                        {user.name?.charAt(0)?.toUpperCase() || 'U'}
-                      </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+          {/* Profile Picture Section */}
+          <div className="lg:col-span-1">
+            <div className="dashboard-card">
+              <div className="text-center">
+                <div className="relative inline-block">
+                  <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-200 mx-auto mb-6">
+                    {user.profilePicture ? (
+                      <img 
+                        src={user.profilePicture} 
+                        alt={user.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold text-4xl">
+                      {user.name?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
-                    
-                    {isEditing && (
-                      <div className="mt-4">
-                        <input
-                          type="text"
-                          name="profilePicture"
-                          value={formData.profilePicture}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/50 focus:bg-white/30 transition-all duration-300"
-                          placeholder="Profile picture URL"
-                        />
-                      </div>
-                    )}
                   </div>
                   
-                  <h2 className="text-2xl font-bold text-white mb-2">{user.name}</h2>
-                  <p className="text-white/80 mb-4">{user.email}</p>
-                  
-                  <div className="space-y-2 text-sm text-white/70">
-                    <div className="flex items-center justify-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${user.isEmailVerified ? 'bg-green-400' : 'bg-red-400'}`}></span>
-                      Email {user.isEmailVerified ? 'Verified' : 'Not Verified'}
-                    </div>
-                    <div className="flex items-center justify-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${user.isPhoneVerified ? 'bg-green-400' : 'bg-red-400'}`}></span>
-                      Phone {user.isPhoneVerified ? 'Verified' : 'Not Verified'}
-                    </div>
-                    <div className="text-primary-300 font-medium">
-                      {user.accountType === 'admin' ? 'Administrator' : 'User'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Profile Details Section */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Personal Information */}
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-white">Personal Information</h3>
-                  {!isEditing ? (
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl transition-all duration-300 backdrop-blur-sm border border-white/30 flex items-center gap-2"
-                    >
-                      <EditIcon className="w-4 h-4" />
-                      Edit
-                    </button>
-                  ) : (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleUpdateProfile}
-                        disabled={loading}
-                        className="bg-green-500/20 hover:bg-green-500/30 text-white px-4 py-2 rounded-xl transition-all duration-300 backdrop-blur-sm border border-green-500/30 flex items-center gap-2 disabled:opacity-50"
-                      >
-                        <SaveIcon className="w-4 h-4" />
-                        {loading ? 'Saving...' : 'Save'}
-                      </button>
-                      <button
-                        onClick={cancelEdit}
-                        className="bg-red-500/20 hover:bg-red-500/30 text-white px-4 py-2 rounded-xl transition-all duration-300 backdrop-blur-sm border border-red-500/30 flex items-center gap-2"
-                      >
-                        <CancelIcon className="w-4 h-4" />
-                        Cancel
-                      </button>
+                  {isEditing && (
+                    <div className="mt-6">
+                      <input
+                        type="text"
+                        name="profilePicture"
+                        value={formData.profilePicture}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300"
+                        placeholder="Profile picture URL"
+                      />
                     </div>
                   )}
                 </div>
+                
+                <h2 className="dashboard-heading text-2xl mb-3">{user.name}</h2>
+                <p className="dashboard-subheading mb-6">{user.email}</p>
+                
+                <div className="space-y-3 text-sm dashboard-text-muted">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${user.isEmailVerified ? 'bg-orange-400' : 'bg-red-400'}`}></span>
+                    Email {user.isEmailVerified ? 'Verified' : 'Not Verified'}
+                  </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${user.isPhoneVerified ? 'bg-orange-400' : 'bg-red-400'}`}></span>
+                    Phone {user.isPhoneVerified ? 'Verified' : 'Not Verified'}
+                  </div>
+                  <div className="text-primary font-medium pt-2">
+                    {user.accountType === 'admin' ? 'Administrator' : 'User'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                <form onSubmit={handleUpdateProfile} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="block text-white font-medium text-sm">Full Name</label>
-                      <div className="relative">
-                        <PersonIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
-                        <input
-                          type="text"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className="w-full pl-10 pr-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/50 focus:bg-white/30 transition-all duration-300 disabled:opacity-50"
-                          placeholder="Enter your full name"
-                          required
-                        />
-                      </div>
-                    </div>
+          {/* Profile Details Section */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Personal Information */}
+            <div className="dashboard-card">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="dashboard-heading text-xl">Personal Information</h3>
+                {!isEditing ? (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="dashboard-button-secondary flex items-center gap-2"
+                  >
+                    <EditIcon className="w-4 h-4" />
+                    Edit
+                  </button>
+                ) : (
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleUpdateProfile}
+                      disabled={loading}
+                      className="dashboard-button-primary flex items-center gap-2 disabled:opacity-50"
+                    >
+                      <SaveIcon className="w-4 h-4" />
+                      {loading ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      className="dashboard-button-danger flex items-center gap-2"
+                    >
+                      <CancelIcon className="w-4 h-4" />
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
 
-                    <div className="space-y-2">
-                      <label className="block text-white font-medium text-sm">Email Address</label>
-                      <div className="relative">
-                        <EmailIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
-                        <input
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          disabled
-                          className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white/60 backdrop-blur-sm opacity-50 cursor-not-allowed"
-                          placeholder="Email address"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-white font-medium text-sm">Phone Number</label>
-                      <div className="relative">
-                        <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className="w-full pl-10 pr-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/50 focus:bg-white/30 transition-all duration-300 disabled:opacity-50"
-                          placeholder="Enter your phone number"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-white font-medium text-sm">Country</label>
-                      <div className="relative">
-                        <LocationOnIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
-                        <input
-                          type="text"
-                          name="country"
-                          value={formData.country}
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className="w-full pl-10 pr-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/60 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/50 focus:bg-white/30 transition-all duration-300 disabled:opacity-50"
-                          placeholder="Enter your country"
-                        />
-                      </div>
+              <form onSubmit={handleUpdateProfile} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                    <label className="dashboard-form-label text-base">Full Name</label>
+                    <div className="relative">
+                      <PersonIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        className="w-full pl-12 pr-4 py-4 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 disabled:opacity-50 disabled:bg-gray-50"
+                        placeholder="Enter your full name"
+                        required
+                      />
                     </div>
                   </div>
-                </form>
-              </div>
+
+                  <div className="space-y-3">
+                    <label className="dashboard-form-label text-base">Email Address</label>
+                    <div className="relative">
+                      <EmailIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        disabled
+                        className="w-full pl-12 pr-4 py-4 bg-gray-100 border border-gray-300 rounded-xl text-gray-500 opacity-50 cursor-not-allowed"
+                        placeholder="Email address"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="dashboard-form-label text-base">Phone Number</label>
+                    <div className="relative">
+                      <PhoneIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        className="w-full pl-12 pr-4 py-4 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 disabled:opacity-50 disabled:bg-gray-50"
+                        placeholder="Enter your phone number"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="dashboard-form-label text-base">Country</label>
+                    <div className="relative">
+                      <LocationOnIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        name="country"
+                        value={formData.country}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                        className="w-full pl-12 pr-4 py-4 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 disabled:opacity-50 disabled:bg-gray-50"
+                        placeholder="Enter your country"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
         </div>
