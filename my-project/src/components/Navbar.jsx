@@ -41,7 +41,7 @@ function Navbar() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/plans/categories');
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'}/plans/categories`);
         const data = await res.json();
         if (data.success && Array.isArray(data.categories)) {
           setCategories(data.categories);

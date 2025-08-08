@@ -5,7 +5,7 @@ import ServiceCard from '../components/ServiceCard';
 const WhyChooseUs = React.lazy(() => import('../components/WhyChooseUs'));
 const CustomerFeedback = React.lazy(() => import('../components/CustomerFeedback'));
 const Footer = React.lazy(() => import('../components/Footer'));
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api';
 
 const CATEGORY_LABELS = {
   music: 'Music Premium',

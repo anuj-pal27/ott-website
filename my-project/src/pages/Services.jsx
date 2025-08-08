@@ -6,7 +6,7 @@ import CategoryFilter from '../components/CategoryFilter';
 const WhyChooseUs = React.lazy(() => import('../components/WhyChooseUs'));
 const CustomerFeedback = React.lazy(() => import('../components/CustomerFeedback'));
 const Footer = React.lazy(() => import('../components/Footer'));
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api';
 
 function Services() {
   const [plans, setPlans] = useState([]);
