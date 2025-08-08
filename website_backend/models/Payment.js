@@ -30,6 +30,15 @@ const paymentSchema = new mongoose.Schema({
         ref:"Order",
         required:true,
     },
+    // New fields for multiple orders (cart purchases)
+    orders: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Order"
+    }],
+    itemCount: {
+        type: Number,
+        default: 1
+    }
 })
 
 module.exports = mongoose.model("Payment",paymentSchema);

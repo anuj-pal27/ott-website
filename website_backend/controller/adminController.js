@@ -51,11 +51,6 @@ const addSubscriptionPlan = async (req, res) => {
             subscriptionData.cloudinaryPublicId = publicId;
         }
 
-        console.log('Creating subscription plan with data:', {
-            serviceName: subscriptionData.serviceName,
-            iconImage: subscriptionData.iconImage,
-            cloudinaryPublicId: subscriptionData.cloudinaryPublicId
-        });
 
         const subscriptionPlan = await SubscriptionPlan.create(subscriptionData);
         
@@ -105,11 +100,7 @@ const updateSubscriptionPlan = async (req, res) => {
             }
         }
 
-        console.log('Updating subscription plan with data:', {
-            planId: planId,
-            iconImage: updateData.iconImage,
-            cloudinaryPublicId: updateData.cloudinaryPublicId
-        });
+
 
         const updatedPlan = await SubscriptionPlan.findByIdAndUpdate(
             planId,

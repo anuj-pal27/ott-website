@@ -355,6 +355,13 @@ const cartAddSchema = Joi.object({
     })
 });
 
+const cartUpdateSchema = Joi.object({
+    duration: Joi.string().valid('1 Month', '3 Months', '6 Months', '1 Year', 'Lifetime', 'One-time').required().messages({
+        'any.only': 'Duration must be one of: 1 Month, 3 Months, 6 Months, 1 Year, Lifetime, One-time',
+        'any.required': 'Duration is required'
+    })
+});
+
 // Validation middleware function
 const validateRequest = (schema) => {
     return (req, res, next) => {
@@ -402,5 +409,6 @@ module.exports = {
     loginAdminSchema,
     sendAdminSignupOtpSchema,
     sendAdminLoginOtpSchema,
-    cartAddSchema
+    cartAddSchema,
+    cartUpdateSchema
 };

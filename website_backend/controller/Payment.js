@@ -3,46 +3,30 @@ const Order = require("../models/Order");
 const User = require("../models/User");
 const Cart = require("../models/Cart");
 const sendEmail = require("../utils/sendEmail");
-// const PhonePe = require("../config/PhonePe");
-const { StandardCheckoutClient, Env, StandardCheckoutPayRequest } = require('pg-sdk-node');
+const PhonePe = require("../config/PhonePe");
 const { randomUUID } = require('crypto');
 const dotenv = require('dotenv');
 
+dotenv.config();
 
-dotenv.config();    
+// Validate PhonePe environment variables
+const PHONEPE_MERCHANT_ID = process.env.PHONEPE_MERCHANT_ID;
+const PHONEPE_SALT_KEY = process.env.PHONEPE_SALT_KEY;
+const PHONEPE_BASE_URL = process.env.PHONEPE_BASE_URL || 'https://api.phonepe.com/apis/hermes';
 
-// Validate environment variables
-const clientId = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
-
-
-const clientVersion = 1;
-const env = Env.SANDBOX; // or Env.PRODUCTION
-
-let client;
-try {
-    client = StandardCheckoutClient.getInstance(clientId, clientSecret, clientVersion, env);
-} catch (error) {
-    console.error('❌ Failed to initialize PhonePe SDK client:', error);
-    process.exit(1);
-}
 
 // Create checkout session (PhonePe)
 const checkout = async (req, res) => {
     try {
-        console.log('🔄 Starting checkout process...');
-        
         const userId = req.user.userId;
-        console.log('👤 User ID:', userId);
         
         const cart = await Cart.findOne({ user: userId }).populate("items.subscriptionPlan");
         if (!cart || cart.items.length === 0) {
-            console.log('❌ Cart is empty for user:', userId);
             return res.status(400).json({ message: "Cart is empty" });
         }
-
-        console.log('🛒 Cart items found:', cart.items.length);
         
+        // Create orders for each cart item
+        const orders = [];
         const items = cart.items.map(item => {
             const plan = item.subscriptionPlan;
             const selectedDuration = plan.durations.find(d => d.duration === item.duration);
@@ -59,82 +43,105 @@ const checkout = async (req, res) => {
         });
 
         const totalAmount = items.reduce((sum, item) => sum + item.priceAtPurchase, 0);
-        console.log('💰 Total amount:', totalAmount);
 
-        const firstItem = items[0];
-        // Find durationInDays for the selected duration
-        let endDate = null;
-        if (firstItem.selectedDuration && firstItem.selectedDuration.duration) {
-            const plan = cart.items[0].subscriptionPlan;
-            const selectedDuration = plan.durations.find(d => d.duration === firstItem.selectedDuration.duration);
-            if (selectedDuration && selectedDuration.durationInDays) {
-                endDate = new Date(Date.now() + selectedDuration.durationInDays * 24 * 60 * 60 * 1000);
-            } else if (firstItem.selectedDuration.duration === 'Lifetime' || firstItem.selectedDuration.duration === 'One-time') {
-                endDate = null;
+        // Create separate orders for each item
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const cartItem = cart.items[i];
+            
+            // Find durationInDays for the selected duration
+            let endDate = null;
+            if (item.selectedDuration && item.selectedDuration.duration) {
+                const plan = cartItem.subscriptionPlan;
+                const selectedDuration = plan.durations.find(d => d.duration === item.selectedDuration.duration);
+                if (selectedDuration && selectedDuration.durationInDays) {
+                    endDate = new Date(Date.now() + selectedDuration.durationInDays * 24 * 60 * 60 * 1000);
+                } else if (item.selectedDuration.duration === 'Lifetime' || item.selectedDuration.duration === 'One-time') {
+                    endDate = null;
+                }
             }
+            
+            const order = new Order({
+                userId: userId,
+                subscriptionId: item.subscriptionPlan,
+                selectedDuration: item.selectedDuration,
+                payment: [],
+                startDate: new Date(),
+                endDate: endDate,
+            });
+            await order.save();
+            orders.push(order);
         }
-        const order = new Order({
-            userId: userId,
-            subscriptionId: firstItem.subscriptionPlan,
-            selectedDuration: firstItem.selectedDuration,
-            payment: [],
-            startDate: new Date(),
-            endDate: endDate,
-        });
-        await order.save();
         
         const merchantOrderId = randomUUID();
-        const amount = totalAmount * 100; // in paise
-        const redirectUrl = `http://localhost:5173/payment-status?paymentId=${merchantOrderId}`;
+        const amount = totalAmount; // Keep in rupees, PhonePe config will convert to paise
+        
+        // Creating PhonePe order
+        
+        const { mobileNumber, type } = req.body || {};
 
-        console.log('🔗 Redirect URL:', redirectUrl);
-        
-        const request = StandardCheckoutPayRequest.builder()
-            .merchantOrderId(merchantOrderId)
-            .amount(amount)
-            .redirectUrl(redirectUrl)
-            .build();
+        let response;
+        try {
+            response = await PhonePe.initiatePhonePePayment(merchantOrderId, amount, userId, mobileNumber, type);
+        } catch (phonepeError) {
+            console.error('❌ PhonePe API Error:', phonepeError);
             
-        console.log('📤 Sending request to PhonePe...');
-        const response = await client.pay(request);
-        console.log('📥 PhonePe response received:', JSON.stringify(response, null, 2));
+            // Log error response for debugging
+            if (phonepeError.response) {
+                console.error('❌ PhonePe API Error Response:', phonepeError.response.status, phonepeError.response.data);
+            } else {
+                console.error('❌ PhonePe API Error:', phonepeError.message);
+            }
+            
+            return res.status(500).json({
+                success: false,
+                message: "Payment gateway error occurred",
+                error: phonepeError.message,
+                details: phonepeError.response ? phonepeError.response.data : null
+            });
+        }
         
-        const paymentUrl = response.redirectUrl;
-         if (!paymentUrl) {
+        const paymentUrl = response?.data?.instrumentResponse?.redirectInfo?.url || response?.instrumentResponse?.redirectInfo?.url;
+        if (!paymentUrl) {
             console.error('❌ No payment URL in PhonePe response');
             return res.status(500).json({ 
                 success: false, 
                 message: "Failed to get payment URL from PhonePe", 
                 details: response 
             });
-         }
+        }
         
-        console.log('🔗 Payment URL generated:', paymentUrl);
+        // Payment URL generated
         
+        // Create payment record with reference to all orders
         const payment = new Payment({
-            order: order._id,
+            order: orders[0]._id, // Keep reference to first order for backward compatibility
+            orders: orders.map(order => order._id), // Add reference to all orders
             paymentAmount: totalAmount,
             paymentId: merchantOrderId,
             paymentStatus: "pending",
             paymentMethod: "phonepe",
+            itemCount: orders.length, // Add count of items
         });
         await payment.save();
-        console.log('💳 Payment record created:', payment._id);
 
-        order.payment.push(payment._id);
-        await order.save();
+        // Add payment reference to all orders
+        for (const order of orders) {
+            order.payment.push(payment._id);
+            await order.save();
+        }
 
         await Cart.findOneAndUpdate({ user: userId }, { $set: { items: [] } });
-        console.log('🛒 Cart cleared for user:', userId);
 
         res.status(200).json({
             success: true,
-            message: "Order created successfully",
-            orderId: order._id,
+            message: "Orders created successfully",
+            orderIds: orders.map(order => order._id),
             paymentId: merchantOrderId,
             paymentUrl,
             amount: totalAmount,
             currency: "INR",
+            itemCount: orders.length,
         });
         
         console.log('✅ Checkout process completed successfully');
@@ -154,10 +161,29 @@ const checkout = async (req, res) => {
 const verifyPayment = async (req, res) => {
     try {
         const { paymentId } = req.body; // paymentId is merchantOrderId
-        const statusResponse = await client.getOrderStatus(paymentId);
-        console.log('📥 PhonePe status response received:', statusResponse);
-        const paymentStatus = statusResponse.state;
-        console.log('📥 Payment status:', paymentStatus);
+        
+        console.log('📤 Checking PhonePe payment status for:', paymentId);
+        
+        let statusResponse;
+        try {
+            statusResponse = await PhonePe.verifyPhonePePayment(paymentId);
+            console.log('📥 PhonePe status response received:', JSON.stringify(statusResponse, null, 2));
+        } catch (phonepeError) {
+            console.error('❌ PhonePe status check error:', phonepeError);
+            
+            if (phonepeError.response) {
+                console.error('❌ PhonePe API Error Response:', phonepeError.response.status, phonepeError.response.data);
+            }
+            
+            return res.status(500).json({
+                success: false,
+                message: "Failed to check payment status",
+                error: phonepeError.message
+            });
+        }
+        
+        const paymentStatus = statusResponse.code === 'PAYMENT_SUCCESS' ? 'COMPLETED' : 
+                             statusResponse.code === 'PAYMENT_PENDING' ? 'PENDING' : 'FAILED';
         const payment = await Payment.findOne({ paymentId });
         if (!payment) {
             return res.status(404).json({ success: false, message: "Payment not found" });
@@ -203,26 +229,65 @@ const verifyPayment = async (req, res) => {
         await payment.save();
         
         if (payment.paymentStatus === 'success' && user && order) {
+            // Handle multiple orders if this is a cart purchase
+            const ordersToUpdate = payment.orders && payment.orders.length > 0 ? payment.orders : [order._id];
+            
+            // Update all orders and user subscriptions
+            for (const orderId of ordersToUpdate) {
+                const currentOrder = await Order.findById(orderId);
+                if (currentOrder) {
+                    // Calculate end date based on selected duration
+                    const subscriptionPlan = await require("../models/SubscriptionPlan").findById(currentOrder.subscriptionId);
+                    let durationInDays = null;
+                    if (subscriptionPlan && currentOrder.selectedDuration && currentOrder.selectedDuration.duration) {
+                        const planDuration = subscriptionPlan.durations.find(
+                            d => d.duration.trim().toLowerCase() === currentOrder.selectedDuration.duration.trim().toLowerCase()
+                        );
+                        durationInDays = planDuration ? planDuration.durationInDays : null;
+                    }
+                    if (durationInDays) {
+                        currentOrder.endDate = new Date(currentOrder.startDate.getTime() + (durationInDays * 24 * 60 * 60 * 1000));
+                    } else if (currentOrder.selectedDuration.duration === 'Lifetime' || currentOrder.selectedDuration.duration === 'One-time') {
+                        currentOrder.endDate = null;
+                    }
+                    await currentOrder.save();
+                    
+                    // Update user's subscription plans
+                    user = await User.findByIdAndUpdate(currentOrder.userId, { $push: { subscriptionPlan: currentOrder.subscriptionId } }, { new: true });
+                }
+            }
+            
             // Create email template for successful payment
             const orderPlacedEmailTemplate = require("../utils/orderPlacedEmailTemplate");
             const adminEmailTemplate = require("../utils/adminEmailTemplate");
             
-            // Populate subscription details
+            // Populate subscription details for email
             const subscriptionPlan = await require("../models/SubscriptionPlan").findById(order.subscriptionId);
             const subscriptionName = subscriptionPlan ? subscriptionPlan.serviceName : 'N/A';
             
             // Customer email details
-            const orderDetails = `
-                <strong>Subscription:</strong> ${subscriptionName}<br/>
-                <strong>Duration:</strong> ${order.selectedDuration?.duration || 'N/A'}<br/>
-                <strong>Amount:</strong> ₹${payment.paymentAmount}<br/>
-                <strong>Start Date:</strong> ${order.startDate ? new Date(order.startDate).toLocaleDateString() : 'N/A'}<br/>
-                <strong>End Date:</strong> ${order.endDate ? new Date(order.endDate).toLocaleDateString() : 'Lifetime/One-time'}
-            `;
+            let orderDetails = '';
+            if (payment.itemCount > 1) {
+                // Multiple items - show summary
+                orderDetails = `
+                    <strong>Items Purchased:</strong> ${payment.itemCount} items<br/>
+                    <strong>Total Amount:</strong> ₹${payment.paymentAmount}<br/>
+                    <strong>Payment Date:</strong> ${new Date().toLocaleDateString()}
+                `;
+            } else {
+                // Single item - show details
+                orderDetails = `
+                    <strong>Subscription:</strong> ${subscriptionName}<br/>
+                    <strong>Duration:</strong> ${order.selectedDuration?.duration || 'N/A'}<br/>
+                    <strong>Amount:</strong> ₹${payment.paymentAmount}<br/>
+                    <strong>Start Date:</strong> ${order.startDate ? new Date(order.startDate).toLocaleDateString() : 'N/A'}<br/>
+                    <strong>End Date:</strong> ${order.endDate ? new Date(order.endDate).toLocaleDateString() : 'Lifetime/One-time'}
+                `;
+            }
             
             const customerEmailHtml = orderPlacedEmailTemplate({
                 userName: user.name,
-                orderId: order._id,
+                orderId: payment.paymentId,
                 orderDetails: orderDetails,
                 orderDate: new Date().toLocaleDateString()
             });
@@ -232,10 +297,8 @@ const verifyPayment = async (req, res) => {
                 <strong>Customer Name:</strong> ${user.name}<br/>
                 <strong>Customer Email:</strong> ${user.email}<br/>
                 <strong>Customer Phone:</strong> ${user.phone}<br/>
-                <strong>Subscription:</strong> ${subscriptionName}<br/>
-                <strong>Duration:</strong> ${order.selectedDuration?.duration || 'N/A'}<br/>
-                <strong>Amount:</strong> ₹${payment.paymentAmount}<br/>
-                <strong>Order ID:</strong> ${order._id}<br/>
+                <strong>Items Purchased:</strong> ${payment.itemCount} items<br/>
+                <strong>Total Amount:</strong> ₹${payment.paymentAmount}<br/>
                 <strong>Payment ID:</strong> ${payment.paymentId}<br/>
                 <strong>Payment Date:</strong> ${new Date().toLocaleDateString()}
             `;
@@ -313,10 +376,21 @@ const getPaymentHistory = async (req, res) => {
                   { path: 'subscriptionId', model: 'SubscriptionPlan' },
                   { path: 'userId', model: 'User' }
                 ]
+            })
+            .populate({
+                path: 'orders',
+                match: { userId: userId },
+                populate: [
+                  { path: 'subscriptionId', model: 'SubscriptionPlan' },
+                  { path: 'userId', model: 'User' }
+                ]
             });
 
         // Filter out payments that don't belong to the user
-        const userPayments = payments.filter(payment => payment.order);
+        const userPayments = payments.filter(payment => {
+            // Check if any order belongs to the user (either single order or multiple orders)
+            return payment.order || (payment.orders && payment.orders.length > 0);
+        });
 
         res.status(200).json({
             success: true,
@@ -345,9 +419,17 @@ const getPaymentById = async (req, res) => {
                   { path: 'subscriptionId', model: 'SubscriptionPlan' },
                   { path: 'userId', model: 'User' }
                 ]
+            })
+            .populate({
+                path: 'orders',
+                match: { userId: userId },
+                populate: [
+                  { path: 'subscriptionId', model: 'SubscriptionPlan' },
+                  { path: 'userId', model: 'User' }
+                ]
             });
         console.log('📥 Payment:', payment);
-        if (!payment || !payment.order) {
+        if (!payment || (!payment.order && (!payment.orders || payment.orders.length === 0))) {
             return res.status(404).json({
                 success: false,
                 message: "Payment not found"

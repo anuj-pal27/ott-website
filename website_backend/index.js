@@ -23,8 +23,10 @@ app.use(express.json());
 const allowedOrigins = [
     'http://localhost:5173',  // Vite dev server
     'http://localhost:3000',  // React dev server
-    'http://127.0.0.1:5173', // Alternative localhost
-    'http://127.0.0.1:3000'  // Alternative localhost
+    'http://127.0.0.1:5174', // Alternative localhost
+    'http://127.0.0.1:3000',
+    'http://localhost:5174',
+    //   // Alternative localhost
 ];
 
 app.use(cors({
@@ -74,6 +76,6 @@ app.use('*', (req, res) => {
 });
 
 app.listen(process.env.PORT, () => {
-    console.log(`🚀 Server is running on port ${process.env.PORT}`);
-    console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
+    // Server started successfully
+    console.log("server started ")
 });

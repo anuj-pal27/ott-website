@@ -17,7 +17,7 @@ const faqDatabase = {
   },
   'support': {
     keywords: ['support', 'help', 'issue', 'problem', 'contact', 'assist', 'trouble'],
-    response: 'Our support team is available 24/7! You can contact us via WhatsApp at +91 93536 90229, email at support@vyapaar360.com, or use this chat. We typically respond within 5 minutes.'
+    response: 'Our support team is available 24/7! You can contact us via WhatsApp at +91 9353690229, email at goutham4391@gmail.com, or use this chat. We typically respond within 5 minutes.'
   },
   'refund': {
     keywords: ['refund', 'return', 'cancel', 'money back', 'replacement', 'not working'],
@@ -75,7 +75,7 @@ const findResponse = (userMessage) => {
   // Default response
   return {
     type: 'unknown',
-    response: 'I\'m not sure about that. Would you like to speak with our human support team? You can contact us on WhatsApp at +91 93536 90229 or email us at support@vyapaar360.com'
+    response: 'I\'m not sure about that. Would you like to speak with our human support team? You can contact us on WhatsApp at +91 9353690229 or email us at goutham4391@gmail.com'
   };
 };
 

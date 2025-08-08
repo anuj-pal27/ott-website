@@ -28,7 +28,6 @@ const auth = async (req, res, next) => {
         
         // Verify token
         const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-        console.log("Decoded token:", decoded);
         
         // Set user data in request
         req.user = decoded;
