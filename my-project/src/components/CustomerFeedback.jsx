@@ -78,8 +78,9 @@ const CustomerFeedback = React.memo(function CustomerFeedback() {
 
   return (
     <section className="max-w-6xl mx-auto my-16 px-2 sm:px-4">
-      <div className="text-center mb-8">
-        <span className="dashboard-badge mb-2">💬 Real Voices, Real Experiences</span>
+      
+      <div className="text-center mb-8 relative">
+        <span className="dashboard-badge mb-2">💬 Real Voices, Real Experiences </span>
         <h2 className="dashboard-heading mb-2 mt-2 ">What Our Customers Say</h2>
         <p className="dashboard-subheading max-w-2xl mx-auto">
           Discover how our affordable subscriptions have transformed the online journeys of our valued customers. Check out their genuine feedback:

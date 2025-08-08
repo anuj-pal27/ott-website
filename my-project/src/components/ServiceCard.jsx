@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaCartPlus } from "react-icons/fa";
 import { FaExternalLinkAlt } from "react-icons/fa";
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 /*
 Example of how the new durations structure should be used:
@@ -46,7 +48,10 @@ const netflixPlan = {
 
 const ServiceCard = React.memo(({ plan, showCartButton = true }) => {
   const [imageError, setImageError] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { user } = useAuth();
 
   const handleImageError = () => {
     console.error('Image failed to load:', plan.iconImage);
@@ -99,9 +104,36 @@ const ServiceCard = React.memo(({ plan, showCartButton = true }) => {
   const priceRange = calculatePriceRange();
   const inStock = hasStock();
 
-  const handleAddToCart = () => {
-    // Navigate to checkout page with plan data
-    navigate('/checkout', { state: { plan } });
+  const handleAddToCart = async () => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Get the first available duration
+      const availableDurations = plan.durations ? plan.durations.filter(d => d.isActive && d.slotsAvailable > 0) : [];
+      
+      if (availableDurations.length === 0) {
+        alert('No duration options available for this service.');
+        return;
+      }
+
+      // Use the first available duration
+      const selectedDuration = availableDurations[0].duration;
+      
+      // Add to cart
+      await addToCart(plan._id, selectedDuration);
+      
+      // Navigate to cart checkout to see all items in cart
+      navigate('/cart-checkout');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add item to cart. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -206,14 +238,14 @@ const ServiceCard = React.memo(({ plan, showCartButton = true }) => {
         {showCartButton && (
           <button
             className={`w-full mt-2 py-2 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
-              inStock 
+              inStock && !loading
                 ? 'bg-primary hover:bg-secondary text-white' 
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
             onClick={handleAddToCart}
-            disabled={!inStock}
+            disabled={!inStock || loading}
           >
-            {inStock ? 'Add to Cart' : 'Out of Stock'} 
+            {loading ? 'Adding...' : inStock ? 'Add to Cart' : 'Out of Stock'} 
             <span className='text-base ml-[10px] '> <FaCartPlus /></span>
           </button>
         )}

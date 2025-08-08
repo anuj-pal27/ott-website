@@ -29,7 +29,7 @@ function Contact() {
   };
 
   const handleWhatsAppClick = (event) => {
-    const phoneNumber = '9389526851';
+    const phoneNumber = '9353690229';
     const message = `Hello! 👋 I'm interested in your subscription services at Vyapaar360. Could you please provide me with more information about your available plans and pricing? Thank you!`;
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     
@@ -116,8 +116,8 @@ function Contact() {
             <div className="text-center text-gray-600 mb-4">
               <div className="mb-3 text-lg font-semibold text-gray-900">Or reach us directly:</div>
               <div className="space-y-2">
-                <div className="font-semibold text-gray-700">support@vyapaar360.com</div>
-                <div className="text-lg font-bold text-gray-900">+91 93536 9022</div>
+                <div className="font-semibold text-gray-700">goutham4391@gmail.com</div>
+                <div className="text-lg font-bold text-gray-900">+91 9353690229</div>
               </div>
             </div>
             
@@ -139,12 +139,12 @@ function Contact() {
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <div className="text-2xl mb-2">📧</div>
                 <div className="text-sm font-semibold text-gray-900">Email</div>
-                <div className="text-xs text-gray-600">support@vyapaar360.com</div>
+                <div className="text-xs text-gray-600">goutham4391@gmail.com</div>
               </div>
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <div className="text-2xl mb-2">📱</div>
                 <div className="text-sm font-semibold text-gray-900">Phone</div>
-                <div className="text-xs text-gray-600">+91 93536 90229</div>
+                <div className="text-xs text-gray-600">+91 9353690229</div>
               </div>
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <div className="text-2xl mb-2">⏰</div>

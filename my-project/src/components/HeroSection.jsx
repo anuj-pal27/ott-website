@@ -25,14 +25,8 @@ const HeroSection = () => {
   };
 
   const handleExploreProducts = () => {
-    // Scroll to the products section if we're on the home page
-    const productsSection = document.getElementById('products-section');
-    if (productsSection) {
-      smoothScrollTo('products-section');
-    } else {
-      // If products section doesn't exist, navigate to categories
-      navigate('/categories/music');
-    }
+    // Navigate to services page
+    navigate('/services');
   };
 
   const handleLearnMore = () => {

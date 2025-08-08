@@ -112,17 +112,17 @@ const PaymentStatus = () => {
                         <div>If you believe this is a mistake, please try again or contact support.</div>
                     </div>
                 )}
-                <div className="mb-4 text-white">Amount Paid: <span className="font-semibold text-white">₹{paymentAmount}</span></div>
-                <div className="mb-4 text-white">Payment Method: <span className="font-semibold text-white">{paymentMethod}</span></div>
-                {paymentDate && <div className="mb-4 text-white">Payment Date: <span className="font-semibold text-white">{new Date(paymentDate).toLocaleString()}</span></div>}
+                <div className="mb-4 text-gray-700">Amount Paid: <span className="font-semibold text-gray-900">₹{paymentAmount}</span></div>
+                <div className="mb-4 text-gray-700">Payment Method: <span className="font-semibold text-gray-900">{paymentMethod}</span></div>
+                {paymentDate && <div className="mb-4 text-gray-700">Payment Date: <span className="font-semibold text-gray-900">{new Date(paymentDate).toLocaleString()}</span></div>}
                 {order && (
-                    <div className="bg-white/10 rounded-xl p-4 mt-4">
-                        <div className="font-semibold mb-2 text-white">Order Details</div>
-                        <div className="text-white">Order ID: <span className="font-semibold text-white">{order._id}</span></div>
-                        <div className="text-white">Subscription: <span className="font-semibold text-white">{order.subscriptionId?.serviceName || 'N/A'}</span></div>
-                        <div className="text-white">Duration: <span className="font-semibold text-white">{order.selectedDuration?.duration || 'N/A'}</span></div>
-                        <div className="text-white">Start Date: <span className="font-semibold text-white">{order.startDate ? new Date(order.startDate).toLocaleDateString() : 'N/A'}</span></div>
-                        {order.endDate && <div>End Date: {new Date(order.endDate).toLocaleDateString()}</div>}
+                    <div className="bg-gray-50 rounded-xl p-4 mt-4 border border-gray-200">
+                        <div className="font-semibold mb-2 text-gray-900">Order Details</div>
+                        <div className="text-gray-700">Order ID: <span className="font-semibold text-gray-900">{order._id}</span></div>
+                        <div className="text-gray-700">Subscription: <span className="font-semibold text-gray-900">{order.subscriptionId?.serviceName || 'N/A'}</span></div>
+                        <div className="text-gray-700">Duration: <span className="font-semibold text-gray-900">{order.selectedDuration?.duration || 'N/A'}</span></div>
+                        <div className="text-gray-700">Start Date: <span className="font-semibold text-gray-900">{order.startDate ? new Date(order.startDate).toLocaleDateString() : 'N/A'}</span></div>
+                        {order.endDate && <div className="text-gray-700">End Date: <span className="font-semibold text-gray-900">{new Date(order.endDate).toLocaleDateString()}</span></div>}
                     </div>
                 )}
                 {paymentStatus === 'pending' && (

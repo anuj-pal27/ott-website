@@ -34,7 +34,15 @@ const PaymentHistory = () => {
 
   const filteredPayments = payments.filter(p => {
     const statusMatch = statusFilter === 'all' || p.paymentStatus === statusFilter;
-    const searchMatch = !search || (p.order?._id || '').toLowerCase().includes(search.toLowerCase());
+    
+    // Check search across all orders (single order and multiple orders)
+    const hasMultipleOrders = p.orders && p.orders.length > 1;
+    const ordersToCheck = hasMultipleOrders ? p.orders : [p.order];
+    
+    const searchMatch = !search || ordersToCheck.some(order => 
+      order && order._id && order._id.toLowerCase().includes(search.toLowerCase())
+    );
+    
     return statusMatch && searchMatch;
   });
 
@@ -77,30 +85,69 @@ const PaymentHistory = () => {
     doc.text('Start Date', 96, 83);
     doc.text('Amount', 156, 83);
     doc.setTextColor(0, 0, 0);
-    // Table Row (handle long subscription names)
-    doc.setFontSize(11);
-    const subscriptionName = payment.order?.subscriptionId?.serviceName || 'N/A';
-    const splitName = doc.splitTextToSize(subscriptionName, 46); // 46mm width for first column
-    doc.text(splitName, 16, 91);
-    const rowHeight = 6; // line height
-    const yRow = 91 + (splitName.length - 1) * rowHeight;
-    doc.text(`${payment.order?.selectedDuration?.duration || 'N/A'}`, 66, yRow);
-    doc.text(`${payment.order?.startDate ? new Date(payment.order.startDate).toLocaleDateString() : 'N/A'}`, 96, yRow);
-    doc.text(`₹${payment.paymentAmount}`, 156, yRow);
+    // Check if this is a cart purchase with multiple orders
+    const hasMultipleOrders = payment.orders && payment.orders.length > 1;
+    const ordersToDisplay = hasMultipleOrders ? payment.orders : [payment.order];
+    
+    let currentY = 91;
+    
+    if (hasMultipleOrders) {
+      // Show summary for multiple items
+      doc.setFontSize(11);
+      doc.text('Multiple Items Purchased:', 16, currentY);
+      currentY += 8;
+      
+      // Show each item
+      ordersToDisplay.forEach((order, index) => {
+        if (!order) return;
+        
+        const subscriptionName = order?.subscriptionId?.serviceName || 'N/A';
+        const splitName = doc.splitTextToSize(subscriptionName, 46);
+        doc.text(splitName, 16, currentY);
+        
+        const rowHeight = 6;
+        const yRow = currentY + (splitName.length - 1) * rowHeight;
+        doc.text(`${order?.selectedDuration?.duration || 'N/A'}`, 66, yRow);
+        doc.text(`${order?.startDate ? new Date(order.startDate).toLocaleDateString() : 'N/A'}`, 96, yRow);
+        doc.text(`₹${order?.selectedDuration?.price || 0}`, 156, yRow);
+        
+        currentY = yRow + 8;
+      });
+      
+      // Show total
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('TOTAL:', 16, currentY);
+      doc.text(`₹${payment.paymentAmount}`, 156, currentY);
+      doc.setFont(undefined, 'normal');
+    } else {
+      // Single item
+      doc.setFontSize(11);
+      const subscriptionName = payment.order?.subscriptionId?.serviceName || 'N/A';
+      const splitName = doc.splitTextToSize(subscriptionName, 46);
+      doc.text(splitName, 16, currentY);
+      
+      const rowHeight = 6;
+      const yRow = currentY + (splitName.length - 1) * rowHeight;
+      doc.text(`${payment.order?.selectedDuration?.duration || 'N/A'}`, 66, yRow);
+      doc.text(`${payment.order?.startDate ? new Date(payment.order.startDate).toLocaleDateString() : 'N/A'}`, 96, yRow);
+      doc.text(`₹${payment.paymentAmount}`, 156, yRow);
+      
+      currentY = yRow;
+    }
     // Payment Details
     doc.setFontSize(12);
-    doc.text('Payment Details:', 14, yRow + 19);
+    doc.text('Payment Details:', 14, currentY + 19);
     doc.setFontSize(11);
-    doc.text(`Order ID: ${payment.order?._id || 'N/A'}`, 14, yRow + 26);
-    doc.text(`Payment ID: ${payment.paymentId || 'N/A'}`, 14, yRow + 32);
-    doc.text(`Payment Method: ${payment.paymentMethod}`, 14, yRow + 38);
-    doc.text(`Payment Status: ${payment.paymentStatus?.toUpperCase()}`, 14, yRow + 44);
-    doc.text(`Payment Date: ${payment.paymentDate ? new Date(payment.paymentDate).toLocaleString() : 'N/A'}`, 14, yRow + 50);
+    doc.text(`Payment ID: ${payment.paymentId || 'N/A'}`, 14, currentY + 26);
+    doc.text(`Payment Method: ${payment.paymentMethod}`, 14, currentY + 32);
+    doc.text(`Payment Status: ${payment.paymentStatus?.toUpperCase()}`, 14, currentY + 38);
+    doc.text(`Payment Date: ${payment.paymentDate ? new Date(payment.paymentDate).toLocaleString() : 'N/A'}`, 14, currentY + 44);
     // Footer
     doc.setFontSize(10);
     doc.setTextColor(120, 120, 120);
-    doc.text('Thank you for your business!', 14, yRow + 64);
-    doc.text('Vyapaar360 | www.vyapaar360.com | support@vyapaar360.com', 14, yRow + 70);
+    doc.text('Thank you for your business!', 14, currentY + 58);
+    doc.text('Vyapaar360 | www.vyapaar360.com | support@vyapaar360.com', 14, currentY + 64);
     doc.save(`Invoice_${payment.order?._id || payment._id}.pdf`);
   };
 
@@ -163,48 +210,62 @@ const PaymentHistory = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredPayments.map((p) => (
-                  <tr
-                    key={p._id}
-                    className="text-gray-900 text-base md:text-lg border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition group"
-                  >
-                    <td className="py-4 px-3 md:px-4">
-                      {p.paymentStatus === 'success' && <span className="bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold text-xs md:text-sm border border-green-200">Success</span>}
-                      {p.paymentStatus === 'pending' && <span className="bg-yellow-50 text-yellow-700 px-3 py-1 rounded-full font-bold text-xs md:text-sm border border-yellow-200">Pending</span>}
-                      {p.paymentStatus === 'failed' && <span className="bg-red-50 text-red-700 px-3 py-1 rounded-full font-bold text-xs md:text-sm border border-red-200">Failed</span>}
-                    </td>
-                    <td className="py-4 px-3 md:px-4 font-semibold">₹{p.paymentAmount}</td>
-                    <td className="py-4 px-3 md:px-4">{p.paymentMethod}</td>
-                    <td className="py-4 px-3 md:px-4 text-sm">{p.paymentDate ? new Date(p.paymentDate).toLocaleString() : 'N/A'}</td>
-                    <td className="py-4 px-3 md:px-4">
-                      <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded border">
-                        {p.order?._id ? p.order._id.substring(0, 8) + '...' : 'N/A'}
-                      </span>
-                    </td>
-                    <td className="py-4 px-3 md:px-4">
-                      <div className="max-w-[200px]">
-                        <span className="text-sm font-medium">{p.order?.subscriptionId?.serviceName || 'N/A'}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-3 md:px-4">
-                      <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-sm font-medium border border-blue-200">
-                        {p.order?.selectedDuration?.duration || 'N/A'}
-                      </span>
-                    </td>
-                    <td className="py-4 px-3 md:px-4 text-sm">{p.order?.startDate ? new Date(p.order.startDate).toLocaleDateString() : 'N/A'}</td>
-                   
-                    <td className="py-4 px-3 md:px-4">
-                      {p.paymentStatus === 'success' && (
-                        <button
-                          className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-secondary transition-all duration-200 shadow-sm hover:shadow-md"
-                          onClick={e => { e.stopPropagation(); handleDownloadInvoice(p); }}
-                        >
-                          📄 Download
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {filteredPayments.map((p) => {
+                  // Check if this is a cart purchase with multiple orders
+                  const hasMultipleOrders = p.orders && p.orders.length > 1;
+                  const ordersToDisplay = hasMultipleOrders ? p.orders : [p.order];
+                  
+                  return ordersToDisplay.map((order, index) => {
+                    if (!order) return null; // Skip if order is null
+                    
+                    return (
+                      <tr
+                        key={`${p._id}-${order._id || index}`}
+                        className="text-gray-900 text-base md:text-lg border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition group"
+                      >
+                        <td className="py-4 px-3 md:px-4">
+                          {p.paymentStatus === 'success' && <span className="bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold text-xs md:text-sm border border-green-200">Success</span>}
+                          {p.paymentStatus === 'pending' && <span className="bg-yellow-50 text-yellow-700 px-3 py-1 rounded-full font-bold text-xs md:text-sm border border-yellow-200">Pending</span>}
+                          {p.paymentStatus === 'failed' && <span className="bg-red-50 text-red-700 px-3 py-1 rounded-full font-bold text-xs md:text-sm border border-red-200">Failed</span>}
+                        </td>
+                        <td className="py-4 px-3 md:px-4 font-semibold">
+                          {hasMultipleOrders && index === 0 ? `₹${p.paymentAmount} (${p.itemCount} items)` : 
+                           hasMultipleOrders ? `₹${order.selectedDuration?.price || 0}` : 
+                           `₹${p.paymentAmount}`}
+                        </td>
+                        <td className="py-4 px-3 md:px-4">{p.paymentMethod}</td>
+                        <td className="py-4 px-3 md:px-4 text-sm">{p.paymentDate ? new Date(p.paymentDate).toLocaleString() : 'N/A'}</td>
+                        <td className="py-4 px-3 md:px-4">
+                          <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded border">
+                            {order._id ? order._id.substring(0, 8) + '...' : 'N/A'}
+                          </span>
+                        </td>
+                        <td className="py-4 px-3 md:px-4">
+                          <div className="max-w-[200px]">
+                            <span className="text-sm font-medium">{order?.subscriptionId?.serviceName || 'N/A'}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-3 md:px-4">
+                          <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-sm font-medium border border-blue-200">
+                            {order?.selectedDuration?.duration || 'N/A'}
+                          </span>
+                        </td>
+                        <td className="py-4 px-3 md:px-4 text-sm">{order?.startDate ? new Date(order.startDate).toLocaleDateString() : 'N/A'}</td>
+                       
+                        <td className="py-4 px-3 md:px-4">
+                          {p.paymentStatus === 'success' && index === 0 && (
+                            <button
+                              className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-secondary transition-all duration-200 shadow-sm hover:shadow-md"
+                              onClick={e => { e.stopPropagation(); handleDownloadInvoice(p); }}
+                            >
+                              📄 Download
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  });
+                })}
               </tbody>
             </table>
           </div>

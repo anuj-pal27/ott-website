@@ -52,7 +52,7 @@ const Footer = () => (
       {/* Buy Now + WhatsApp */}
       <div className="flex items-center gap-3">
         <a href="/services" className="dashboard-button-primary px-4 py-2 text-sm">Buy Now</a>
-        <a href="https://wa.me/918250919483" target="_blank" rel="noopener noreferrer" className="ml-1 bg-green-500 hover:bg-green-600 rounded-full p-2 transition" aria-label="WhatsApp">
+        <a href="https://wa.me/919353690229" target="_blank" rel="noopener noreferrer" className="ml-1 bg-green-500 hover:bg-green-600 rounded-full p-2 transition" aria-label="WhatsApp">
           <FaWhatsapp className="text-white text-2xl" />
         </a>
       </div>

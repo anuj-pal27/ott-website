@@ -39,6 +39,17 @@ const cartService = {
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || 'Failed to remove from cart');
     return data;
+  },
+
+  async updateCartItem(itemId, duration) {
+    const response = await fetchWithAuth(`${API_BASE_URL}/cart/${itemId}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ duration: duration })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update cart item');
+    return data;
   }
 };
 

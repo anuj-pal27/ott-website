@@ -160,6 +160,33 @@ function Dashboard() {
           </div>
         </div>
 
+        {/* WhatsApp Community Banner */}
+        <div className="dashboard-card mb-12 bg-gradient-to-r from-green-500 to-emerald-500 border-0">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-start md:items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
+                <FaWhatsapp className="text-2xl text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Join our WhatsApp Community</h2>
+                <p className="text-white/90 text-sm md:text-base mt-1">
+                  Get more updates about new services at prices lower than original and stay up to date.
+                </p>
+              </div>
+            </div>
+            <a
+              href="https://chat.whatsapp.com/GFu9A0huDdS7gcyntNbyZD"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white text-green-700 hover:bg-gray-100 px-6 py-3 rounded-xl font-semibold shadow transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-white/40"
+              aria-label="Join our WhatsApp Community for updates"
+            >
+              <FaWhatsapp className="text-lg" />
+              Join Community
+            </a>
+          </div>
+        </div>
+ 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {stats.map((stat, index) => (
@@ -178,50 +205,52 @@ function Dashboard() {
         {/* WhatsApp Contact Section */}
         <div className="dashboard-card mb-12 bg-gradient-to-r from-green-50 to-orange-50 border-green-200">
           <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500 rounded-full mb-4">
-              <FaWhatsapp className="text-2xl text-white" />
+            <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-green-500 rounded-full mb-4">
+              <FaWhatsapp className="text-lg sm:text-2xl text-white" />
             </div>
-            <h2 className="dashboard-heading text-2xl mb-2">Get Instant Support</h2>
-            <p className="dashboard-subheading">Connect with us on WhatsApp for quick assistance</p>
+            <h2 className="dashboard-heading text-xl sm:text-2xl mb-2">Get Instant Support</h2>
+            <p className="dashboard-subheading text-sm sm:text-base">Connect with us on WhatsApp for quick assistance</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="text-center p-6 bg-white rounded-xl border border-green-200 hover:shadow-lg transition-all duration-300">
-              <FaWhatsapp className="text-3xl text-green-500 mx-auto mb-3" />
-              <h3 className="font-semibold text-gray-900 mb-2">WhatsApp Support</h3>
-              <p className="text-gray-600 text-sm mb-4">Get instant help via WhatsApp</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="text-center p-4 sm:p-6 bg-white rounded-xl border border-green-200 hover:shadow-lg transition-all duration-300">
+              <FaWhatsapp className="text-2xl sm:text-3xl text-green-500 mx-auto mb-3" />
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">WhatsApp Support</h3>
+              <p className="text-gray-600 text-xs sm:text-sm mb-4">Get instant help via WhatsApp</p>
               <a 
-                href="https://wa.me/918250919483" 
+                href="https://wa.me/919353690229" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+                className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 text-sm sm:text-base"
               >
-                <FaWhatsapp className="text-lg" />
+                <FaWhatsapp className="text-sm sm:text-lg" />
                 Chat on WhatsApp
               </a>
             </div>
             
-            <div className="text-center p-6 bg-white rounded-xl border border-orange-200 hover:shadow-lg transition-all duration-300">
-              <FaPhone className="text-3xl text-orange-500 mx-auto mb-3" />
-              <h3 className="font-semibold text-gray-900 mb-2">Phone Support</h3>
-              <p className="text-gray-600 text-sm mb-4">Call us directly for support</p>
+            <div className="text-center p-4 sm:p-6 bg-white rounded-xl border border-orange-200 hover:shadow-lg transition-all duration-300">
+              <FaPhone className="text-2xl sm:text-3xl text-orange-500 mx-auto mb-3" />
+              <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">Phone Support</h3>
+              <p className="text-gray-600 text-xs sm:text-sm mb-4">Call us directly for support</p>
               <a 
-                href="tel:+918250919483"
-                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+                href="tel:+919353690229"
+                className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 text-sm sm:text-base"
               >
-                <FaPhone className="text-lg" />
+                <FaPhone className="text-sm sm:text-lg" />
                 Call Now
               </a>
             </div>
           </div>
           
           <div className="mt-6 p-4 bg-white rounded-xl border border-gray-200">
-            <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-              <FaClock className="text-orange-500" />
-              <span className="font-medium">Available 24/7</span>
-              <span>•</span>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-sm text-gray-600 text-center">
+              <div className="flex items-center gap-1">
+                <FaClock className="text-orange-500" />
+                <span className="font-medium">Available 24/7</span>
+              </div>
+              <span className="hidden sm:inline">•</span>
               <span>Instant Response</span>
-              <span>•</span>
+              <span className="hidden sm:inline">•</span>
               <span>Multilingual Support</span>
             </div>
           </div>
@@ -243,46 +272,46 @@ function Dashboard() {
           </div>
           
           {/* Enhanced Support Info */}
-          <div className="mt-8 p-8 bg-gradient-to-r from-orange-50 to-green-50 rounded-xl border border-orange-200">
-            <div className="flex items-start gap-6">
-              <div className="flex-shrink-0">
-                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-green-500 rounded-full flex items-center justify-center">
-                  <FaHeadset className="text-2xl text-white" />
+          <div className="mt-8 p-4 sm:p-8 bg-gradient-to-r from-orange-50 to-green-50 rounded-xl border border-orange-200">
+            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+              <div className="flex-shrink-0 mx-auto sm:mx-0">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-orange-500 to-green-500 rounded-full flex items-center justify-center">
+                  <FaHeadset className="text-lg sm:text-2xl text-white" />
                 </div>
               </div>
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">24/7 Customer Support</h3>
-                <p className="text-gray-600 mb-4 text-lg">
+              <div className="flex-1 text-center sm:text-left">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">24/7 Customer Support</h3>
+                <p className="text-gray-600 mb-4 text-sm sm:text-lg">
                   Need help? Our dedicated support team is available round the clock to assist you with any questions, orders, or technical issues. We're here to ensure you have the best experience.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <a 
-                    href="https://wa.me/918250919483" 
+                    href="https://wa.me/919353690229" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+                    className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 text-sm sm:text-base"
                   >
-                    <FaWhatsapp className="text-lg" />
+                    <FaWhatsapp className="text-sm sm:text-lg" />
                     WhatsApp Support
                   </a>
                   <a 
-                    href="tel:+918250919483"
-                    className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+                    href="tel:+919353690229"
+                    className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 text-sm sm:text-base"
                   >
-                    <FaPhone className="text-lg" />
-                    Call: +91 8250919483
+                    <FaPhone className="text-sm sm:text-lg" />
+                    Call: +91 9353690229
                   </a>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
+                <div className="mt-4 flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 justify-center sm:justify-start">
+                  <div className="flex items-center gap-1 justify-center sm:justify-start">
                     <FaClock className="text-orange-500" />
                     <span>24/7 Available</span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 justify-center sm:justify-start">
                     <FaShieldAlt className="text-green-500" />
                     <span>Secure Support</span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 justify-center sm:justify-start">
                     <FaStar className="text-yellow-500" />
                     <span>Premium Service</span>
                   </div>

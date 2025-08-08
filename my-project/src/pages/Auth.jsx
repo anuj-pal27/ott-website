@@ -354,14 +354,6 @@ function Auth() {
                     </div>
                   </div>
                 )}
-
-                <button
-                  type="submit"
-                  disabled={loading || !otpSent}
-                  className="dashboard-button-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
-                </button>
               </form>
 
               {/* Footer */}

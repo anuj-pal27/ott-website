@@ -430,9 +430,9 @@ function AddSubscription() {
               <label className="dashboard-form-label">Duration Options</label>
               <div className="space-y-4">
                 {form.durations.map((duration, idx) => (
-                  <div key={idx} className="border border-white/20 rounded-lg p-4 bg-white/5">
+                  <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-white">
                     <div className="flex justify-between items-center mb-3">
-                      <h4 className="text-white font-medium">Duration Option {idx + 1}</h4>
+                      <h4 className="text-gray-900 font-medium">Duration Option {idx + 1}</h4>
                       <button
                         type="button"
                         className="bg-red-500 hover:bg-red-600 text-white rounded-lg px-2 py-1 text-xs font-bold"
@@ -444,7 +444,7 @@ function AddSubscription() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Duration</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Duration</label>
                         <select
                           value={duration.duration}
                           onChange={e => handleDurationChange(idx, 'duration', e.target.value)}
@@ -460,7 +460,7 @@ function AddSubscription() {
                         </select>
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Description</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Description</label>
                         <input
                           type="text"
                           value={duration.description}
@@ -471,7 +471,7 @@ function AddSubscription() {
                         />
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Price</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Price</label>
                         <input
                           type="number"
                           value={duration.price}
@@ -482,7 +482,7 @@ function AddSubscription() {
                         />
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Original Price</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Original Price</label>
                         <input
                           type="number"
                           value={duration.originalPrice}
@@ -493,7 +493,7 @@ function AddSubscription() {
                         />
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Slots Available</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Slots Available</label>
                         <input
                           type="number"
                           value={duration.slotsAvailable}
@@ -504,7 +504,7 @@ function AddSubscription() {
                         />
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Total Slots</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Total Slots</label>
                         <input
                           type="number"
                           value={duration.totalSlots}
@@ -515,7 +515,7 @@ function AddSubscription() {
                         />
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Start Date</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Start Date</label>
                         <input
                           type="date"
                           value={duration.startDate}
@@ -525,14 +525,14 @@ function AddSubscription() {
                         />
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">End Date</label>
+                        <label className="text-gray-700 text-sm mb-1 block">End Date</label>
                         <input
                           type="date"
                           value={duration.endDate}
                           className="dashboard-input bg-gray-100 cursor-not-allowed"
                           readOnly
                         />
-                        <p className="text-xs text-white/60 mt-1">
+                        <p className="text-xs text-gray-500 mt-1">
                           Automatically calculated based on duration and start date
                         </p>
                       </div>
@@ -545,7 +545,7 @@ function AddSubscription() {
                           onChange={e => handleDurationChange(idx, 'isActive', e.target.checked)}
                           className="w-4 h-4 text-primary bg-white/20 border-white/30 rounded focus:ring-white/50"
                         />
-                        <span className="ml-2 text-white/80 text-sm">Active Duration</span>
+                                                 <span className="ml-2 text-gray-700 text-sm">Active Duration</span>
                       </label>
                     </div>
                   </div>

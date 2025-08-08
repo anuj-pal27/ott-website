@@ -177,7 +177,7 @@ function Services() {
         {/* List of Services Info Box */}
         <div className="max-w-2xl mx-auto mt-12 mb-8 p-6 bg-white rounded-xl shadow-lg border border-gray-200 text-center">
           <h2 className="text-xl font-bold mb-2 text-primary">LIST OF SERVICES WE DEAL IN ⭐</h2>
-          <p className="mb-2 text-gray-800">Message here : <a href="https://wa.me/918250919483" target="_blank" rel="noopener noreferrer" className="text-green-600 underline">Wa.me/918250919483</a></p>
+                          <p className="mb-2 text-gray-800">Message here : <a href="https://wa.me/919353690229" target="_blank" rel="noopener noreferrer" className="text-green-600 underline">Wa.me/919353690229</a></p>
           <p className="text-xs text-gray-600 font-semibold mt-2">NOTE : All Our Services Are Genuine And 100% Legal, We Don&apos;t Provide 3rd Party Or Crack Services.</p>
         </div>
         
@@ -222,7 +222,7 @@ function Services() {
               <div className="flex items-start gap-3">
                 <span className="text-primary font-bold text-lg">💬</span>
                 <div>
-                  <span className="text-gray-900 font-bold">24/7 Support:</span> If you have any questions or face any issues, our support team is available round the clock via WhatsApp: <a href="https://wa.me/918250919483" className="text-primary hover:text-secondary underline font-bold transition-colors">+91 8250919483</a>
+                  <span className="text-gray-900 font-bold">24/7 Support:</span> If you have any questions or face any issues, our support team is available round the clock via WhatsApp: <a href="https://wa.me/919353690229" className="text-primary hover:text-secondary underline font-bold transition-colors">+91 9353690229</a>
                 </div>
               </div>
             </div>

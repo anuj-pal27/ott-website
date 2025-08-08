@@ -43,6 +43,11 @@ export const CartProvider = ({ children }) => {
     await refreshCart();
   };
 
+  const updateCartItem = async (itemId, newDuration) => {
+    await cartService.updateCartItem(itemId, newDuration);
+    await refreshCart();
+  };
+
   // Add clearCart function
   const clearCart = () => {
     setCart({ items: [] });
@@ -50,7 +55,7 @@ export const CartProvider = ({ children }) => {
   };
 
   return (
-    <CartContext.Provider value={{ cart, loading, error, addToCart, removeFromCart, refreshCart, clearCart }}>
+    <CartContext.Provider value={{ cart, loading, error, addToCart, removeFromCart, updateCartItem, refreshCart, clearCart }}>
       {children}
     </CartContext.Provider>
   );
