@@ -1,4 +1,5 @@
 import React, { Suspense } from 'react';
+import { Link } from 'react-router-dom';
 import SvgEffect from '../components/SvgEffect';
 const Footer = React.lazy(() => import('../components/Footer'));
 
@@ -46,7 +47,7 @@ const TermsAndConditions = () => (
         <div>
           <h2 className="text-xl font-bold mb-2">4. Data Privacy</h2>
           <p className="dashboard-text mb-2">4.1 We adhere to strict data privacy guidelines to protect your payment and personal information.</p>
-          <p className="dashboard-text">4.2 Please refer to our <a href="/privacy-policy" className="text-primary underline">Privacy Policy</a> for detailed information on how we collect, use, and protect your data.</p>
+          <p className="dashboard-text">4.2 Please refer to our <Link to="/privacy-policy" className="text-primary underline">Privacy Policy</Link> for detailed information on how we collect, use, and protect your data.</p>
         </div>
 
         <div>
@@ -57,7 +58,7 @@ const TermsAndConditions = () => (
 
         <div>
           <h2 className="text-xl font-bold mb-2">6. Refunds and Cancellations</h2>
-          <p className="dashboard-text mb-2">6.1 Our <a href="/refund-policy" className="text-primary underline">Refund Policy</a> outlines the conditions under which refunds are processed.</p>
+          <p className="dashboard-text mb-2">6.1 Our <Link to="/refund-policy" className="text-primary underline">Refund Policy</Link> outlines the conditions under which refunds are processed.</p>
           <p className="dashboard-text">6.2 Cancellations and refunds may be subject to additional fees as applicable.</p>
         </div>
 

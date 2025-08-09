@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { FaFacebookF, FaTwitter, FaInstagram, FaWhatsapp } from "react-icons/fa";
 
 const Footer = () => (
@@ -22,22 +23,22 @@ const Footer = () => (
       <div>
         <h3 className="text-xl font-bold text-gray-900 mb-3">BEST SELLING</h3>
         <ul className="space-y-2">
-          <li><a href="/" className="hover:text-primary text-gray-600 transition">Home</a></li>
-          <li><a href="/services" className="hover:text-primary text-gray-600 transition">Services</a></li>
-          <li><a href="/services" className="hover:text-primary text-gray-600 transition">Shop</a></li>
-          <li><a href="/contact" className="hover:text-primary text-gray-600 transition">Contact Us</a></li>
-          <li><a href="/profile" className="hover:text-primary text-gray-600 transition">My account</a></li>
+          <li><Link to="/" className="hover:text-primary text-gray-600 transition">Home</Link></li>
+          <li><Link to="/services" className="hover:text-primary text-gray-600 transition">Services</Link></li>
+          <li><Link to="/services" className="hover:text-primary text-gray-600 transition">Shop</Link></li>
+          <li><Link to="/contact" className="hover:text-primary text-gray-600 transition">Contact Us</Link></li>
+          <li><Link to="/profile" className="hover:text-primary text-gray-600 transition">My account</Link></li>
         </ul>
       </div>
       {/* Right: Useful Links */}
       <div>
         <h3 className="text-xl font-bold text-gray-900 mb-3">USEFUL LINKS</h3>
         <ul className="space-y-2">
-          <li><a href="/about" className="hover:text-primary text-gray-600 transition">About Us</a></li>
-          <li><a href="/contact" className="hover:text-primary text-gray-600 transition">Contact Us</a></li>
-          <li><a href="/privacy-policy" className="hover:text-primary text-gray-600 transition">Privacy Policy</a></li>
-          <li><a href="/refund-policy" className="hover:text-primary text-gray-600 transition">Refunds Policy</a></li>
-          <li><a href="/terms-and-conditions" className="hover:text-primary text-gray-600 transition">Terms & Conditions</a></li>
+          <li><Link to="/about" className="hover:text-primary text-gray-600 transition">About Us</Link></li>
+          <li><Link to="/contact" className="hover:text-primary text-gray-600 transition">Contact Us</Link></li>
+          <li><Link to="/privacy-policy" className="hover:text-primary text-gray-600 transition">Privacy Policy</Link></li>
+          <li><Link to="/refund-policy" className="hover:text-primary text-gray-600 transition">Refunds Policy</Link></li>
+          <li><Link to="/terms-and-conditions" className="hover:text-primary text-gray-600 transition">Terms & Conditions</Link></li>
         </ul>
       </div>
     </div>
@@ -46,7 +47,7 @@ const Footer = () => (
     {/* Bottom bar */}
     <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-gray-600 text-sm px-2">
       <div>©Copyright 2025 | <a href="#" className="hover:underline text-primary">vyapaar360</a></div>
-      {/* Buy Now + WhatsApp */}
+      {/* WhatsApp */}
       <div className="flex items-center gap-3">
         <a href="https://wa.me/919353690229" target="_blank" rel="noopener noreferrer" className="ml-1 bg-green-500 hover:bg-green-600 rounded-full p-2 transition" aria-label="WhatsApp">
           <FaWhatsapp className="text-white text-2xl" />
