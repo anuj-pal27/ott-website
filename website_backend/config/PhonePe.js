@@ -9,7 +9,7 @@ const PHONEPE_MERCHANT_ID = process.env.PHONEPE_MERCHANT_ID;
 const PHONEPE_SALT_KEY = process.env.PHONEPE_SALT_KEY;
 const PHONEPE_SALT_INDEX = process.env.PHONEPE_SALT_INDEX || '1';
 const PHONEPE_BASE_URL = process.env.PHONEPE_BASE_URL || 'https://api.phonepe.com/apis/hermes';
-const FRONTENDURL = process.env.FRONTENDURL || 'http://localhost:5173';
+const FRONTENDURL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 // Utility to generate X-VERIFY header
 function generateXVerify(payload, apiEndpoint) {
@@ -35,7 +35,7 @@ async function createPhonePeOrder(orderId, amount, userId) {
         merchantTransactionId: orderId,
         amount: amount * 100, // in paise
         merchantUserId: userId,
-        redirectUrl: 'http://localhost:8080/api/payment/verify-payment',
+        redirectUrl: `${process.env.BACKEND_URL}/payment/verify-payment`,
         redirectMode: 'POST',
         paymentInstrument: {
             type: 'PAY_PAGE',
@@ -90,7 +90,6 @@ async function checkPhonePePaymentStatus(orderId) {
 
 // New: Initiate PhonePe payment using provided code
 async function initiatePhonePePayment(orderId, amount, userId, mobileNumber, type) {
-  console.log('FRONTENDURL:', FRONTENDURL);
 
   try {
     const payload = {
