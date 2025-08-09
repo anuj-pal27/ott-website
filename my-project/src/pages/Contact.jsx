@@ -116,7 +116,7 @@ function Contact() {
             <div className="text-center text-gray-600 mb-4">
               <div className="mb-3 text-lg font-semibold text-gray-900">Or reach us directly:</div>
               <div className="space-y-2">
-                <div className="font-semibold text-gray-700">goutham4391@gmail.com</div>
+                <div className="font-semibold text-gray-700">sales@vyapaar360.in</div>
                 <div className="text-lg font-bold text-gray-900">+91 9353690229</div>
               </div>
             </div>
@@ -139,7 +139,7 @@ function Contact() {
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <div className="text-2xl mb-2">📧</div>
                 <div className="text-sm font-semibold text-gray-900">Email</div>
-                <div className="text-xs text-gray-600">goutham4391@gmail.com</div>
+                <div className="text-xs text-gray-600">sales@vyapaar360.in</div>
               </div>
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <div className="text-2xl mb-2">📱</div>

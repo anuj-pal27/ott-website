@@ -4,14 +4,41 @@ import { useAuth } from '../context/AuthContext';
 import SvgEffect from '../components/SvgEffect';
 import { FaUsers, FaChartLine, FaShoppingCart, FaStar, FaTruck, FaHeadset, FaShieldAlt, FaClock, FaWhatsapp, FaPhone } from 'react-icons/fa';
 import { MdDashboard, MdAdd, MdLogout, MdHome } from 'react-icons/md';
+import ServiceCard from '../components/ServiceCard';
 // Lazy load footer
 const Footer = React.lazy(() => import('../components/Footer'));
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api';
 
 function Dashboard() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [visitorCount, setVisitorCount] = useState(100000);
   const [isCounting, setIsCounting] = useState(true);
+
+  // Featured services state
+  const [featuredPlans, setFeaturedPlans] = useState([]);
+  const [featuredLoading, setFeaturedLoading] = useState(true);
+  const [featuredError, setFeaturedError] = useState('');
+
+  // Fetch featured services (first 8 public plans)
+  useEffect(() => {
+    const fetchPlans = async () => {
+      setFeaturedLoading(true);
+      setFeaturedError('');
+      try {
+        const res = await fetch(`${API_BASE_URL}/plans/public`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to fetch services');
+        const plans = Array.isArray(data.plans) ? data.plans.slice(0, 8) : [];
+        setFeaturedPlans(plans);
+      } catch (err) {
+        setFeaturedError(err.message);
+      } finally {
+        setFeaturedLoading(false);
+      }
+    };
+    fetchPlans();
+  }, []);
 
   // Simulate animated visitor count
   useEffect(() => {
@@ -158,6 +185,32 @@ function Dashboard() {
               </button>
             )}
           </div>
+        </div>
+
+        {/* Popular Services */}
+        <div className="dashboard-card mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="dashboard-heading text-2xl">Popular Services</h2>
+            <button
+              className="dashboard-button-secondary"
+              onClick={() => navigate('/services')}
+            >
+              View All
+            </button>
+          </div>
+          {featuredLoading ? (
+            <div className="dashboard-loading">Loading services...</div>
+          ) : featuredError ? (
+            <div className="dashboard-error-message">{featuredError}</div>
+          ) : featuredPlans.length === 0 ? (
+            <div className="text-center text-gray-600">No services available right now.</div>
+          ) : (
+            <div className="dashboard-responsive-grid">
+              {featuredPlans.map(plan => (
+                <ServiceCard key={plan._id} plan={plan} />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* WhatsApp Community Banner */}

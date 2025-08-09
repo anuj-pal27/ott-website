@@ -19,7 +19,6 @@ import Category from './pages/Category';
 import PaymentStatus from './pages/PaymentStatus';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsAndConditions from './pages/TermsAndConditions';
-import Disclaimer from './pages/Disclaimer';
 import RefundPolicy from './pages/RefundPolicy';
 import PaymentHistory from './pages/PaymentHistory';
 import NotFound from './pages/NotFound';
@@ -40,7 +39,6 @@ function App() {
             <Route path="categories/:category" element={<Category />} />
             <Route path="privacy-policy" element={<PrivacyPolicy />} />
             <Route path="terms-and-conditions" element={<TermsAndConditions />} />
-            <Route path="disclaimer" element={<Disclaimer />} />
             <Route path="refund-policy" element={<RefundPolicy />} />
           </Route>
           {/* Auth routes without navbar */}

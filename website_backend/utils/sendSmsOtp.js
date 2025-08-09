@@ -8,7 +8,7 @@ const sendSmsOtp = async (phoneNumber, otp) => {
             // console.log('📱 Would send SMS to:', phoneNumber);
             // console.log('📱 OTP:', otp);
             // console.log('✅ OTP logged to console for testing');
-            return { success: true, messageId: 'dev-mode' };
+            // return { success: true, messageId: 'dev-mode' };
         }
 
         // Check if Twilio credentials are configured
@@ -16,7 +16,7 @@ const sendSmsOtp = async (phoneNumber, otp) => {
             // console.log('⚠️ Twilio credentials not configured, logging OTP to console');
             // console.log('📱 Would send SMS to:', phoneNumber);
             // console.log('📱 OTP:', otp);
-            return { success: true, messageId: 'no-twilio-config' };
+            // return { success: true, messageId: 'no-twilio-config' };
         }
 
         // Create Twilio client
@@ -35,7 +35,7 @@ const sendSmsOtp = async (phoneNumber, otp) => {
             from: process.env.TWILIO_PHONE_NUMBER,
             to: formattedPhone
         });
-
+        console.log(otp)
         return { success: true, messageId: message.sid };
     } catch (error) {
         console.error('❌ Error sending SMS:', error);

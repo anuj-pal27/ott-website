@@ -9,6 +9,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import authService from '../services/authService';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/logo.jpg';
 
 function Auth() {
   const navigate = useNavigate();
@@ -188,10 +189,8 @@ function Auth() {
             {/* Logo */}
             <div className="text-center mb-8">
               <Link to="/" className="inline-flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center border border-primary/20">
-                  <span className="text-white font-bold text-2xl">L</span>
-                </div>
-                <h2 className="dashboard-heading text-3xl">Logo</h2>
+                <img src={logo} alt="Vyapaar360" className="w-12 h-12 rounded-xl object-cover border border-primary/20" />
+                <h2 className="dashboard-heading text-3xl">Vyapaar360</h2>
               </Link>
             </div>
 
