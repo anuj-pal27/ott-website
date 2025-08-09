@@ -40,12 +40,12 @@ const HeroSection = () => {
   };
 
   return (
-    <div className="dashboard-theme flex items-center justify-center px-4 py-16">
+    <div className="dashboard-theme flex items-center justify-center px-4 pt-6 pb-12 md:pt-10 md:pb-16 ">
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         {/* Left Side - Content */}
         <div className="text-left space-y-8">
           {/* Animated badge */}
-          <div className="inline-flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-full px-4 py-2 text-gray-700 text-sm font-medium animate-pulse mt-10">
+          <div className="inline-flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-full px-4 py-2 text-gray-700 text-sm font-medium">
             <span className="w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
             Trusted by 5000+ users worldwide
           </div>

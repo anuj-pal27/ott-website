@@ -33,7 +33,7 @@
 }
 
 .dashboard-content {
-    @apply relative z-10 max-w-7xl mx-auto px-4 py-12;
+    @apply relative z-10 max-w-7xl mx-auto px-4 py-12 bottom-0;
 }
 
 .dashboard-content-scrollable {
