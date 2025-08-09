@@ -26,6 +26,7 @@ const allowedOrigins = [
     'http://127.0.0.1:5174', // Alternative localhost
     'http://127.0.0.1:3000',
     'http://localhost:5174',
+    `${process.env.FRONTEND_URL}`, // Production frontend URL
     //   // Alternative localhost
 ];
 
