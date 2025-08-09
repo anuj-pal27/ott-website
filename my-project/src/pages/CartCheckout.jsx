@@ -14,6 +14,7 @@ function CartCheckout() {
   const [editingDuration, setEditingDuration] = useState(null);
   const [updatingDuration, setUpdatingDuration] = useState(null);
   const [collapsedSections, setCollapsedSections] = useState({});
+  const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : false);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -26,19 +27,25 @@ function CartCheckout() {
   const { user } = useAuth();
   const { cart, removeFromCart, updateCartItem } = useCart();
 
-  // Initialize collapsed sections for mobile (collapsed by default)
+  // Track viewport to determine desktop vs mobile
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Initialize collapsed sections (expand on desktop, collapse on mobile)
   useEffect(() => {
     if (cart && cart.items && cart.items.length > 0) {
       const initialCollapsedState = {};
       cart.items.forEach(item => {
-        // Collapse description and features by default on mobile
-        initialCollapsedState[`${item._id}-description`] = true;
-        initialCollapsedState[`${item._id}-features`] = true;
-        initialCollapsedState[`${item._id}-sample`] = true;
+        initialCollapsedState[`${item._id}-description`] = !isDesktop;
+        initialCollapsedState[`${item._id}-features`] = !isDesktop;
+        initialCollapsedState[`${item._id}-sample`] = true; // keep sample collapsed by default
       });
       setCollapsedSections(initialCollapsedState);
     }
-  }, [cart]);
+  }, [cart, isDesktop]);
 
   useEffect(() => {
     if (!user) {
@@ -246,65 +253,65 @@ function CartCheckout() {
                               <div className="text-sm dashboard-text-muted mb-2">Select Duration:</div>
                               <div className="space-y-2 max-h-64 overflow-y-auto">
                                 {plan?.durations?.filter(d => d.isActive).map((dur, idx) => (
-                                                                                                        <div 
-                                     key={idx}
-                                     className={`border-2 rounded-lg p-2 sm:p-3 transition-all ${
-                                       updatingDuration === item._id 
-                                         ? 'border-gray-400 bg-gray-400/10 cursor-not-allowed' 
-                                         : item.duration === dur.duration 
-                                           ? 'border-secondary bg-secondary/10 cursor-pointer' 
-                                           : 'border-white/20 hover:border-secondary/50 cursor-pointer'
-                                     }`}
-                                     onClick={() => !updatingDuration && handleDurationChange(item._id, dur.duration)}
-                                   >
-                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                       <div className="flex items-center gap-2">
-                                                                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                                           updatingDuration === item._id && item.duration === dur.duration
-                                             ? 'border-gray-400 bg-gray-400'
-                                             : item.duration === dur.duration 
-                                               ? 'border-secondary bg-secondary' 
-                                               : 'border-white/40'
-                                         }`}>
-                                           {updatingDuration === item._id && item.duration === dur.duration ? (
-                                             <div className="w-2 h-2 border border-white border-t-transparent rounded-full animate-spin"></div>
-                                           ) : item.duration === dur.duration && (
-                                             <FaCheck size={8} className="text-white" />
-                                           )}
-                                         </div>
-                                                                                 <div className="min-w-0 flex-1">
-                                           <div className="font-semibold dashboard-text text-sm truncate">{dur.duration}</div>
-                                           <div className="text-xs dashboard-text-muted truncate">{dur.description}</div>
-                                         </div>
-                                       </div>
-                                       <div className="text-right flex-shrink-0">
-                                        {dur.originalPrice && dur.originalPrice !== dur.price && (
-                                          <div className="line-through text-gray-400 text-xs">
-                                            ₹{dur.originalPrice}
-                                          </div>
-                                        )}
-                                        <div className="font-bold text-secondary text-sm">
-                                          ₹{dur.price}
+                                  <div 
+                                    key={idx}
+                                    className={`border-2 rounded-lg p-2 sm:p-3 transition-all ${
+                                      updatingDuration === item._id 
+                                        ? 'border-gray-400 bg-gray-400/10 cursor-not-allowed' 
+                                        : item.duration === dur.duration 
+                                          ? 'border-secondary bg-secondary/10 cursor-pointer' 
+                                          : 'border-white/20 hover:border-secondary/50 cursor-pointer'
+                                    }`}
+                                    onClick={() => !updatingDuration && handleDurationChange(item._id, dur.duration)}
+                                  >
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                      <div className="flex items-center gap-2">
+                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                                          updatingDuration === item._id && item.duration === dur.duration
+                                            ? 'border-gray-400 bg-gray-400'
+                                            : item.duration === dur.duration 
+                                              ? 'border-secondary bg-secondary' 
+                                              : 'border-white/40'
+                                        }`}>
+                                          {updatingDuration === item._id && item.duration === dur.duration ? (
+                                            <div className="w-2 h-2 border border-white border-t-transparent rounded-full animate-spin"></div>
+                                          ) : item.duration === dur.duration && (
+                                            <FaCheck size={8} className="text-white" />
+                                          )}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                          <div className="font-semibold dashboard-text text-sm truncate">{dur.duration}</div>
+                                          <div className="text-xs dashboard-text-muted truncate">{dur.description}</div>
                                         </div>
                                       </div>
-                                    </div>
-                                                                         {/* Stock Status */}
-                                     <div className="mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                                       <div className="text-xs text-gray-500">
-                                         {dur.slotsAvailable > 0 ? (
-                                           <span className="text-green-400">
-                                             ✓ In Stock ({dur.slotsAvailable} available)
-                                           </span>
-                                         ) : (
-                                           <span className="text-red-400">✗ Out of Stock</span>
-                                         )}
-                                       </div>
+                                      <div className="text-right flex-shrink-0">
                                        {dur.originalPrice && dur.originalPrice !== dur.price && (
-                                         <div className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full self-start sm:self-auto">
-                                           {Math.round(((dur.originalPrice - dur.price) / dur.originalPrice) * 100)}% OFF
+                                         <div className="line-through text-gray-400 text-xs">
+                                           ₹{dur.originalPrice}
                                          </div>
                                        )}
+                                       <div className="font-bold text-secondary text-sm">
+                                         ₹{dur.price}
+                                       </div>
                                      </div>
+                                   </div>
+                                    {/* Stock Status */}
+                                    <div className="mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                      <div className="text-xs text-gray-500">
+                                        {dur.slotsAvailable > 0 ? (
+                                          <span className="text-green-400">
+                                            ✓ In Stock ({dur.slotsAvailable} available)
+                                          </span>
+                                        ) : (
+                                          <span className="text-red-400">✗ Out of Stock</span>
+                                        )}
+                                      </div>
+                                      {dur.originalPrice && dur.originalPrice !== dur.price && (
+                                        <div className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full self-start sm:self-auto">
+                                          {Math.round(((dur.originalPrice - dur.price) / dur.originalPrice) * 100)}% OFF
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -331,10 +338,10 @@ function CartCheckout() {
                               <div className="flex items-center gap-2 self-start sm:self-auto">
                                 <button
                                   onClick={() => startEditingDuration(item._id)}
-                                  className="flex items-center gap-1 text-xs bg-secondary/20 text-secondary hover:bg-secondary hover:text-white px-2 py-1 rounded transition-all"
+                                  className="flex items-center gap-1 text-sm bg-primary text-white hover:bg-secondary px-3 py-2 rounded-lg shadow transition-all"
                                   title="Change duration"
                                 >
-                                  <FaEdit size={10} />
+                                  <FaEdit size={12} />
                                   <span>Change Duration</span>
                                 </button>
                                 <button
@@ -354,18 +361,24 @@ function CartCheckout() {
                       {/* Service Description */}
                       {plan?.description && (
                         <div className="border-b border-white/20">
-                          <button
-                            onClick={() => toggleSection(item._id, 'description')}
-                            className="w-full flex items-center justify-between p-3 sm:p-4 hover:bg-white/5 transition-colors"
-                          >
-                            <h4 className="font-semibold dashboard-text">Description</h4>
-                            {collapsedSections[`${item._id}-description`] ? (
-                              <FaChevronDown className="text-secondary" />
-                            ) : (
-                              <FaChevronUp className="text-secondary" />
-                            )}
-                          </button>
-                          {!collapsedSections[`${item._id}-description`] && (
+                          {isDesktop ? (
+                            <div className="flex items-center justify-between p-3 sm:p-4">
+                              <h4 className="font-semibold dashboard-text">Description</h4>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => toggleSection(item._id, 'description')}
+                              className="w-full flex items-center justify-between p-3 sm:p-4 hover:bg-white/5 transition-colors"
+                            >
+                              <h4 className="font-semibold dashboard-text">Description</h4>
+                              {collapsedSections[`${item._id}-description`] ? (
+                                <FaChevronDown className="text-secondary" />
+                              ) : (
+                                <FaChevronUp className="text-secondary" />
+                              )}
+                            </button>
+                          )}
+                          {(isDesktop || !collapsedSections[`${item._id}-description`]) && (
                             <div className="px-3 sm:px-4 pb-3 sm:pb-4">
                               <div className="dashboard-text-muted text-sm leading-relaxed">
                                 {plan.description.split(/[\n\r\.]|\u2022/).map((desc, idx) => {
@@ -418,18 +431,24 @@ function CartCheckout() {
                       {/* Service Features */}
                       {plan?.features && plan.features.length > 0 && (
                         <div className="border-t border-white/20">
-                          <button
-                            onClick={() => toggleSection(item._id, 'features')}
-                            className="w-full flex items-center justify-between p-3 sm:p-4 hover:bg-white/5 transition-colors"
-                          >
-                            <h4 className="font-semibold dashboard-text">Features</h4>
-                            {collapsedSections[`${item._id}-features`] ? (
-                              <FaChevronDown className="text-secondary" />
-                            ) : (
-                              <FaChevronUp className="text-secondary" />
-                            )}
-                          </button>
-                          {!collapsedSections[`${item._id}-features`] && (
+                          {isDesktop ? (
+                            <div className="flex items-center justify-between p-3 sm:p-4">
+                              <h4 className="font-semibold dashboard-text">Features</h4>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => toggleSection(item._id, 'features')}
+                              className="w-full flex items-center justify-between p-3 sm:p-4 hover:bg-white/5 transition-colors"
+                            >
+                              <h4 className="font-semibold dashboard-text">Features</h4>
+                              {collapsedSections[`${item._id}-features`] ? (
+                                <FaChevronDown className="text-secondary" />
+                              ) : (
+                                <FaChevronUp className="text-secondary" />
+                              )}
+                            </button>
+                          )}
+                          {(isDesktop || !collapsedSections[`${item._id}-features`]) && (
                             <div className="px-3 sm:px-4 pb-3 sm:pb-4">
                               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                                 {plan.features.map((feature, idx) => (

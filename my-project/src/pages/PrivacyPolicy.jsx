@@ -1,5 +1,4 @@
 import React, { Suspense } from 'react';
-import { FaShieldAlt, FaEye, FaLock, FaUserShield, FaDatabase, FaCookieBite, FaExclamationTriangle, FaCheckCircle, FaPhone, FaEnvelope, FaWhatsapp } from 'react-icons/fa';
 import SvgEffect from '../components/SvgEffect';
 const Footer = React.lazy(() => import('../components/Footer'));
 
@@ -17,335 +16,121 @@ const PrivacyPolicy = () => (
     
     {/* Content */}
     <div className="dashboard-content">
-      {/* Header Section */}
-      <div className="text-center mb-12">
-        <div className="flex justify-center mb-6">
-          <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
-            <FaShieldAlt className="text-4xl text-white" />
-          </div>
-        </div>
-        <h1 className="dashboard-heading mb-6">Privacy Policy</h1>
-        <p className="dashboard-subheading text-lg max-w-3xl mx-auto">
-          Your privacy is important to us. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
-        </p>
-        <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-xl">
-          <p className="text-orange-700 font-semibold">Last Updated: {new Date().toLocaleDateString()}</p>
-        </div>
+      <div className="text-center mb-8">
+        <h1 className="dashboard-heading">Privacy Policy</h1>
+        <p className="dashboard-subheading max-w-3xl mx-auto mt-2">Your privacy is important to us. Please read this policy to understand how we handle your data.</p>
       </div>
 
-      {/* Main Content */}
-      <div className="space-y-8">
-        {/* Information We Collect */}
-        <div className="dashboard-card">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900 flex items-center gap-3">
-            <FaDatabase className="text-2xl text-primary" />
-            Information We Collect
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-900">Personal Information</h3>
-              <ul className="list-disc ml-6 space-y-2 dashboard-text-muted">
-                <li>Full name and contact details</li>
-                <li>Email address and phone number</li>
-                <li>Billing and shipping addresses</li>
-                <li>Payment information (processed securely)</li>
-                <li>Account credentials and preferences</li>
-                <li>Communication history with support</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-900">Technical Information</h3>
-              <ul className="list-disc ml-6 space-y-2 dashboard-text-muted">
-                <li>Device information and IP addresses</li>
-                <li>Browser type and version</li>
-                <li>Operating system details</li>
-                <li>Usage data and analytics</li>
-                <li>Cookies and session data</li>
-                <li>Error logs and performance data</li>
-              </ul>
-            </div>
-          </div>
+      <div className="dashboard-card space-y-6">
+        <div>
+          <h2 className="text-xl font-bold mb-2">Data Aggregation</h2>
+          <p className="dashboard-text">Vyapaar360 collects information with elements for business and consumers alike. All information is acquired from reliable sources and quality control measures are taken to ensure the accuracy of the database.</p>
         </div>
 
-        {/* How We Use Your Information */}
-        <div className="dashboard-card">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900 flex items-center gap-3">
-            <FaEye className="text-2xl text-primary" />
-            How We Use Your Information
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-900">Service Provision</h3>
-              <ul className="list-disc ml-6 space-y-2 dashboard-text-muted">
-                <li>Process and fulfill your orders</li>
-                <li>Deliver services and credentials</li>
-                <li>Provide customer support</li>
-                <li>Send order confirmations</li>
-                <li>Handle payment processing</li>
-                <li>Manage your account</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-900">Platform Improvement</h3>
-              <ul className="list-disc ml-6 space-y-2 dashboard-text-muted">
-                <li>Analyze usage patterns</li>
-                <li>Improve user experience</li>
-                <li>Develop new features</li>
-                <li>Ensure platform security</li>
-                <li>Prevent fraud and abuse</li>
-                <li>Comply with legal obligations</li>
-              </ul>
-            </div>
-          </div>
+        <div>
+          <h2 className="text-xl font-bold mb-2">Where Do We Collect Prospect Data?</h2>
+          <ul className="list-disc ml-6 dashboard-text-muted space-y-1">
+            <li>Web-based registrations and offers</li>
+            <li>Government records</li>
+            <li>Transactional data</li>
+            <li>Newsletter subscription offers</li>
+            <li>Business tradeshow attendee lists</li>
+            <li>Public record information</li>
+            <li>Business trade magazine subscription offers</li>
+            <li>Sign-up data from email campaigns</li>
+            <li>B2B directories</li>
+            <li>Annual reports, SEC filings</li>
+            <li>Phone surveys with businesses</li>
+            <li>Registration process for subscription sites</li>
+            <li>Community postings</li>
+          </ul>
         </div>
 
-        {/* Information Sharing */}
-        <div className="dashboard-card">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900 flex items-center gap-3">
-            <FaUserShield className="text-2xl text-primary" />
-            Information Sharing and Disclosure
-          </h2>
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-900">We Do NOT Share</h3>
-              <ul className="list-disc ml-6 space-y-2 dashboard-text-muted">
-                <li>Your personal information with unauthorized third parties</li>
-                <li>Your payment details with anyone</li>
-                <li>Your account credentials with external services</li>
-                <li>Your communication history without consent</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-900">Limited Sharing (When Required)</h3>
-              <ul className="list-disc ml-6 space-y-2 dashboard-text-muted">
-                <li>With trusted service providers (payment processors, SMS services)</li>
-                <li>To comply with legal obligations and court orders</li>
-                <li>To protect our rights, property, or safety</li>
-                <li>With your explicit consent for specific purposes</li>
-                <li>In case of business transfer or merger (with notice)</li>
-              </ul>
-            </div>
-          </div>
+        <div>
+          <h2 className="text-xl font-bold mb-2">Community Postings</h2>
+          <p className="dashboard-text">Vyapaar360 gathers information by prioritizing its quality. We do not collect or engage generic email addresses entered by individuals. Vyapaar360 collects Personal Information (name and email address) through contact forms on our site because it helps us contact individuals likely to become our paying customers. We may also acquire information from our affiliates and co-branded sites.</p>
         </div>
 
-        {/* Data Security */}
-        <div className="dashboard-card">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900 flex items-center gap-3">
-            <FaLock className="text-2xl text-primary" />
-            Data Security
-          </h2>
-          <div className="space-y-6">
-            <p className="text-lg leading-relaxed dashboard-text">
-              We implement industry-standard security measures to protect your personal information from unauthorized access, alteration, disclosure, or destruction.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">Security Measures</h3>
-                <ul className="list-disc ml-6 space-y-2 dashboard-text-muted">
-                  <li>End-to-end encryption for all data</li>
-                  <li>Secure SSL/TLS connections</li>
-                  <li>Regular security audits and updates</li>
-                  <li>Access controls and authentication</li>
-                  <li>Data backup and recovery systems</li>
-                  <li>24/7 security monitoring</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">Your Role in Security</h3>
-                <ul className="list-disc ml-6 space-y-2 dashboard-text-muted">
-                  <li>Use strong, unique passwords</li>
-                  <li>Keep your login credentials secure</li>
-                  <li>Log out from shared devices</li>
-                  <li>Report suspicious activities</li>
-                  <li>Update your contact information</li>
-                  <li>Enable two-factor authentication if available</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+        <div>
+          <h2 className="text-xl font-bold mb-2">Sharing Of Information And Disclosure</h2>
+          <p className="dashboard-text">Vyapaar360 does not share any collected Personal Information with third-party affiliates or partners. We value the privacy of information filled by users, and no information shall be used in any manner other than disclosed in this Privacy Policy. Vyapaar360 may roll out promotional offers to help its clients discover value. Hence, any Personal Information of the subscriber shall only be disclosed to a third party where:</p>
+          <ul className="list-disc ml-6 dashboard-text-muted space-y-1 mt-2">
+            <li>Vyapaar360 is confident about the benefits that favor its customers.</li>
+            <li>The recipients acknowledge receiving communications.</li>
+            <li>Law enforcers and judicial authorities urge to furnish information.</li>
+          </ul>
+          <p className="dashboard-text mt-2">Should you wish to stop receiving any marketing communications from Vyapaar360, unsubscribe by following the link provided at the footer of our promotional emails. We shall remove unsubscribed users from the mailing database to cease future marketing communications from reaching their mailbox.</p>
         </div>
 
-        {/* Cookies and Tracking */}
-        <div className="dashboard-card">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900 flex items-center gap-3">
-            <FaCookieBite className="text-2xl text-primary" />
-            Cookies and Tracking Technologies
-          </h2>
-          <div className="space-y-6">
-            <p className="text-lg leading-relaxed dashboard-text">
-              We use cookies and similar tracking technologies to enhance your browsing experience and provide personalized services.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <h3 className="text-lg font-semibold mb-3 text-gray-900">Essential Cookies</h3>
-                <p className="text-sm dashboard-text-muted">Required for basic platform functionality, security, and authentication.</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <h3 className="text-lg font-semibold mb-3 text-gray-900">Analytics Cookies</h3>
-                <p className="text-sm dashboard-text-muted">Help us understand how users interact with our platform to improve services.</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <h3 className="text-lg font-semibold mb-3 text-gray-900">Preference Cookies</h3>
-                <p className="text-sm dashboard-text-muted">Remember your settings and preferences for a personalized experience.</p>
-              </div>
-            </div>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800 font-semibold mb-2">Cookie Management:</p>
-              <p className="text-sm dashboard-text-muted">You can control cookie settings through your browser preferences. However, disabling essential cookies may affect platform functionality.</p>
-            </div>
-          </div>
+        <div>
+          <h2 className="text-xl font-bold mb-2">Privacy And Security</h2>
+          <p className="dashboard-text">Vyapaar360 carries its positive reputation for taking utmost care in managing Personal Information collected from site visitors and customers. We may share your contact information with our affiliates only if some offerings are relevant to your interest. Your Personal Information helps us serve better and improve the user experience on our site. We also use the information to identify legitimate users. We identify the site visitors by tracking information such as domain name, IP address, and other information that distinctively identifies one user from another. We also collect information obtained through surveys, form fill-outs, and tracking pages visited by users. The purpose of tapping such information is to provide seamless delivery of customized promotions such as email alerts, e‑newsletters, promotional emails, and product information. Vyapaar360 may also use the information to build our internal database of interest-based users.</p>
         </div>
 
-        {/* Your Rights */}
-        <div className="dashboard-card">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900 flex items-center gap-3">
-            <FaCheckCircle className="text-2xl text-green-600" />
-            Your Privacy Rights
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-900">Access and Control</h3>
-              <ul className="list-disc ml-6 space-y-2 dashboard-text-muted">
-                <li>Access your personal information</li>
-                <li>Update or correct your data</li>
-                <li>Request deletion of your account</li>
-                <li>Export your data in portable format</li>
-                <li>Withdraw consent for data processing</li>
-                <li>Opt-out of marketing communications</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-900">How to Exercise Rights</h3>
-              <ul className="list-disc ml-6 space-y-2 dashboard-text-muted">
-                <li>Contact our support team directly</li>
-                <li>Use account settings in your dashboard</li>
-                <li>Send email to our privacy team</li>
-                <li>We will respond within 30 days</li>
-                <li>No fees for reasonable requests</li>
-                <li>We may verify your identity first</li>
-              </ul>
-            </div>
-          </div>
+        <div>
+          <h2 className="text-xl font-bold mb-2">The Policy Of Data Usage</h2>
+          <p className="dashboard-text">The Personal Information that we collect is primarily used for our B2B transactions. However, we may also use the same for notifying updates and validating sales transactions. We do not share your information with third-party marketers who may have an interest in communicating with you. If you no longer wish to receive marketing communication from Vyapaar360, follow the link to unsubscribe provided at the footer of every email. Vyapaar360 will remove your information from our mailing database preventing any future communications from reaching your mailbox.</p>
+          <p className="dashboard-text mt-2">When you access an external link from our site, your information may be collected by third-party sites to identify you personally. Vyapaar360 is not liable to mediate any disputes or cover for damages that users endure by visiting an external site. Vyapaar360 requests its users to refrain from divulging any personal information on our site. Information such as account details and passwords are sensitive data that are vulnerable to misuse and loss. Despite the exhaustive measures taken by our security experts to safeguard your data, you will be solely held responsible for any data acquired from us.</p>
         </div>
 
-        {/* Data Retention */}
-        <div className="dashboard-card">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900">Data Retention</h2>
-          <div className="space-y-6">
-            <p className="text-lg leading-relaxed dashboard-text">
-              We retain your personal information only for as long as necessary to fulfill the purposes outlined in this Privacy Policy.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">Retention Periods</h3>
-                <ul className="list-disc ml-6 space-y-2 dashboard-text-muted">
-                  <li>Account data: Until account deletion</li>
-                  <li>Transaction records: 7 years (legal requirement)</li>
-                  <li>Support communications: 3 years</li>
-                  <li>Analytics data: 2 years</li>
-                  <li>Log files: 1 year</li>
-                  <li>Marketing data: Until opt-out</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-4 text-gray-900">Data Deletion</h3>
-                <ul className="list-disc ml-6 space-y-2 dashboard-text-muted">
-                  <li>Automatic deletion after retention period</li>
-                  <li>Manual deletion upon request</li>
-                  <li>Secure destruction methods</li>
-                  <li>Backup data also deleted</li>
-                  <li>Third-party data removal</li>
-                  <li>Confirmation of deletion provided</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+        <div>
+          <h2 className="text-xl font-bold mb-2">How Vyapaar360 Protects User Information?</h2>
+          <p className="dashboard-text">Our in-house security experts deploy advanced digital tactics to secure every database. Some of the latest strategies are used to prevent mismanagement and unauthorized access to sensitive data. Vyapaar360 does not furnish Personal Information to its affiliates and partners without prior consent from individuals. Since Vyapaar360 is a technologically driven brand, we take stringent measures to protect data integrity. Our updated data security mechanism checks the pulse of every database and Personal Information to prevent unauthorized access and misuse. However, in the wake of technological evolution, it is impossible to assure a 100% safety of any digital data. Hence, Vyapaar360 does not guarantee a 100% safety of any client information. By using our services, you acknowledge the passive risks of sharing digital data.</p>
         </div>
 
-        {/* Children's Privacy */}
-        <div className="dashboard-card">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900 flex items-center gap-3">
-            <FaExclamationTriangle className="text-2xl text-red-600" />
-            Children's Privacy
-          </h2>
-          <div className="space-y-4 text-lg leading-relaxed">
-            <p className="dashboard-text">Our platform is not intended for children under 18 years of age. We do not knowingly collect personal information from children under 18.</p>
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-800 font-semibold mb-2">Important:</p>
-              <ul className="list-disc ml-6 space-y-1 text-sm dashboard-text-muted">
-                <li>You must be at least 18 years old to use our services</li>
-                <li>If we discover we have collected data from a child under 18, we will delete it immediately</li>
-                <li>Parents or guardians should contact us if they believe their child has provided personal information</li>
-              </ul>
-            </div>
-          </div>
+        <div>
+          <h2 className="text-xl font-bold mb-2">What Information Do We Collect?</h2>
+          <h3 className="font-semibold text-gray-900">Personal Information</h3>
+          <p className="dashboard-text">Personal Information such as email, name, and address offered to us through form fill-outs by users interested in our services. Should you choose not to submit complete information, you may not enjoy full benefits offered by us.</p>
+          <h3 className="font-semibold text-gray-900 mt-3">Tracking Information</h3>
+          <p className="dashboard-text">Vyapaar360 may collect your IP address to identify users personally. It is part of our effort to encourage effective interaction with legitimate users alone.</p>
+          <h3 className="font-semibold text-gray-900 mt-3">Cookies</h3>
+          <p className="dashboard-text">Vyapaar360 uses cookies to track fundamental interactions made by users on our site. It helps us to improve the user experience. You reserve the right to accept or decline our cookies. Note: Any third-party links leading away from our website may use cookies to track visitors, and the use of such is not covered under this Policy.</p>
         </div>
 
-        {/* International Transfers */}
-        <div className="dashboard-card">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900">International Data Transfers</h2>
-          <div className="space-y-4 text-lg leading-relaxed">
-            <p className="dashboard-text">Your information may be transferred to and processed in countries other than your own. We ensure appropriate safeguards are in place to protect your data during such transfers.</p>
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <p className="font-semibold text-gray-900 mb-2">Safeguards Include:</p>
-              <ul className="list-disc ml-6 space-y-1 text-sm dashboard-text-muted">
-                <li>Standard contractual clauses</li>
-                <li>Adequacy decisions by relevant authorities</li>
-                <li>Certification schemes and codes of conduct</li>
-                <li>Regular security assessments</li>
-              </ul>
-            </div>
-          </div>
+        <div>
+          <h2 className="text-xl font-bold mb-2">Protection Of Information</h2>
+          <p className="dashboard-text">The user behavior information such as cookies, click-throughs, opened acknowledgments, and email conversations collected from users will not be shared with any third party in any manner other than otherwise indicated in this Privacy Policy. Vyapaar360 collaborates with third-party sources for closure of sales transactions. We take extraordinary measures to prevent retaining or storing the transaction details and are a subject matter of solicitation.</p>
         </div>
 
-        {/* Changes to Privacy Policy */}
-        <div className="dashboard-card">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900">Changes to This Privacy Policy</h2>
-          <div className="space-y-4 text-lg leading-relaxed">
-            <p className="dashboard-text">We may update this Privacy Policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons.</p>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-yellow-800 font-semibold mb-2">Notification of Changes:</p>
-              <ul className="list-disc ml-6 space-y-1 text-sm dashboard-text-muted">
-                <li>We will notify you of significant changes via email or SMS</li>
-                <li>Updated policy will be posted on our platform</li>
-                <li>Continued use constitutes acceptance of changes</li>
-                <li>You can review the current policy anytime</li>
-              </ul>
-            </div>
-          </div>
+        <div>
+          <h2 className="text-xl font-bold mb-2">Marketing Emails</h2>
+          <p className="dashboard-text">It is prohibited to use Vyapaar360 resources for illicit reasons, and we advise users to remain compliant with respective laws (state, federal, or international) while using our service features. This Privacy Policy is presented to promulgate the ethical use of digital data and to brief users how we handle the information submitted to us. Your information and feedback help us enhance the quality of service and the security of digital data. When you are using the features of our services, you are agreeing to the terms of this Policy and acknowledging the data handling ethics.</p>
         </div>
 
-        {/* Contact Section */}
-        <div className="dashboard-card text-center">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900">Privacy Questions?</h2>
-          <p className="dashboard-subheading text-lg mb-6">
-            If you have any questions about this Privacy Policy or our data practices, please contact our privacy team.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="tel:+919353690229"
-              className="dashboard-button-primary inline-flex items-center gap-2"
-            >
-              <FaPhone />
-              Call Us
-            </a>
-            <a 
-              href="https://wa.me/919353690229"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 inline-flex items-center gap-2"
-            >
-              <FaWhatsapp />
-              WhatsApp
-            </a>
-            <a 
-              href="mailto:goutham4391@gmail.com"
-              className="dashboard-button-secondary inline-flex items-center gap-2"
-            >
-              <FaEnvelope />
-              Email Us
-            </a>
-          </div>
+        <div>
+          <h2 className="text-xl font-bold mb-2">Marketing Content</h2>
+          <p className="dashboard-text">At Vyapaar360, we take particular care to ensure that subscribers receive relevant content fully compliant with the laws. Our content algorithm is capable of serving the right content based on the Personal Information submitted by individuals.</p>
+        </div>
+
+        <div>
+          <h2 className="text-xl font-bold mb-2">Unsubscribe</h2>
+          <p className="dashboard-text">Every email that we send has an unsubscribe link prominently displayed in the footer. If you choose not to be contacted, click the link and you will be automatically removed from all our future email campaigns, newsletters, and promotions. We are bound to respect the interest of our valuable clients and will commit to abide by rules of the industry. Note: When recipients unsubscribe from our marketing campaigns, they may stop receiving any future communications. However, some residual information may remain in our database, which could be due to data being deleted multiple times.</p>
+        </div>
+
+        <div>
+          <h2 className="text-xl font-bold mb-2">Modification Of Personal Information</h2>
+          <p className="dashboard-text">If you wish to update the Personal Information submitted to us, reach us at <a className="text-primary underline" href="mailto:Gowtham@vyapaar360.in">Gowtham@vyapaar360.in</a> or call <a className="text-primary underline" href="tel:+919353690229">+91 9353690229</a>. We shall get back to you in 24 hours.</p>
+        </div>
+
+        <div>
+          <h2 className="text-xl font-bold mb-2">Emendation Of Privacy Policy</h2>
+          <p className="dashboard-text">Vyapaar360 may modify this Privacy Policy without prior intimation. To stay updated on recent revisions on data usage, please refer to this Policy periodically. Alternatively, you may receive email communication from us when changes are amended to this policy. Nevertheless, by using our site or services you acknowledge the terms of this Privacy Policy unconditionally.</p>
+        </div>
+
+        <div>
+          <h2 className="text-xl font-bold mb-2">Disclaimer</h2>
+          <p className="dashboard-text">Users may visit any external links within our website at their own risk. Vyapaar360 is not liable for any information submitted by visitors on third-party links.</p>
+        </div>
+
+        <div>
+          <h2 className="text-xl font-bold mb-2">Queries And Concerns</h2>
+          <p className="dashboard-text">If you have doubts regarding the use of our services, reach us now!</p>
+          <ul className="list-disc ml-6 dashboard-text-muted space-y-1 mt-2">
+            <li>Email: <a className="text-primary underline" href="mailto:sales@vyapaar360.in">sales@vyapaar360.in</a></li>
+            <li>Phone: <a className="text-primary underline" href="tel:+919353690229">+91 9353690229</a></li>
+            <li>Address: 1955, H V HALL RR NAGARA , BENGALURU, Karnataka, India - 560098.</li>
+          </ul>
         </div>
       </div>
     </div>

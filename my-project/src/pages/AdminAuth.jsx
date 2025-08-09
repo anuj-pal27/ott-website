@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SvgEffect from '../components/SvgEffect';
 import PersonIcon from '@mui/icons-material/Person';
+import LockIcon from '@mui/icons-material/Lock';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import adminService from '../services/adminService';
 import authService from '../services/authService';
 import { useAuth } from '../context/AuthContext';
+import logo from '../assets/logo.jpg';
 
 function AdminAuth() {
   const navigate = useNavigate();
@@ -171,10 +175,8 @@ function AdminAuth() {
             {/* Logo */}
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center border border-primary/20">
-                  <span className="text-white font-bold text-2xl">A</span>
-                </div>
-                <h2 className="dashboard-heading text-3xl">Admin</h2>
+                <img src={logo} alt="Vyapaar360" className="w-12 h-12 rounded-xl object-cover border border-primary/20" />
+                <h2 className="dashboard-heading text-3xl">Vyapaar360 Admin</h2>
               </div>
             </div>
 
