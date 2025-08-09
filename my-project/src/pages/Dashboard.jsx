@@ -152,6 +152,34 @@ function Dashboard() {
       
       {/* Content */}
       <div className="dashboard-content">
+        {/* Trust Banner */}
+        <div className="flex justify-center mb-6">
+          <div className="w-full max-w-4xl bg-white rounded-2xl border border-gray-200 shadow-md px-5 py-4 sm:px-8 sm:py-6">
+            <div className="flex items-center justify-between gap-5 flex-col sm:flex-row ">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1" aria-label="5 star rating on Trustpilot">
+                  <FaStar className="text-[#00B67A] text-2xl sm:text-3xl" />
+                  <FaStar className="text-[#00B67A] text-2xl sm:text-3xl" />
+                  <FaStar className="text-[#00B67A] text-2xl sm:text-3xl" />
+                  <FaStar className="text-[#00B67A] text-2xl sm:text-3xl" />
+                  <FaStar className="text-[#00B67A] text-2xl sm:text-3xl" />
+                </div>
+                <div>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-none">5.0</div>
+                  <div className="text-gray-600 text-sm sm:text-base">on Trustpilot</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="inline-flex items-center gap-2 bg-[#00B67A]/10 text-[#00B67A] font-bold px-4 py-2 rounded-xl">
+                  <span className="w-3.5 h-3.5 rounded-sm bg-[#00B67A] block"></span>
+                  <span>Trustpilot</span>
+                </div>
+                <div className="text-gray-500 text-sm sm:text-base whitespace-nowrap">Trusted by 10,000+ customers</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-8">
           <div>
