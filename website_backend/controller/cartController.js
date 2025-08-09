@@ -53,4 +53,33 @@ const getCart = async (req, res) => {
     }
 };
 
-module.exports = { addToCart, removeFromCart, getCart };
+const updateCartItem = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const { itemId } = req.params;
+        const { duration } = req.body;
+
+        const cart = await Cart.findOne({ user: userId });
+        if (!cart) {
+            return res.status(404).json({ success: false, message: "Cart not found" });
+        }
+
+        const item = cart.items.find(item => item._id.toString() === itemId);
+        if (!item) {
+            return res.status(404).json({ success: false, message: "Item not found in cart" });
+        }
+
+        // Update the duration
+        item.duration = duration;
+        await cart.save();
+
+        // Return updated cart
+        const updatedCart = await Cart.findOne({ user: userId }).populate("items.subscriptionPlan");
+        res.status(200).json({ success: true, message: "Cart item updated successfully", cart: updatedCart });
+    } catch (error) {
+        console.error("Error in updateCartItem:", error);
+        res.status(500).json({ success: false, message: "Error updating cart item" });
+    }
+};
+
+module.exports = { addToCart, removeFromCart, getCart, updateCartItem };

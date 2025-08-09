@@ -41,7 +41,7 @@ function Navbar() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/plans/categories');
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'}/plans/categories`);
         const data = await res.json();
         if (data.success && Array.isArray(data.categories)) {
           setCategories(data.categories);
@@ -63,14 +63,15 @@ function Navbar() {
 
   const navLinks = [
     { to: '/', label: 'Home' },
+    { to: '/services', label: 'Services' },
     { to: '/about', label: 'About' },
     { to: '/contact', label: 'Contact' },
     // Categories button will be handled separately
-    { to: '/cart', label: '', icon: <ShoppingCartIcon className="text-white" /> },
-    ...(user?.accountType === 'admin' ? [{ to: '/admin-dashboard', label: 'Admin Dashboard', icon: <DashboardIcon className="text-white" /> }] : []),
+    { to: '/cart', label: '', icon: <ShoppingCartIcon className="text-gray-800" /> },
+    ...(user?.accountType === 'admin' ? [{ to: '/admin-dashboard', label: 'Admin Dashboard', icon: <DashboardIcon className="text-gray-800" /> }] : []),
     user 
       ? { to: '/profile', label: '', icon: null, isAvatar: true }
-      : { to: '/auth', label: '', icon: <PersonIcon className="text-white" /> },
+      : { to: '/auth', label: '', icon: <PersonIcon className="text-gray-800" /> },
   ];
 
   return (
@@ -79,15 +80,15 @@ function Navbar() {
       <div className='absolute inset-0 w-full h-full'>
         <SvgEffect />
       </div>
-      {/* Modern Glassmorphism Overlay */}
-      <div className='absolute inset-0 bg-white/10 backdrop-blur-sm border-b border-white/20 shadow-lg'></div>
+      {/* Modern Clean Overlay */}
+      <div className='absolute inset-0 bg-white border-b border-gray-200 shadow-lg'></div>
       {/* Navbar Content - positioned absolutely over SVG */}
       <div className='relative z-10 flex flex-col'>
         {/* Top Navigation Bar */}
         <div className='flex justify-between items-center p-4 max-w-7xl mx-auto w-full'>
         <div className='flex items-center gap-4'>
             <div className='flex items-center gap-3'>
-              <div className='w-18 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30 overflow-hidden'>
+              <div className='w-18 h-14 bg-white rounded-xl flex items-center justify-center border border-gray-200 overflow-hidden shadow-md'>
                 <img src={logo} alt="Logo" className="w-full h-full object-cover" />
               </div>
             </div>
@@ -97,7 +98,7 @@ function Navbar() {
             {/* Categories Dropdown */}
             <div className='relative group' onMouseEnter={() => setCategoriesOpen(true)} onMouseLeave={() => setCategoriesOpen(false)}>
               <button
-                className='text-white hover:text-gray-200 transition-all duration-300 font-medium flex items-center gap-1 px-2 py-1 rounded-lg focus:outline-none'
+                className='text-gray-800 hover:text-primary transition-all duration-300 font-medium flex items-center gap-1 px-2 py-1 rounded-lg focus:outline-none'
                 type='button'i
                 aria-haspopup='true'
                 aria-expanded={categoriesOpen}
@@ -129,7 +130,7 @@ function Navbar() {
                   aria-label="Open cart"
                   type="button"
                 >
-                  <ShoppingCartIcon className="text-white" />
+                  <ShoppingCartIcon className="text-gray-800" />
                   {cart && cart.items && cart.items.length > 0 && (
                     <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                       {cart.items.length}
@@ -137,9 +138,9 @@ function Navbar() {
                   )}
                 </button>
               ) : (
-                <Link key={link.to} to={link.to} className='text-white hover:text-gray-200 transition-all duration-300 font-medium relative group flex items-center gap-2'>
+                <Link key={link.to} to={link.to} className='text-gray-800 hover:text-primary transition-all duration-300 font-medium relative group flex items-center gap-2'>
                   {link.isAvatar ? (
-                    <div className='w-8 h-8 rounded-full overflow-hidden border-2 border-white/30 hover:border-white/50 transition-all duration-300'>
+                                          <div className='w-8 h-8 rounded-full overflow-hidden border-2 border-gray-300 hover:border-primary transition-all duration-300'>
                       {user?.profilePicture ? (
                         <img 
                           src={user.profilePicture} 
@@ -151,7 +152,7 @@ function Navbar() {
                           }}
                         />
                       ) : null}
-                      <div className='w-full h-full bg-white/20 flex items-center justify-center text-white font-semibold text-sm'>
+                      <div className='w-full h-full bg-gray-200 flex items-center justify-center text-gray-700 font-semibold text-sm'>
                         {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
                     </div>
@@ -167,7 +168,7 @@ function Navbar() {
             ))}
             {/* Payment History & Orders link */}
             {user && (
-              <Link to="/payment-history" className='text-white hover:text-gray-200 transition-all duration-300 font-medium relative group flex items-center gap-2'>
+              <Link to="/payment-history" className='text-gray-800 hover:text-primary transition-all duration-300 font-medium relative group flex items-center gap-2'>
                 <span>Payment History & Orders</span>
               </Link>
             )}
@@ -179,7 +180,7 @@ function Navbar() {
                   logout();
                   clearCart();
                 }}
-                className='bg-red-500/20 hover:bg-red-500/30 text-white px-4 py-2 rounded-xl transition-all duration-300 font-medium backdrop-blur-sm border border-red-500/30 shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2'
+                className='bg-red-100 hover:bg-red-200 text-red-800 px-4 py-2 rounded-xl transition-all duration-300 font-medium border border-red-300 shadow-md hover:shadow-lg hover:scale-105 flex items-center gap-2'
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -190,16 +191,16 @@ function Navbar() {
           </div>
           {/* Hamburger/Close Icon */}
           <button
-            className='md:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-white/20 hover:bg-white/30 border border-white/30 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50'
+            className='md:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 hover:bg-gray-200 border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary'
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           >
             {mobileOpen ? (
-              <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
+              <svg className='w-6 h-6 text-gray-700' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
                 <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
               </svg>
             ) : (
-              <svg className='w-6 h-6 text-white' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
+              <svg className='w-6 h-6 text-gray-700' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
                 <path strokeLinecap='round' strokeLinejoin='round' d='M4 6h16M4 12h16M4 18h16' />
               </svg>
             )}
@@ -327,7 +328,7 @@ function Navbar() {
             </div>
             {/* Bottom Close Button - More Visible */}
             <button 
-              className='mt-6 w-12 h-12 bg-white/20 hover:bg-white/30 text-white rounded-full flex items-center justify-center text-2xl font-bold transition-all duration-200 hover:scale-110 backdrop-blur-sm border border-white/30 shadow-lg' 
+              className='mt-6 w-12 h-12 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full flex items-center justify-center text-2xl font-bold transition-all duration-200 hover:scale-110 border border-gray-300 shadow-lg' 
               onClick={() => setMobileOpen(false)} 
               aria-label='Close menu'
             >

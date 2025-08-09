@@ -7,13 +7,15 @@ dotenv.config();
 // Placeholder credentials (replace with process.env usage in production)
 const PHONEPE_MERCHANT_ID = process.env.PHONEPE_MERCHANT_ID;
 const PHONEPE_SALT_KEY = process.env.PHONEPE_SALT_KEY;
-const PHONEPE_BASE_URL = process.env.PHONEPE_BASE_URL || 'https://api-preprod.phonepe.com/apis/pg-sandbox';
+const PHONEPE_SALT_INDEX = process.env.PHONEPE_SALT_INDEX || '1';
+const PHONEPE_BASE_URL = process.env.PHONEPE_BASE_URL || 'https://api.phonepe.com/apis/hermes';
+const FRONTENDURL = process.env.FRONTENDURL || 'http://localhost:5173';
 
 // Utility to generate X-VERIFY header
 function generateXVerify(payload, apiEndpoint) {
     const base64Payload = Buffer.from(JSON.stringify(payload)).toString('base64');
     const stringToHash = base64Payload + apiEndpoint + PHONEPE_SALT_KEY;
-    const xVerify = crypto.createHash('sha256').update(stringToHash).digest('hex') + '###' + PHONEPE_SALT_KEY;
+    const xVerify = crypto.createHash('sha256').update(stringToHash).digest('hex') + '###' + PHONEPE_SALT_INDEX;
     // Debug logs for signature generation
     console.log('--- PhonePe Signature Debug ---');
     console.log('Payload:', JSON.stringify(payload));
@@ -76,7 +78,7 @@ async function createPhonePeOrder(orderId, amount, userId) {
 async function checkPhonePePaymentStatus(orderId) {
     const apiEndpoint = `/pg/v1/status/${PHONEPE_MERCHANT_ID}/${orderId}`;
     const url = `${PHONEPE_BASE_URL}${apiEndpoint}`;
-    const xVerify = crypto.createHash('sha256').update(apiEndpoint + PHONEPE_SALT_KEY).digest('hex') + '###' + PHONEPE_SALT_KEY;
+    const xVerify = crypto.createHash('sha256').update(apiEndpoint + PHONEPE_SALT_KEY).digest('hex') + '###' + PHONEPE_SALT_INDEX;
     const headers = {
         'Content-Type': 'application/json',
         'X-VERIFY': xVerify,
@@ -86,7 +88,66 @@ async function checkPhonePePaymentStatus(orderId) {
     return response.data;
 }
 
+// New: Initiate PhonePe payment using provided code
+async function initiatePhonePePayment(orderId, amount, userId, mobileNumber, type) {
+  console.log('FRONTENDURL:', FRONTENDURL);
+
+  try {
+    const payload = {
+      merchantId: PHONEPE_MERCHANT_ID,
+      merchantTransactionId: orderId,
+      merchantUserId: userId,
+      amount: amount * 100,
+      redirectUrl: `${FRONTENDURL}/payment-status?paymentId=${orderId}`,
+      redirectMode: 'REDIRECT',
+      callbackUrl: `${FRONTENDURL}/payment-status?paymentId=${orderId}`,
+      mobileNumber: mobileNumber,
+      paymentInstrument: { type: 'PAY_PAGE' }
+    };
+
+    const payloadString = JSON.stringify(payload);
+    const apiEndpoint = '/pg/v1/pay';
+    const checksum = crypto.createHash('sha256')
+      .update(Buffer.from(payloadString).toString('base64') + apiEndpoint + PHONEPE_SALT_KEY)
+      .digest('hex') + '###' + PHONEPE_SALT_INDEX;
+
+    const url = `${PHONEPE_BASE_URL}${apiEndpoint}`;
+    const response = await axios.post(url,
+      { request: Buffer.from(payloadString).toString('base64') },
+      { headers: { 'Content-Type': 'application/json', 'X-VERIFY': checksum, 'X-MERCHANT-ID': PHONEPE_MERCHANT_ID } }
+    );
+
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error initiating PhonePe payment:', error?.response?.data || error.message);
+    throw error;
+  }
+}
+
+// New: Verify PhonePe payment using provided code
+async function verifyPhonePePayment(transactionId) {
+  try {
+    const apiEndpoint = `/pg/v1/status/${PHONEPE_MERCHANT_ID}/${transactionId}`;
+    const checksum = crypto.createHash('sha256')
+      .update(apiEndpoint + PHONEPE_SALT_KEY)
+      .digest('hex') + '###' + PHONEPE_SALT_INDEX;
+
+    const url = `${PHONEPE_BASE_URL}${apiEndpoint}`;
+    const response = await axios.get(url, {
+      headers: { 'X-VERIFY': checksum }
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error verifying PhonePe payment:', error?.response?.data || error.message);
+    throw error;
+  }
+}
+
 module.exports = {
     createPhonePeOrder,
     checkPhonePePaymentStatus,
+    initiatePhonePePayment,
+    verifyPhonePePayment,
 }; 

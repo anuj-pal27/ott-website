@@ -25,14 +25,8 @@ const HeroSection = () => {
   };
 
   const handleExploreProducts = () => {
-    // Scroll to the products section if we're on the home page
-    const productsSection = document.getElementById('products-section');
-    if (productsSection) {
-      smoothScrollTo('products-section');
-    } else {
-      // If products section doesn't exist, navigate to categories
-      navigate('/categories/music');
-    }
+    // Navigate to services page
+    navigate('/services');
   };
 
   const handleLearnMore = () => {
@@ -51,7 +45,7 @@ const HeroSection = () => {
         {/* Left Side - Content */}
         <div className="text-left space-y-8">
           {/* Animated badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 text-white text-sm font-medium animate-pulse mt-10">
+          <div className="inline-flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-full px-4 py-2 text-gray-700 text-sm font-medium animate-pulse mt-10">
             <span className="w-2 h-2 bg-green-400 rounded-full animate-ping"></span>
             Trusted by 5000+ users worldwide
           </div>
@@ -69,19 +63,19 @@ const HeroSection = () => {
           <p className="dashboard-text-muted text-lg md:text-xl leading-relaxed max-w-2xl">
             Get Netflix, Prime, YouTube Premium & more — at unbeatable shared prices.
             <br />
-            <span className="font-semibold text-white">Instant Access, Global Availability, trusted by thousands.</span> 
+            <span className="font-semibold text-gray-900">Instant Access, Global Availability, trusted by thousands.</span> 
           </p>
           {/* Feature highlights */}
           <div className="flex flex-wrap gap-4">
-            <div className="flex items-center gap-2 text-white/90">
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
               <span className="text-sm">Instant Access</span>
             </div>
-            <div className="flex items-center gap-2 text-white/90">
+            <div className="flex items-center gap-2 text-gray-600">
               <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
               <span className="text-sm">24/7 Support</span>
             </div>
-            <div className="flex items-center gap-2 text-white/90">
+            <div className="flex items-center gap-2 text-gray-600">
               <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
               <span className="text-sm">Global Availability</span>
             </div>
@@ -127,21 +121,21 @@ const HeroSection = () => {
                 🔥 Hot Deals
               </div>
               {/* Bottom stats */}
-              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-white/10 backdrop-blur-md rounded-xl px-6 py-3 border border-white/20 shadow-lg">
-                <div className="flex items-center gap-4 text-white text-sm">
+              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-white rounded-xl px-6 py-3 border border-gray-200 shadow-lg">
+                <div className="flex items-center gap-4 text-gray-700 text-sm">
                   <div className="text-center">
                     <div className="font-bold text-lg">50K+</div>
-                    <div className="text-white/70">Users</div>
+                    <div className="text-gray-500">Users</div>
                   </div>
-                  <div className="w-px h-8 bg-white/30"></div>
+                  <div className="w-px h-8 bg-gray-300"></div>
                   <div className="text-center">
                     <div className="font-bold text-lg">24/7</div>
-                    <div className="text-white/70">Support</div>
+                    <div className="text-gray-500">Support</div>
                   </div>
-                  <div className="w-px h-8 bg-white/30"></div>
+                  <div className="w-px h-8 bg-gray-300"></div>
                   <div className="text-center">
                     <div className="font-bold text-lg">99%</div>
-                    <div className="text-white/70">Uptime</div>
+                    <div className="text-gray-500">Uptime</div>
                   </div>
                 </div>
               </div>

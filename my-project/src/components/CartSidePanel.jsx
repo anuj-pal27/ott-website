@@ -14,7 +14,7 @@ const CartSidePanel = ({ isOpen, onClose }) => {
 
   const handleCheckout = () => {
     onClose();
-    navigate('/checkout');
+    navigate('/cart-checkout');
   };
 
   const getDurationDetails = (item) => {

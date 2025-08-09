@@ -1,4 +1,5 @@
 const SubscriptionPlan = require("../models/SubscriptionPlan");
+const { uploadToCloudinary, deleteFromCloudinary } = require("../utils/cloudinaryUpload");
 
 const VALID_CATEGORIES = ['SUBSCRIPTIONS',    
             'SOFTWARE',         
@@ -22,6 +23,7 @@ const VALID_CATEGORIES = ['SUBSCRIPTIONS',
 const addSubscriptionPlan = async (req, res) => {
     try {
         const subscriptionData = req.body;
+        
         // Validate category
         if (!subscriptionData.category || !VALID_CATEGORIES.includes(subscriptionData.category)) {
             return res.status(400).json({
@@ -29,16 +31,29 @@ const addSubscriptionPlan = async (req, res) => {
                 message: "Invalid or missing category. Allowed: subscriptions, software, websites, tools, music, design, marketing, hosting, other."
             });
         }
+        
         const existingPlan = await SubscriptionPlan.findOne({
             serviceName: subscriptionData.serviceName
         });
+        
         if (existingPlan) {
             return res.status(400).json({
                 success: false,
                 message: "Subscription plan already exists"
             });
         }
+
+        // If iconImage is a Cloudinary URL, extract public_id
+        if (subscriptionData.iconImage && subscriptionData.iconImage.includes('cloudinary.com')) {
+            const urlParts = subscriptionData.iconImage.split('/');
+            const publicIdWithExtension = urlParts[urlParts.length - 1];
+            const publicId = publicIdWithExtension.split('.')[0];
+            subscriptionData.cloudinaryPublicId = publicId;
+        }
+
+
         const subscriptionPlan = await SubscriptionPlan.create(subscriptionData);
+        
         return res.status(200).json({
             success: true,
             message: "Subscription plan created successfully",
@@ -57,6 +72,7 @@ const updateSubscriptionPlan = async (req, res) => {
     try {
         const { planId } = req.params;
         const updateData = req.body;
+        
         // Validate category if present
         if (updateData.category && !VALID_CATEGORIES.includes(updateData.category)) {
             return res.status(400).json({
@@ -64,6 +80,7 @@ const updateSubscriptionPlan = async (req, res) => {
                 message: "Invalid category. Allowed: subscriptions, software, websites, tools, music, design, marketing, hosting, other."
             });
         }
+        
         const existingPlan = await SubscriptionPlan.findById(planId);
         if (!existingPlan) {
             return res.status(404).json({
@@ -71,11 +88,26 @@ const updateSubscriptionPlan = async (req, res) => {
                 message: "Subscription plan not found"
             });
         }
+
+        // If iconImage is being updated and there's an existing Cloudinary image, delete it
+        if (updateData.iconImage && existingPlan.cloudinaryPublicId && 
+            updateData.iconImage !== existingPlan.iconImage) {
+            try {
+                await deleteFromCloudinary(existingPlan.cloudinaryPublicId);
+            } catch (deleteError) {
+                console.error("Error deleting old Cloudinary image:", deleteError);
+                // Continue with update even if deletion fails
+            }
+        }
+
+
+
         const updatedPlan = await SubscriptionPlan.findByIdAndUpdate(
             planId,
             { ...updateData, updatedAt: new Date() },
             { new: true, runValidators: true }
         );
+        
         return res.status(200).json({
             success: true,
             message: "Subscription plan updated successfully",
@@ -101,12 +133,18 @@ const deleteSubscriptionPlan = async (req, res) => {
                 message: "Subscription plan not found"
             });
         }
-        
-        // Soft delete by setting isActive to false
-        await SubscriptionPlan.findByIdAndUpdate(planId, { 
-            isActive: false, 
-            updatedAt: new Date() 
-        });
+
+        // Delete Cloudinary image if it exists
+        if (existingPlan.cloudinaryPublicId) {
+            try {
+                await deleteFromCloudinary(existingPlan.cloudinaryPublicId);
+            } catch (deleteError) {
+                console.error("Error deleting Cloudinary image:", deleteError);
+                // Continue with deletion even if image deletion fails
+            }
+        }
+
+        await SubscriptionPlan.findByIdAndDelete(planId);
         
         return res.status(200).json({
             success: true,
@@ -145,8 +183,8 @@ const getSubscriptionPlanById = async (req, res) => {
     try {
         const { planId } = req.params;
         
-        const plan = await SubscriptionPlan.findById(planId);
-        if (!plan) {
+        const subscriptionPlan = await SubscriptionPlan.findById(planId);
+        if (!subscriptionPlan) {
             return res.status(404).json({
                 success: false,
                 message: "Subscription plan not found"
@@ -155,14 +193,44 @@ const getSubscriptionPlanById = async (req, res) => {
         
         return res.status(200).json({
             success: true,
-            message: "Subscription plan retrieved successfully",
-            plan
+            subscriptionPlan
         });
     } catch (error) {
         console.error("Error in getSubscriptionPlanById:", error);
         return res.status(500).json({
             success: false,
-            message: "Error in retrieving subscription plan"
+            message: "Error in fetching subscription plan"
+        });
+    }
+};
+
+const uploadImage = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "No image file uploaded"
+            });
+        }
+
+        // Upload to Cloudinary
+        const uploadResult = await uploadToCloudinary(req.file);
+        
+        return res.status(200).json({
+            success: true,
+            message: "Image uploaded successfully",
+            imageUrl: uploadResult.url,
+            publicId: uploadResult.public_id,
+            width: uploadResult.width,
+            height: uploadResult.height,
+            format: uploadResult.format,
+            size: uploadResult.size
+        });
+    } catch (error) {
+        console.error("Error in uploadImage:", error);
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Error in uploading image"
         });
     }
 };
@@ -172,5 +240,6 @@ module.exports = {
     updateSubscriptionPlan,
     deleteSubscriptionPlan,
     getAllSubscriptionPlans,
-    getSubscriptionPlanById
+    getSubscriptionPlanById,
+    uploadImage
 };

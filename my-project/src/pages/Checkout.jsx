@@ -23,7 +23,7 @@ function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { addToCart, cart } = useCart();
+  const { addToCart } = useCart();
   
   // Get plan from location state (passed from ServiceCard)
   const plan = location.state?.plan;
@@ -205,19 +205,19 @@ function Checkout() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        selectedDuration === idx 
-                          ? 'border-secondary bg-secondary' 
-                          : 'border-white/50'
-                      }`}>
-                        {selectedDuration === idx && (
-                          <FaCheck size={10} className="text-white" />
-                        )}
-                      </div>
-                      <div>
-                        <div className="font-semibold dashboard-text text-lg">{duration.duration}</div>
-                        <div className="text-sm dashboard-text-muted mt-1">{duration.description}</div>
-                      </div>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                          selectedDuration === idx 
+                            ? 'border-secondary bg-secondary' 
+                            : 'border-white/50'
+                        }`}>
+                          {selectedDuration === idx && (
+                            <FaCheck size={10} className="text-white" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-semibold dashboard-text text-lg">{duration.duration}</div>
+                          <div className="text-sm dashboard-text-muted mt-1">{duration.description}</div>
+                        </div>
                       </div>
                       <div className="text-right">
                         {duration.originalPrice && duration.originalPrice !== duration.price && (
@@ -304,7 +304,7 @@ function Checkout() {
                   </div>
                   <div>
                     <h4 className="font-semibold dashboard-text">24/7 Support</h4>
-                    <p className="dashboard-text-muted text-sm">Get help anytime via WhatsApp: <a href="https://wa.me/918250919483" className="text-secondary hover:text-primary transition-colors">+91 8250919483</a></p>
+                    <p className="dashboard-text-muted text-sm">Get help anytime via WhatsApp: <a href="https://wa.me/919353690229" className="text-secondary hover:text-primary transition-colors">+91 9353690229</a></p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -335,10 +335,10 @@ function Checkout() {
             <div className="dashboard-card">
               <h3 className="dashboard-heading text-2xl mb-4">Order Summary</h3>
               <div className="space-y-3">
-                                  <div className="flex justify-between items-center">
-                    <span className="dashboard-text-muted">Service:</span>
-                    <span className="font-medium dashboard-text">{plan.serviceName}</span>
-                  </div>
+                <div className="flex justify-between items-center">
+                  <span className="dashboard-text-muted">Service:</span>
+                  <span className="font-medium dashboard-text">{plan.serviceName}</span>
+                </div>
                 {selectedDurationData && (
                   <>
                     <div className="flex justify-between items-center">
@@ -422,64 +422,47 @@ function Checkout() {
 
             {/* Checkout Button */}
             <div className="dashboard-card">
-                              <button
-                  onClick={handleCheckout}
-                  disabled={loading || !selectedDurationData || selectedDurationData.slotsAvailable === 0}
-                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
-                    selectedDurationData && selectedDurationData.slotsAvailable > 0 && !loading
-                      ? 'dashboard-button-primary'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                {loading
-                  ? 'Processing...'
-                  : selectedDurationData && selectedDurationData.slotsAvailable > 0
+              <button
+                onClick={handleCheckout}
+                disabled={loading || !selectedDurationData}
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
+                  loading || !selectedDurationData
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-primary hover:bg-secondary text-white shadow-lg hover:shadow-xl hover:scale-105'
+                }`}
+              >
+                {loading 
+                  ? 'Processing...' 
+                  : selectedDurationData 
                     ? `Proceed to Payment - ₹${selectedDurationData.price}`
-                    : 'Out of Stock'
+                    : 'Select Duration'
                 }
               </button>
-              {error && (
-                <div className="dashboard-error text-center mt-3">{error}</div>
-              )}
-            </div>
-
-            {/* Support Info */}
-            <div className="dashboard-card bg-gradient-to-r from-primary/20 to-secondary/20">
-              <h4 className="dashboard-heading text-xl mb-3 flex items-center gap-2">
-                <FaHeadset className="text-secondary" />
-                Need Help?
-              </h4>
-              <p className="dashboard-text-muted text-sm mb-3">
-                Contact us anytime for support or questions about your order.
-              </p>
-              <a
-                href="https://wa.me/918250919483"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-secondary hover:text-primary font-medium text-sm transition-colors"
-              >
-                <FaHeadset />
-                WhatsApp Support
-              </a>
+              {error && <div className="text-red-500 mt-4 text-center">{error}</div>}
             </div>
           </div>
         </div>
+        
+        {/* Footer */}
+        <Suspense fallback={<div className="dashboard-loading">Loading footer...</div>}>
+          <Footer />
+        </Suspense>
       </div>
 
       {/* Auth Modal */}
       {showAuthModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="dashboard-card max-w-sm w-full text-center">
-            <h2 className="dashboard-heading mb-4">Login Required</h2>
-            <p className="mb-6 dashboard-text-muted">You need to be logged in to proceed with checkout. Please login or sign up to continue.</p>
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-xl">
+            <h2 className="text-2xl font-bold mb-4 text-primary">Login Required</h2>
+            <p className="mb-6 text-gray-700">You need to be logged in to proceed with checkout. Please login or sign up to continue.</p>
             <button
-              className="dashboard-button-primary w-full mb-3"
+              className="dashboard-button-primary w-full mb-2"
               onClick={() => navigate('/auth')}
             >
               Login / Signup
             </button>
             <button
-              className="dashboard-button-secondary w-full"
+              className="w-full py-2 mt-2 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-100"
               onClick={() => setShowAuthModal(false)}
             >
               Cancel
@@ -487,11 +470,6 @@ function Checkout() {
           </div>
         </div>
       )}
-      
-      {/* Footer */}
-      <Suspense fallback={<div className="dashboard-loading">Loading footer...</div>}>
-        <Footer />
-      </Suspense>
     </div>
   );
 }

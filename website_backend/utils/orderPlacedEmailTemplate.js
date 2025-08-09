@@ -76,11 +76,11 @@ function orderPlacedEmailTemplate({ userName, orderId, orderDetails, orderDate }
               <li>Any additional setup instructions will be shared</li>
               <li>Feel free to ask questions during the setup process</li>
             </ul>
-            <p>If you don't receive a WhatsApp message within 30 minutes, please contact us at: <strong>+91 8250919483</strong></p>
+            <p>If you don't receive a WhatsApp message within 30 minutes, please contact us at: <strong>+91 9353690229</strong></p>
           </div>
           <div class="footer">
             &copy; ${new Date().getFullYear()} Vyapaar360. All rights reserved.<br/>
-            Contact: support@vyapaar360.com
+            Contact: goutham4391@gmail.com
           </div>
         </div>
       </body>

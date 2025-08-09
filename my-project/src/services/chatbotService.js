@@ -1,5 +1,5 @@
 // Chatbot Service - Can be easily upgraded to AI integration
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api';
 
 class ChatbotService {
   constructor() {
@@ -22,7 +22,7 @@ class ChatbotService {
       },
       'support': {
         keywords: ['support', 'help', 'issue', 'problem', 'contact', 'assist', 'trouble', 'customer care', 'service desk'],
-        response: 'Need help? Our support team is available 24/7 via WhatsApp (+91 93536 90229), email (support@vyapaar360.com), or this chat. We respond quickly!'
+        response: 'Need help? Our support team is available 24/7 via WhatsApp (+91 9353690229), email (goutham4391@gmail.com), or this chat. We respond quickly!'
       },
       'refund': {
         keywords: ['refund', 'return', 'cancel', 'money back', 'replacement', 'not working', 'cancel order', 'refund policy'],
@@ -111,7 +111,7 @@ class ChatbotService {
     // Default response
     return {
       type: 'unknown',
-      response: 'I\'m not sure about that. Would you like to speak with our human support team? You can contact us on WhatsApp at +91 93536 90229 or email us at support@vyapaar360.com'
+      response: 'I\'m not sure about that. Would you like to speak with our human support team? You can contact us on WhatsApp at +91 9353690229 or email us at goutham4391@gmail.com'
     };
   }
 

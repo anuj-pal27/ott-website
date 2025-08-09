@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import adminService from '../services/adminService';
 import SvgEffect from '../components/SvgEffect';
 import { useAuth } from '../context/AuthContext';
+import { FaUpload, FaImage, FaLink } from 'react-icons/fa';
 
 const CATEGORY_ICON_MAP = {
   'AI TOOLS': { name: 'AI Tools' },
@@ -27,6 +28,8 @@ function EditSubscription() {
   const navigate = useNavigate();
   const { planId } = useParams();
   const { isAuthenticated, user } = useAuth();
+  
+
   const [form, setForm] = useState({
     serviceName: '',
     description: '',
@@ -56,11 +59,14 @@ function EditSubscription() {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
+  const [imageUploadLoading, setImageUploadLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/plans/categories');
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'}/plans/categories`);
         const data = await res.json();
         if (data.success && Array.isArray(data.categories)) {
           setCategories(data.categories);
@@ -90,6 +96,12 @@ function EditSubscription() {
       return;
     }
 
+    // Check if planId exists
+    if (!planId) {
+      setFormError('Plan ID is missing');
+      return;
+    }
+
     // Fetch plan data
     fetchPlanData();
   }, [navigate, planId, isAuthenticated, user]);
@@ -98,7 +110,13 @@ function EditSubscription() {
     try {
       setLoading(true);
       const response = await adminService.getSubscriptionPlanById(planId);
-      const plan = response.plan;
+      
+      if (!response.success || !response.subscriptionPlan) {
+        throw new Error('Plan not found or failed to fetch');
+      }
+      
+      const plan = response.subscriptionPlan;
+
       setForm({
         serviceName: plan.serviceName || '',
         description: plan.description || '',
@@ -132,7 +150,12 @@ function EditSubscription() {
         category: plan.category || 'others', // Set category from fetched data
         sampleLink: plan.sampleLink || '',
       });
+      // Set image preview for existing image
+      if (plan.iconImage) {
+        setImagePreview(plan.iconImage);
+      }
     } catch (err) {
+      console.error('Error fetching plan data:', err);
       setFormError(err.message || 'Failed to fetch plan data');
     } finally {
       setLoading(false);
@@ -142,6 +165,68 @@ function EditSubscription() {
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setFormError('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setFormError('Image size should be less than 5MB');
+      return;
+    }
+
+    setSelectedImage(file);
+    setImageUploadLoading(true);
+    setFormError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+              const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api'}/admin/upload-image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setForm(prev => ({ ...prev, iconImage: data.imageUrl }));
+        setImagePreview(data.imageUrl);
+        setFormSuccess(`Image uploaded successfully! Size: ${(data.size / 1024).toFixed(1)}KB`);
+        setTimeout(() => setFormSuccess(''), 3000);
+      } else {
+        setFormError(data.message || 'Failed to upload image');
+      }
+    } catch (error) {
+      setFormError('Error uploading image. Please try again.');
+    } finally {
+      setImageUploadLoading(false);
+    }
+  };
+
+  const handleImageUrlChange = (e) => {
+    const url = e.target.value;
+    setForm(prev => ({ ...prev, iconImage: url }));
+    setImagePreview(url);
+    setSelectedImage(null);
+  };
+
+  const clearImage = () => {
+    setForm({ ...form, iconImage: '' });
+    setImagePreview('');
+    setSelectedImage(null);
   };
 
   // Dynamic features list handlers
@@ -278,6 +363,23 @@ function EditSubscription() {
     );
   }
 
+  // Show loading state while fetching data
+  if (loading) {
+    return (
+      <div className="dashboard-theme">
+        <div className="dashboard-background">
+          <SvgEffect />
+        </div>
+        <div className="dashboard-gradient-overlay"></div>
+        <div className="dashboard-gradient-top"></div>
+        <div className="dashboard-glassmorphism"></div>
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen">
+          <div className="dashboard-loading">Loading subscription plan...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-theme">
       {/* SVG Background */}
@@ -367,18 +469,47 @@ function EditSubscription() {
               </select>
             </div>
             <div className="dashboard-form-group">
-              <label className="dashboard-form-label">Icon Image URL</label>
-              <input
-                type="text"
-                name="iconImage"
-                value={form.iconImage}
-                onChange={handleFormChange}
-                className="dashboard-input"
-                placeholder="https://example.com/image.jpg"
-                required
-              />
+              <label className="dashboard-form-label">Icon Image</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  name="iconImage"
+                  value={form.iconImage}
+                  onChange={handleImageUrlChange}
+                  className="flex-1 dashboard-input"
+                  placeholder="https://example.com/image.jpg (optional)"
+                />
+                <label htmlFor="iconImageUpload" className="dashboard-button-secondary cursor-pointer flex items-center gap-1">
+                  <FaImage />
+                  <span>Upload</span>
+                  <input
+                    type="file"
+                    id="iconImageUpload"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={imageUploadLoading}
+                  />
+                </label>
+                {selectedImage && (
+                  <button
+                    type="button"
+                    className="dashboard-button-secondary text-red-500 hover:text-red-600"
+                    onClick={clearImage}
+                    disabled={imageUploadLoading}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              {imagePreview && (
+                <div className="mt-2 flex items-center gap-2">
+                  <img src={imagePreview} alt="Icon Preview" className="w-10 h-10 object-cover rounded-full" />
+                  <p className="text-xs text-white/60">Selected Image: {selectedImage?.name || 'No image selected'}</p>
+                </div>
+              )}
               <p className="text-xs text-white/60 mt-1">
-                Enter a valid image URL (e.g., https://picsum.photos/300/200)
+                Enter a valid image URL (e.g., https://picsum.photos/300/200) or upload an image.
               </p>
             </div>
             {/* Sample Link Section */}
@@ -400,9 +531,9 @@ function EditSubscription() {
               <label className="dashboard-form-label">Duration Options</label>
               <div className="space-y-4">
                 {form.durations.map((duration, idx) => (
-                  <div key={idx} className="border border-white/20 rounded-lg p-4 bg-white/5">
+                  <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-white">
                     <div className="flex justify-between items-center mb-3">
-                      <h4 className="text-white font-medium">Duration Option {idx + 1}</h4>
+                      <h4 className="text-gray-900 font-medium">Duration Option {idx + 1}</h4>
                       <button
                         type="button"
                         className="bg-red-500 hover:bg-red-600 text-white rounded-lg px-2 py-1 text-xs font-bold"
@@ -414,7 +545,7 @@ function EditSubscription() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Duration</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Duration</label>
                         <select
                           value={duration.duration}
                           onChange={e => handleDurationChange(idx, 'duration', e.target.value)}
@@ -430,7 +561,7 @@ function EditSubscription() {
                         </select>
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Description</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Description</label>
                         <input
                           type="text"
                           value={duration.description}
@@ -441,7 +572,7 @@ function EditSubscription() {
                         />
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Price</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Price</label>
                         <input
                           type="number"
                           value={duration.price}
@@ -452,7 +583,7 @@ function EditSubscription() {
                         />
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Original Price</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Original Price</label>
                         <input
                           type="number"
                           value={duration.originalPrice}
@@ -463,7 +594,7 @@ function EditSubscription() {
                         />
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Slots Available</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Slots Available</label>
                         <input
                           type="number"
                           value={duration.slotsAvailable}
@@ -474,7 +605,7 @@ function EditSubscription() {
                         />
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Total Slots</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Total Slots</label>
                         <input
                           type="number"
                           value={duration.totalSlots}
@@ -485,7 +616,7 @@ function EditSubscription() {
                         />
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">Start Date</label>
+                        <label className="text-gray-700 text-sm mb-1 block">Start Date</label>
                         <input
                           type="date"
                           value={duration.startDate}
@@ -495,16 +626,16 @@ function EditSubscription() {
                         />
                       </div>
                       <div>
-                        <label className="text-white/80 text-sm mb-1 block">End Date</label>
+                        <label className="text-gray-700 text-sm mb-1 block">End Date</label>
                         <input
                           type="date"
                           value={duration.endDate}
                           className="dashboard-input bg-gray-100 cursor-not-allowed"
                           readOnly
                         />
-                        <p className="text-xs text-white/60 mt-1">
-                          Automatically calculated based on duration and start date
-                        </p>
+                                                   <p className="text-xs text-gray-500 mt-1">
+                             Automatically calculated based on duration and start date
+                           </p>
                       </div>
                     </div>
                     <div className="mt-3">
@@ -515,7 +646,7 @@ function EditSubscription() {
                           onChange={e => handleDurationChange(idx, 'isActive', e.target.checked)}
                           className="w-4 h-4 text-primary bg-white/20 border-white/30 rounded focus:ring-white/50"
                         />
-                        <span className="ml-2 text-white/80 text-sm">Active Duration</span>
+                     <span className="ml-2 text-gray-700 text-sm">Active Duration</span>
                       </label>
                     </div>
                   </div>

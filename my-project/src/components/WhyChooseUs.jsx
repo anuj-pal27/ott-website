@@ -3,7 +3,7 @@ import React from 'react';
 const WhyChooseUs = React.memo(function WhyChooseUs() {
   return (
     <section className="max-w-6xl mx-auto mt-16 mb-12 px-4">    
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 relative">
         <span className="dashboard-badge mb-2">💡 Why Choose Our Digital Services Platform</span>
         <h2 className="dashboard-heading mb-2">Your One-Stop Digital Solution</h2>
         <p className="dashboard-subheading max-w-3xl mx-auto">

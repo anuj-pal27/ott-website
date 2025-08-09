@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
+import Services from './pages/Services'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import Cart from './pages/Cart'
@@ -12,6 +13,7 @@ import AddSubscription from './pages/AddSubscription'
 import EditSubscription from './pages/EditSubscription'
 import { AuthProvider } from './context/AuthContext'
 import Checkout from './pages/Checkout'
+import CartCheckout from './pages/CartCheckout'
 import { CartProvider } from './context/CartContext'
 import Category from './pages/Category';
 import PaymentStatus from './pages/PaymentStatus';
@@ -20,6 +22,7 @@ import TermsAndConditions from './pages/TermsAndConditions';
 import Disclaimer from './pages/Disclaimer';
 import RefundPolicy from './pages/RefundPolicy';
 import PaymentHistory from './pages/PaymentHistory';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -30,6 +33,7 @@ function App() {
           <Route path="/" element={<Layout />}>
             {/* Nested routes that will render inside the Layout */}
             <Route index element={<Dashboard />} />
+            <Route path="services" element={<Services />} />
             <Route path="about" element={<About />} />
             <Route path="contact" element={<Contact />} />
   
@@ -47,8 +51,11 @@ function App() {
           <Route path="/admin-dashboard/add" element={<AddSubscription />} />
           <Route path="/admin-dashboard/edit/:planId" element={<EditSubscription />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/cart-checkout" element={<CartCheckout />} />
           <Route path="/payment-status" element={<PaymentStatus />} />
           <Route path="/payment-history" element={<PaymentHistory />} />
+          {/* 404 Catch-all route - must be last */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </CartProvider>
     </AuthProvider>

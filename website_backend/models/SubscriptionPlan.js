@@ -84,6 +84,10 @@ const subscriptionSchema = new mongoose.Schema({
     iconImage: {
         type:String,
     },
+    cloudinaryPublicId: {
+        type: String,
+        default: null
+    },
     sampleLink: {
         type: String
     },

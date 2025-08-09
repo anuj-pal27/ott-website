@@ -192,7 +192,7 @@ const Chatbot = () => {
             <div className="mt-2 md:mt-3 text-center">
               <button
                 onClick={openWhatsApp}
-                className="inline-flex items-center gap-1 md:gap-2 bg-green-500 hover:bg-green-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm transition-colors"
+                className="inline-flex items-center gap-1 md:gap-2 bg-orange-500 hover:bg-orange-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm transition-colors"
               >
                 <FaWhatsapp className="text-xs md:text-sm" />
                 Talk to Human

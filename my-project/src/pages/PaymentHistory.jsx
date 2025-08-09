@@ -34,7 +34,15 @@ const PaymentHistory = () => {
 
   const filteredPayments = payments.filter(p => {
     const statusMatch = statusFilter === 'all' || p.paymentStatus === statusFilter;
-    const searchMatch = !search || (p.order?._id || '').toLowerCase().includes(search.toLowerCase());
+    
+    // Check search across all orders (single order and multiple orders)
+    const hasMultipleOrders = p.orders && p.orders.length > 1;
+    const ordersToCheck = hasMultipleOrders ? p.orders : [p.order];
+    
+    const searchMatch = !search || ordersToCheck.some(order => 
+      order && order._id && order._id.toLowerCase().includes(search.toLowerCase())
+    );
+    
     return statusMatch && searchMatch;
   });
 
@@ -77,30 +85,69 @@ const PaymentHistory = () => {
     doc.text('Start Date', 96, 83);
     doc.text('Amount', 156, 83);
     doc.setTextColor(0, 0, 0);
-    // Table Row (handle long subscription names)
-    doc.setFontSize(11);
-    const subscriptionName = payment.order?.subscriptionId?.serviceName || 'N/A';
-    const splitName = doc.splitTextToSize(subscriptionName, 46); // 46mm width for first column
-    doc.text(splitName, 16, 91);
-    const rowHeight = 6; // line height
-    const yRow = 91 + (splitName.length - 1) * rowHeight;
-    doc.text(`${payment.order?.selectedDuration?.duration || 'N/A'}`, 66, yRow);
-    doc.text(`${payment.order?.startDate ? new Date(payment.order.startDate).toLocaleDateString() : 'N/A'}`, 96, yRow);
-    doc.text(`₹${payment.paymentAmount}`, 156, yRow);
+    // Check if this is a cart purchase with multiple orders
+    const hasMultipleOrders = payment.orders && payment.orders.length > 1;
+    const ordersToDisplay = hasMultipleOrders ? payment.orders : [payment.order];
+    
+    let currentY = 91;
+    
+    if (hasMultipleOrders) {
+      // Show summary for multiple items
+      doc.setFontSize(11);
+      doc.text('Multiple Items Purchased:', 16, currentY);
+      currentY += 8;
+      
+      // Show each item
+      ordersToDisplay.forEach((order, index) => {
+        if (!order) return;
+        
+        const subscriptionName = order?.subscriptionId?.serviceName || 'N/A';
+        const splitName = doc.splitTextToSize(subscriptionName, 46);
+        doc.text(splitName, 16, currentY);
+        
+        const rowHeight = 6;
+        const yRow = currentY + (splitName.length - 1) * rowHeight;
+        doc.text(`${order?.selectedDuration?.duration || 'N/A'}`, 66, yRow);
+        doc.text(`${order?.startDate ? new Date(order.startDate).toLocaleDateString() : 'N/A'}`, 96, yRow);
+        doc.text(`₹${order?.selectedDuration?.price || 0}`, 156, yRow);
+        
+        currentY = yRow + 8;
+      });
+      
+      // Show total
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('TOTAL:', 16, currentY);
+      doc.text(`₹${payment.paymentAmount}`, 156, currentY);
+      doc.setFont(undefined, 'normal');
+    } else {
+      // Single item
+      doc.setFontSize(11);
+      const subscriptionName = payment.order?.subscriptionId?.serviceName || 'N/A';
+      const splitName = doc.splitTextToSize(subscriptionName, 46);
+      doc.text(splitName, 16, currentY);
+      
+      const rowHeight = 6;
+      const yRow = currentY + (splitName.length - 1) * rowHeight;
+      doc.text(`${payment.order?.selectedDuration?.duration || 'N/A'}`, 66, yRow);
+      doc.text(`${payment.order?.startDate ? new Date(payment.order.startDate).toLocaleDateString() : 'N/A'}`, 96, yRow);
+      doc.text(`₹${payment.paymentAmount}`, 156, yRow);
+      
+      currentY = yRow;
+    }
     // Payment Details
     doc.setFontSize(12);
-    doc.text('Payment Details:', 14, yRow + 19);
+    doc.text('Payment Details:', 14, currentY + 19);
     doc.setFontSize(11);
-    doc.text(`Order ID: ${payment.order?._id || 'N/A'}`, 14, yRow + 26);
-    doc.text(`Payment ID: ${payment.paymentId || 'N/A'}`, 14, yRow + 32);
-    doc.text(`Payment Method: ${payment.paymentMethod}`, 14, yRow + 38);
-    doc.text(`Payment Status: ${payment.paymentStatus?.toUpperCase()}`, 14, yRow + 44);
-    doc.text(`Payment Date: ${payment.paymentDate ? new Date(payment.paymentDate).toLocaleString() : 'N/A'}`, 14, yRow + 50);
+    doc.text(`Payment ID: ${payment.paymentId || 'N/A'}`, 14, currentY + 26);
+    doc.text(`Payment Method: ${payment.paymentMethod}`, 14, currentY + 32);
+    doc.text(`Payment Status: ${payment.paymentStatus?.toUpperCase()}`, 14, currentY + 38);
+    doc.text(`Payment Date: ${payment.paymentDate ? new Date(payment.paymentDate).toLocaleString() : 'N/A'}`, 14, currentY + 44);
     // Footer
     doc.setFontSize(10);
     doc.setTextColor(120, 120, 120);
-    doc.text('Thank you for your business!', 14, yRow + 64);
-    doc.text('Vyapaar360 | www.vyapaar360.com | support@vyapaar360.com', 14, yRow + 70);
+    doc.text('Thank you for your business!', 14, currentY + 58);
+    doc.text('Vyapaar360 | www.vyapaar360.com | support@vyapaar360.com', 14, currentY + 64);
     doc.save(`Invoice_${payment.order?._id || payment._id}.pdf`);
   };
 
@@ -117,17 +164,17 @@ const PaymentHistory = () => {
   return (
     <div className="dashboard-theme min-h-screen p-4 md:p-10 flex flex-col items-center">
       <button
-        className="dashboard-button-secondary px-4 py-2 rounded-xl font-semibold text-base shadow-md hover:bg-secondary hover:text-white transition-all mb-4 md:mb-8"
+        className="dashboard-button-secondary px-4 py-2 rounded-xl font-semibold text-base shadow-md hover:bg-gray-200 transition-all mb-4 md:mb-8"
         onClick={() => navigate('/')}
       >
         ← Go to Dashboard
       </button>
       <h1 className="dashboard-heading mb-4 md:mb-10 text-center text-2xl md:text-4xl font-bold">Payment History & Orders</h1>
-      <div className="w-full max-w-7xl">
+      <div className="w-full max-w-[95vw] xl:max-w-[1400px]">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 md:mb-8 gap-4">
           <div className="flex items-center gap-2">
-            <label className="text-white font-semibold mr-2 text-base md:text-lg">Status:</label>
-            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="rounded-lg px-2 py-1 focus:ring-2 focus:ring-primary text-base md:text-lg text-white ">
+            <label className="text-gray-900 font-semibold mr-2 text-base md:text-lg">Status:</label>
+            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="rounded-lg px-2 py-1 focus:ring-2 focus:ring-primary text-base md:text-lg text-gray-900 border border-gray-300 bg-white">
               <option value="all" className='text-black'>All</option>
               <option value="success" className='text-black'>Success</option>
               <option value="pending" className='text-black'>Pending</option>
@@ -140,69 +187,90 @@ const PaymentHistory = () => {
               placeholder="Search by Order ID..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="rounded-lg px-2 py-1 w-full md:w-80 focus:ring-2 focus:ring-primary text-base md:text-lg border-white/10 bg-white/5"
+              className="rounded-lg px-2 py-1 w-full md:w-80 focus:ring-2 focus:ring-primary text-base md:text-lg border border-gray-300 bg-white text-gray-900"
             />
           </div>
         </div>
         {filteredPayments.length === 0 ? (
-          <div className="text-center text-white text-lg bg-red-500/10 rounded-xl py-8 mt-8">No previous payments or orders found.</div>
+          <div className="text-center text-gray-600 text-lg bg-gray-50 rounded-xl py-8 mt-8 border border-gray-200">No previous payments or orders found.</div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl shadow-2xl border border-white/20 bg-white/5">
-            <table className="min-w-full divide-y divide-white/10 text-base md:text-lg">
-              <thead className="sticky top-0 bg-primary/90 z-10">
-                <tr className="text-white text-base md:text-lg">
-                  <th className="py-4 px-2 md:px-6 text-left">Status</th>
-                  <th className="py-4 px-2 md:px-6 text-left">Amount</th>
-                  <th className="py-4 px-2 md:px-6 text-left">Method</th>
-                  <th className="py-4 px-2 md:px-6 text-left">Date</th>
-                  <th className="py-4 px-2 md:px-6 text-left">Order ID</th>
-                  <th className="py-4 px-2 md:px-6 text-left">Subscription</th>
-                  <th className="py-4 px-2 md:px-6 text-left">Duration</th>
-                  <th className="py-4 px-2 md:px-6 text-left">Start</th>
-                  <th className="py-4 px-2 md:px-6 text-left">Actions</th>
+          <div className="overflow-x-auto rounded-2xl shadow-lg border border-gray-200 bg-white">
+            <table className="w-full divide-y divide-gray-200 text-base md:text-lg">
+              <thead className="sticky top-0 bg-gray-50 z-10">
+                <tr className="text-gray-900 text-base md:text-lg">
+                  <th className="py-4 px-3 md:px-4 text-left font-semibold">Status</th>
+                  <th className="py-4 px-3 md:px-4 text-left font-semibold">Amount</th>
+                  <th className="py-4 px-3 md:px-4 text-left font-semibold">Method</th>
+                  <th className="py-4 px-3 md:px-4 text-left font-semibold">Date</th>
+                  <th className="py-4 px-3 md:px-4 text-left font-semibold">Order ID</th>
+                  <th className="py-4 px-3 md:px-4 text-left font-semibold">Subscription</th>
+                  <th className="py-4 px-3 md:px-4 text-left font-semibold">Duration</th>
+                  <th className="py-4 px-3 md:px-4 text-left font-semibold">Start Date</th>
+                  <th className="py-4 px-3 md:px-4 text-left font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredPayments.map((p) => (
-                  <tr
-                    key={p._id}
-                    className="text-white text-base md:text-lg border-b border-white/10 last:border-b-0 hover:bg-primary/10 transition group"
-                  >
-                    <td>
-                      {p.paymentStatus === 'success' && <span className="bg-green-500/20 text-green-500 px-3 py-1 rounded-full font-bold text-xs md:text-base">Success</span>}
-                      {p.paymentStatus === 'pending' && <span className="bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full font-bold text-xs md:text-base">Pending</span>}
-                      {p.paymentStatus === 'failed' && <span className="bg-red-500/20 text-red-500 px-3 py-1 rounded-full font-bold text-xs md:text-base">Failed</span>}
-                    </td>
-                    <td>₹{p.paymentAmount}</td>
-                    <td>{p.paymentMethod}</td>
-                    <td>{p.paymentDate ? new Date(p.paymentDate).toLocaleString() : 'N/A'}</td>
-                    <td className="truncate max-w-[120px] md:max-w-xs">{p.order?._id || 'N/A'}</td>
-                    <td className="truncate max-w-[120px] md:max-w-xs">{p.order?.subscriptionId?.serviceName || 'N/A'}</td>
-                    <td>{p.order?.selectedDuration?.duration || 'N/A'}</td>
-                    <td>{p.order?.startDate ? new Date(p.order.startDate).toLocaleDateString() : 'N/A'}</td>
-                   
-                    <td>
-                      {p.paymentStatus === 'success' && (
-                        <button
-                          className="dashboard-button-secondary px-3 py-1 rounded text-xs md:text-base hover:bg-primary/80 hover:text-white transition"
-                          onClick={e => { e.stopPropagation(); handleDownloadInvoice(p); }}
-                        >
-                          Download Invoice
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {filteredPayments.map((p) => {
+                  // Check if this is a cart purchase with multiple orders
+                  const hasMultipleOrders = p.orders && p.orders.length > 1;
+                  const ordersToDisplay = hasMultipleOrders ? p.orders : [p.order];
+                  
+                  return ordersToDisplay.map((order, index) => {
+                    if (!order) return null; // Skip if order is null
+                    
+                    return (
+                      <tr
+                        key={`${p._id}-${order._id || index}`}
+                        className="text-gray-900 text-base md:text-lg border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition group"
+                      >
+                        <td className="py-4 px-3 md:px-4">
+                          {p.paymentStatus === 'success' && <span className="bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold text-xs md:text-sm border border-green-200">Success</span>}
+                          {p.paymentStatus === 'pending' && <span className="bg-yellow-50 text-yellow-700 px-3 py-1 rounded-full font-bold text-xs md:text-sm border border-yellow-200">Pending</span>}
+                          {p.paymentStatus === 'failed' && <span className="bg-red-50 text-red-700 px-3 py-1 rounded-full font-bold text-xs md:text-sm border border-red-200">Failed</span>}
+                        </td>
+                        <td className="py-4 px-3 md:px-4 font-semibold">
+                          {hasMultipleOrders && index === 0 ? `₹${p.paymentAmount} (${p.itemCount} items)` : 
+                           hasMultipleOrders ? `₹${order.selectedDuration?.price || 0}` : 
+                           `₹${p.paymentAmount}`}
+                        </td>
+                        <td className="py-4 px-3 md:px-4">{p.paymentMethod}</td>
+                        <td className="py-4 px-3 md:px-4 text-sm">{p.paymentDate ? new Date(p.paymentDate).toLocaleString() : 'N/A'}</td>
+                        <td className="py-4 px-3 md:px-4">
+                          <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded border">
+                            {order._id ? order._id.substring(0, 8) + '...' : 'N/A'}
+                          </span>
+                        </td>
+                        <td className="py-4 px-3 md:px-4">
+                          <div className="max-w-[200px]">
+                            <span className="text-sm font-medium">{order?.subscriptionId?.serviceName || 'N/A'}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-3 md:px-4">
+                          <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-sm font-medium border border-blue-200">
+                            {order?.selectedDuration?.duration || 'N/A'}
+                          </span>
+                        </td>
+                        <td className="py-4 px-3 md:px-4 text-sm">{order?.startDate ? new Date(order.startDate).toLocaleDateString() : 'N/A'}</td>
+                       
+                        <td className="py-4 px-3 md:px-4">
+                          {p.paymentStatus === 'success' && index === 0 && (
+                            <button
+                              className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-secondary transition-all duration-200 shadow-sm hover:shadow-md"
+                              onClick={e => { e.stopPropagation(); handleDownloadInvoice(p); }}
+                            >
+                              📄 Download
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  });
+                })}
               </tbody>
             </table>
           </div>
         )}
       </div>
-      
-      {/* Footer */}
-      <Suspense fallback={<div className="dashboard-loading">Loading footer...</div>}>
-        <Footer />
-      </Suspense>
     </div>
   );
 };
