@@ -322,7 +322,7 @@ const verifyPayment = async (req, res) => {
                 
                 // Send email to admin
                 await sendEmail(
-                    'anujpal27669@gmail.com', 
+                    'goutham4391@gmail.com', 
                     'Admin', 
                     '', 
                     adminEmailHtml, 
