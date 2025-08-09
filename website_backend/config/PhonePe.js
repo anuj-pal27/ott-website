@@ -97,9 +97,10 @@ async function initiatePhonePePayment(orderId, amount, userId, mobileNumber, typ
       merchantTransactionId: orderId,
       merchantUserId: userId,
       amount: amount * 100,
-      redirectUrl: `${process.env.FRONTEND_URL}/payment-status?paymentId=${orderId}`,
+      // Redirect to app root with intent so SPA can route without server rewrites
+      redirectUrl: `${process.env.FRONTEND_URL}/?goto=payment-status&paymentId=${orderId}`,
       redirectMode: 'REDIRECT',
-      callbackUrl: `${process.env.FRONTEND_URL}/payment-status?paymentId=${orderId}`,
+      callbackUrl: `${process.env.FRONTEND_URL}/?goto=payment-status&paymentId=${orderId}`,
       mobileNumber: mobileNumber,
       paymentInstrument: { type: 'PAY_PAGE' }
     };
