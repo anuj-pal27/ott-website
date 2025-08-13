@@ -11,27 +11,59 @@ const userSchema = Joi.object({
         'string.email': 'Please provide a valid email address',
         'any.required': 'Email is required'
     }),
-    phone: Joi.string().pattern(/^[0-9]{10}$/).required().messages({
-        'string.pattern.base': 'Phone number must be 10 digits',
-        'any.required': 'Phone number is required'
+    password: Joi.string().min(6).required().messages({
+        'string.min': 'Password must be at least 6 characters long',
+        'any.required': 'Password is required'
     }),
-    otp: Joi.string().length(6).required().messages({
-        'any.required': 'OTP is required'
+    phone: Joi.string().pattern(/^[0-9]{10}$/).optional().allow(null, '').messages({
+        'string.pattern.base': 'Phone number must be 10 digits'
     }),
     accountType: Joi.string().valid('user', 'admin').default('user')
 });
 
 const loginSchema = Joi.object({
-    phone: Joi.string().pattern(/^[0-9]{10}$/).required().messages({
-        'string.pattern.base': 'Phone number must be 10 digits',
-        'any.required': 'Phone number is required'
+    email: Joi.string().email().required().messages({
+        'string.email': 'Please provide a valid email address',
+        'any.required': 'Email is required'
     }),
-    otp: Joi.string().length(6).required().messages({
-        'any.required': 'OTP is required'
+    password: Joi.string().required().messages({
+        'any.required': 'Password is required'
     })
 });
 
-// OTP validation schemas
+const adminSignupSchema = Joi.object({
+    name: Joi.string().min(2).max(50).required().messages({
+        'string.min': 'Name must be at least 2 characters long',
+        'string.max': 'Name cannot exceed 50 characters',
+        'any.required': 'Name is required'
+    }),
+    email: Joi.string().email().required().messages({
+        'string.email': 'Please provide a valid email address',
+        'any.required': 'Email is required'
+    }),
+    password: Joi.string().min(6).required().messages({
+        'string.min': 'Password must be at least 6 characters long',
+        'any.required': 'Password is required'
+    }),
+    adminSecret: Joi.string().required().messages({
+        'any.required': 'Admin secret is required'
+    }),
+    phone: Joi.string().pattern(/^[0-9]{10}$/).optional().allow(null, '').messages({
+        'string.pattern.base': 'Phone number must be 10 digits'
+    })
+});
+
+const adminLoginSchema = Joi.object({
+    email: Joi.string().email().required().messages({
+        'string.email': 'Please provide a valid email address',
+        'any.required': 'Email is required'
+    }),
+    password: Joi.string().required().messages({
+        'any.required': 'Password is required'
+    })
+});
+
+// OTP validation schemas (keeping for backward compatibility but not used)
 const sendOtpSchema = Joi.object({
     email: Joi.string().email().required().messages({
         'string.email': 'Please provide a valid email address',
@@ -391,6 +423,8 @@ const validateRequest = (schema) => {
 module.exports = { 
     userSchema, 
     loginSchema, 
+    adminSignupSchema,
+    adminLoginSchema,
     planSchema,
     updatePlanSchema,
     createOrderSchema,

@@ -7,9 +7,12 @@ const userSchema = new mongoose.Schema({
     },
     email:{
         type:String,
-        required:false, // Made optional for phone-based auth
+        required:true,
         unique:true,
-        sparse: true, // Allow multiple null values
+    },
+    password:{
+        type:String,
+        required:true,
     },
     isPhoneVerified:{
         type:Boolean,
@@ -17,7 +20,7 @@ const userSchema = new mongoose.Schema({
     },
     isEmailVerified:{
         type:Boolean,
-        default: false,
+        default: true, // Set to true since we're using email/password auth
     },
     token:{
         type:String,
@@ -31,8 +34,9 @@ const userSchema = new mongoose.Schema({
     },
     phone:{
         type:String,
-        required: true, // Made required for phone-based auth
+        required: false, // Made optional for email-based auth
         unique: true,
+        sparse: true, // Allow multiple null values
     },
     accountType:{
         type:String,
