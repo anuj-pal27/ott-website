@@ -88,7 +88,7 @@ function AdminDashboard() {
   }
   if (!isAuthenticated() || !user || user.accountType !== 'admin') {
     alert('Access denied. Admin privileges required.');
-    window.location.href = '/admin';
+    navigate('/admin');
     return null;
   }
 

@@ -19,76 +19,7 @@ async function fetchWithAuth(url, options = {}) {
 }
 
 class AuthService {
-  // Send OTP for signup (phone-based)
-  async sendSignupOtp(phone, email, name) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/user/send-signup-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phone, email, name }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to send OTP');
-      }
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Send OTP for login (phone-based)
-  async sendLoginOtp(phone) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/user/send-login-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phone }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to send OTP');
-      }
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Legacy email OTP (for backward compatibility)
-  async sendOtp(email) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/user/send-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to send OTP');
-      }
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Phone-based signup
+  // Email/password signup
   async signup(userData) {
     try {
       const response = await fetch(`${API_BASE_URL}/user/signup`, {
@@ -111,7 +42,7 @@ class AuthService {
     }
   }
 
-  // Phone-based login
+  // Email/password login
   async login(credentials) {
     try {
       const response = await fetch(`${API_BASE_URL}/user/login`, {
@@ -131,6 +62,26 @@ class AuthService {
       return data;
     } catch (error) {
       throw error;
+    }
+  }
+
+  // Logout (clear token from localStorage and call backend)
+  async logout() {
+    try {
+      const token = this.getToken();
+      if (token) {
+        await fetchWithAuth(`${API_BASE_URL}/user/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
     }
   }
 
@@ -182,13 +133,6 @@ class AuthService {
     }
   }
 
-  // Logout (clear token from localStorage)
-  logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    // Clear any other auth-related data
-  }
-
   // Get stored token
   getToken() {
     return localStorage.getItem('token');
@@ -205,56 +149,10 @@ class AuthService {
     return !!this.getToken();
   }
 
-  // Send OTP for admin signup (phone verification)
-  async sendAdminSignupOtp(phone, email, name, adminSecret) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/send-admin-signup-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phone, email, name, adminSecret }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to send OTP');
-      }
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Send OTP for admin login (phone verification)
-  async sendAdminLoginOtp(phone) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/send-admin-login-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phone }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to send OTP');
-      }
-
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Admin signup
+  // Admin signup with email/password
   async createAdmin(adminData) {
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/create-admin`, {
+      const response = await fetch(`${API_BASE_URL}/user/admin/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -274,10 +172,10 @@ class AuthService {
     }
   }
 
-  // Admin login
+  // Admin login with email/password
   async loginAdmin(credentials) {
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/login-admin`, {
+      const response = await fetch(`${API_BASE_URL}/user/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

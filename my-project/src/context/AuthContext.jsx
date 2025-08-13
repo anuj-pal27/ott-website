@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
       alert('Session expired. Please log in again.');
       // Redirect based on user type
       if (user && user.accountType === 'admin') {
-        navigate('/admin');
+        navigate('/admin-dashboard');
       } else {
         navigate('/auth');
       }

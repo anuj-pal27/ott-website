@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SvgEffect from '../components/SvgEffect';
 import PersonIcon from '@mui/icons-material/Person';
@@ -7,7 +7,6 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import authService from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.jpg';
 
@@ -20,18 +19,13 @@ function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpLoading, setOtpLoading] = useState(false);
-  const [resendTimer, setResendTimer] = useState(0);
-  const RESEND_INTERVAL = 60; // seconds
 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
     name: '',
-    phone: '',
-    otp: ''
+    phone: ''
   });
 
   const handleInputChange = (e) => {
@@ -43,57 +37,6 @@ function Auth() {
     if (error) setError('');
   };
 
-  useEffect(() => {
-    if (resendTimer > 0) {
-      const timerId = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
-      return () => clearTimeout(timerId);
-    }
-  }, [resendTimer]);
-
-  const handleSendSignupOtp = async () => {
-    if (!formData.phone || !formData.email || !formData.name) {
-      setError('Please enter your phone number, email, and name');
-      return;
-    }
-
-    setOtpLoading(true);
-    setError('');
-
-    try {
-      await authService.sendSignupOtp(formData.phone, formData.email, formData.name);
-      setOtpSent(true);
-      setSuccess('OTP sent successfully to your phone!');
-      setTimeout(() => setSuccess(''), 5000);
-      setResendTimer(RESEND_INTERVAL);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setOtpLoading(false);
-    }
-  };
-
-  const handleSendLoginOtp = async () => {
-    if (!formData.phone) {
-      setError('Please enter your phone number');
-      return;
-    }
-
-    setOtpLoading(true);
-    setError('');
-
-    try {
-      await authService.sendLoginOtp(formData.phone);
-      setOtpSent(true);
-      setSuccess('OTP sent successfully to your phone!');
-      setTimeout(() => setSuccess(''), 5000);
-      setResendTimer(RESEND_INTERVAL);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setOtpLoading(false);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -101,16 +44,16 @@ function Auth() {
 
     try {
       if (isLogin) {
-        // Handle phone-based login
-        if (!otpSent) {
-          setError('Please send OTP first');
+        // Handle email/password login
+        if (!formData.email || !formData.password) {
+          setError('Please enter your email and password');
           setLoading(false);
           return;
         }
 
         const response = await login({
-          phone: formData.phone,
-          otp: formData.otp
+          email: formData.email,
+          password: formData.password
         });
 
         setSuccess('Login successful! Redirecting...');
@@ -118,9 +61,21 @@ function Auth() {
           navigate('/');
         }, 1500);
       } else {
-        // Handle phone-based signup
-        if (!otpSent) {
-          setError('Please send OTP first');
+        // Handle email/password signup
+        if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+          setError('Please fill in all required fields');
+          setLoading(false);
+          return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+          setError('Passwords do not match');
+          setLoading(false);
+          return;
+        }
+
+        if (formData.password.length < 6) {
+          setError('Password must be at least 6 characters long');
           setLoading(false);
           return;
         }
@@ -128,8 +83,8 @@ function Auth() {
         const signupData = {
           name: formData.name,
           email: formData.email,
-          phone: formData.phone,
-          otp: formData.otp
+          password: formData.password,
+          phone: formData.phone || null
         };
 
         const response = await signup(signupData);
@@ -150,14 +105,12 @@ function Auth() {
     setIsLogin(!isLogin);
     setError('');
     setSuccess('');
-    setOtpSent(false);
     setFormData({
       email: '',
       password: '',
       confirmPassword: '',
       name: '',
-      phone: '',
-      otp: ''
+      phone: ''
     });
   };
 
@@ -261,19 +214,18 @@ function Auth() {
                   <div className="flex items-center gap-3">
                     <div className="w-5 h-5 flex-shrink-0"></div>
                     <label className="dashboard-label">
-                      Phone Number
+                      Email Address
                     </label>
                   </div>
                   <div className="flex items-center gap-3">
-                    <PhoneIcon className="text-gray-400 w-5 h-5 flex-shrink-0" />
+                    <EmailIcon className="text-gray-400 w-5 h-5 flex-shrink-0" />
                     <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
+                      type="email"
+                      name="email"
+                      value={formData.email}
                       onChange={handleInputChange}
                       className="dashboard-input"
-                      placeholder="Enter your phone number"
-                      maxLength="10"
+                      placeholder="Enter your email"
                       required
                     />
                   </div>
@@ -284,75 +236,89 @@ function Auth() {
                     <div className="flex items-center gap-3">
                       <div className="w-5 h-5 flex-shrink-0"></div>
                       <label className="dashboard-label">
-                        Email Address
+                        Phone Number (Optional)
                       </label>
                     </div>
                     <div className="flex items-center gap-3">
-                      <EmailIcon className="text-gray-400 w-5 h-5 flex-shrink-0" />
+                      <PhoneIcon className="text-gray-400 w-5 h-5 flex-shrink-0" />
                       <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
                         onChange={handleInputChange}
                         className="dashboard-input"
-                        placeholder="Enter your email"
-                        required={!isLogin}
+                        placeholder="Enter your phone number (optional)"
+                        maxLength="10"
                       />
                     </div>
                   </div>
                 )}
 
-                {!otpSent && (
-                  <button
-                    type="button"
-                    onClick={isLogin ? handleSendLoginOtp : handleSendSignupOtp}
-                    disabled={otpLoading || resendTimer > 0}
-                    className="dashboard-button-secondary w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {otpLoading ? 'Sending OTP...' : 'Send OTP'}
-                  </button>
-                )}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 flex-shrink-0"></div>
+                    <label className="dashboard-label">
+                      Password
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <LockIcon className="text-gray-400 w-5 h-5 flex-shrink-0" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="dashboard-input"
+                      placeholder="Enter your password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                    </button>
+                  </div>
+                </div>
 
-                {otpSent && (
+                {!isLogin && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-3">
                       <div className="w-5 h-5 flex-shrink-0"></div>
                       <label className="dashboard-label">
-                        OTP Code
+                        Confirm Password
                       </label>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-5 h-5 flex-shrink-0"></div>
+                      <LockIcon className="text-gray-400 w-5 h-5 flex-shrink-0" />
                       <input
-                        type="text"
-                        name="otp"
-                        value={formData.otp}
+                        type={showConfirmPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
                         onChange={handleInputChange}
                         className="dashboard-input"
-                        placeholder="Enter 6-digit OTP"
-                        maxLength="6"
-                        required
+                        placeholder="Confirm your password"
+                        required={!isLogin}
                       />
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="submit"
-                        disabled={loading || !formData.otp || formData.otp.length !== 6}
-                        className="dashboard-button-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {loading ? 'Verifying...' : (isLogin ? 'Login' : 'Sign Up')}
-                      </button>
                       <button
                         type="button"
-                        onClick={isLogin ? handleSendLoginOtp : handleSendSignupOtp}
-                        disabled={otpLoading || resendTimer > 0}
-                        className="dashboard-button-secondary disabled:opacity-50 disabled:cursor-not-allowed px-4"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="text-gray-400 hover:text-gray-600"
                       >
-                        {otpLoading ? '...' : resendTimer > 0 ? `Resend (${resendTimer}s)` : 'Resend'}
+                        {showConfirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
                       </button>
                     </div>
                   </div>
                 )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="dashboard-button-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Processing...' : (isLogin ? 'Login' : 'Sign Up')}
+                </button>
               </form>
 
               {/* Footer */}

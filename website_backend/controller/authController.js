@@ -1,390 +1,39 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const otpGenerator = require('otp-generator');
-const { Otp, sendVerificationSms } = require("../models/Otp");
 
-// Send OTP for phone verification (for login)
-const sendPhoneOtp = async (req, res) => {
-    try {
-        const { phone } = req.body;
-        
-        if (!phone) {
-            return res.status(400).json({
-                success: false,
-                message: "Phone number is required"
-            });
-        }
-        
-        // Check if user exists
-        const user = await User.findOne({ phone });
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found with this phone number"
-            });
-        }
-        
-        // Generate unique OTP with retry limit
-        let otp;
-        let attempts = 0;
-        const maxAttempts = 10;
-        
-        do {
-            otp = otpGenerator.generate(6, { 
-                upperCaseAlphabets: false, 
-                specialChars: false 
-            });
-            attempts++;
-            
-            if (attempts >= maxAttempts) {
-                return res.status(500).json({
-                    success: false,
-                    message: "Unable to generate unique OTP. Please try again."
-                });
-            }
-        } while (await Otp.findOne({ otp, phone }));
-        
-        // Delete any existing OTP for this phone
-        await Otp.deleteMany({ phone });
-        
-        const otpPayload = { phone, otp, type: 'phone' };
-        const otpBody = await Otp.create(otpPayload);
-        
-        return res.status(200).json({
-            success: true,
-            message: "OTP sent successfully to your phone",
-            otp, // Remove this in production
-        });
-    } catch (error) {
-        console.error("Error in sendPhoneOtp:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Error in sending OTP"
-        });
-    }
-};
-
-// Send OTP for signup (phone verification)
-const sendSignupOtp = async (req, res) => {
-    try {
-        const { phone, email, name } = req.body;
-        
-        if (!phone || !email || !name) {
-            return res.status(400).json({
-                success: false,
-                message: "Phone number, email, and name are required"
-            });
-        }
-        
-        // Check if user already exists
-        const existingUser = await User.findOne({ 
-            $or: [{ phone }, { email }] 
-        });
-        if (existingUser) {
-            return res.status(400).json({
-                success: false,
-                message: "User already exists with this phone number or email"
-            });
-        }
-        
-        // Generate unique OTP with retry limit
-        let otp;
-        let attempts = 0;
-        const maxAttempts = 10;
-        
-        do {
-            otp = otpGenerator.generate(6, { 
-                upperCaseAlphabets: false, 
-                specialChars: false 
-            });
-            attempts++;
-            
-            if (attempts >= maxAttempts) {
-                return res.status(500).json({
-                    success: false,
-                    message: "Unable to generate unique OTP. Please try again."
-                });
-            }
-        } while (await Otp.findOne({ otp, phone }));
-        
-        // Delete any existing OTP for this phone
-        await Otp.deleteMany({ phone });
-        
-        const otpPayload = { phone, otp, type: 'phone' };
-        const otpBody = await Otp.create(otpPayload);
-        
-        return res.status(200).json({
-            success: true,
-            message: "OTP sent successfully to your phone",
-            otp, // Remove this in production
-        });
-    } catch (error) {
-        console.error("Error in sendSignupOtp:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Error in sending OTP"
-        });
-    }
-};
-
-// Send OTP for admin signup (phone verification)
-const sendAdminSignupOtp = async (req, res) => {
-    try {
-        const { phone, email, name, adminSecret } = req.body;
-        
-        if (!phone || !email || !name || !adminSecret) {
-            return res.status(400).json({
-                success: false,
-                message: "Phone number, email, name, and admin secret are required"
-            });
-        }
-        
-        // Verify admin secret key
-        if (adminSecret !== process.env.ADMIN_SECRET_KEY) {
-            return res.status(403).json({
-                success: false,
-                message: "Unauthorized: Invalid admin secret key"
-            });
-        }
-        
-        // Check if user already exists
-        const existingUser = await User.findOne({ 
-            $or: [{ phone }, { email }] 
-        });
-        if (existingUser) {
-            return res.status(400).json({
-                success: false,
-                message: "User already exists with this phone number or email"
-            });
-        }
-        
-        // Check if admin already exists
-        const existingAdmin = await User.findOne({ accountType: "admin" });
-        if (existingAdmin) {
-            return res.status(400).json({
-                success: false,
-                message: "Admin user already exists"
-            });
-        }
-        
-        // Generate unique OTP with retry limit
-        let otp;
-        let attempts = 0;
-        const maxAttempts = 10;
-        
-        do {
-            otp = otpGenerator.generate(6, { 
-                upperCaseAlphabets: false, 
-                specialChars: false 
-            });
-            attempts++;
-            
-            if (attempts >= maxAttempts) {
-                return res.status(500).json({
-                    success: false,
-                    message: "Unable to generate unique OTP. Please try again."
-                });
-            }
-        } while (await Otp.findOne({ otp, phone }));
-        
-        // Delete any existing OTP for this phone
-        await Otp.deleteMany({ phone });
-        
-        const otpPayload = { phone, otp, type: 'phone' };
-        const otpBody = await Otp.create(otpPayload);
-        
-        return res.status(200).json({
-            success: true,
-            message: "OTP sent successfully to your phone",
-            otp, // Remove this in production
-        });
-    } catch (error) {
-        console.error("Error in sendAdminSignupOtp:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Error in sending OTP"
-        });
-    }
-};
-
-// Send OTP for admin login (phone verification)
-const sendAdminLoginOtp = async (req, res) => {
-    try {
-        const { phone } = req.body;
-        
-        if (!phone) {
-            return res.status(400).json({
-                success: false,
-                message: "Phone number is required"
-            });
-        }
-        
-        // Check if user exists and is admin
-        const user = await User.findOne({ phone });
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found with this phone number"
-            });
-        }
-        
-        if (user.accountType !== "admin") {
-            return res.status(403).json({
-                success: false,
-                message: "Access denied: User is not an admin"
-            });
-        }
-        
-        // Generate unique OTP with retry limit
-        let otp;
-        let attempts = 0;
-        const maxAttempts = 10;
-        
-        do {
-            otp = otpGenerator.generate(6, { 
-                upperCaseAlphabets: false, 
-                specialChars: false 
-            });
-            attempts++;
-            
-            if (attempts >= maxAttempts) {
-                return res.status(500).json({
-                    success: false,
-                    message: "Unable to generate unique OTP. Please try again."
-                });
-            }
-        } while (await Otp.findOne({ otp, phone }));
-        
-        // Delete any existing OTP for this phone
-        await Otp.deleteMany({ phone });
-        
-        const otpPayload = { phone, otp, type: 'phone' };
-        const otpBody = await Otp.create(otpPayload);
-        
-        return res.status(200).json({
-            success: true,
-            message: "OTP sent successfully to your phone",
-            otp, // Remove this in production
-        });
-    } catch (error) {
-        console.error("Error in sendAdminLoginOtp:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Error in sending OTP"
-        });
-    }
-};
-
-// Legacy email OTP function (keeping for backward compatibility)
-const sendOtp = async (req,res) =>{
-    try{
-        const {email} = req.body;
-         
-        // Check for recent OTP requests (rate limiting)
-        const checkUserPresent = await User.findOne({email});
-        if (checkUserPresent) {
-            return res.status(429).json({
-                success: false,
-                message: "User already exists"
-            });
-        }
-        
-        // Generate unique OTP with retry limit
-        let otp;
-        let attempts = 0;
-        const maxAttempts = 10;
-        
-        do {
-            otp = otpGenerator.generate(6, { 
-                upperCaseAlphabets: false, 
-                specialChars: false 
-            });
-            attempts++;
-            
-            if (attempts >= maxAttempts) {
-                return res.status(500).json({
-                    success: false,
-                    message: "Unable to generate unique OTP. Please try again."
-                });
-            }
-        } while (await Otp.findOne({ otp }));
-        
-        const otpPayload = {email, otp, type: 'email'};
-        const otpBody = await Otp.create(otpPayload);
-        
-        return res.status(200).json({
-            success: true,
-            message: "OTP sent successfully to your email",
-            otp,
-        });
-    } catch(error){
-        console.error("Error in sendOtp:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Error in sending OTP"
-        });
-    }
-}
-
+// Simple signup with email and password
 const signup = async (req, res) => {
     try {
-        const { name, email, phone, otp } = req.body;
+        const { name, email, password, phone } = req.body;
         
-        if (!name || !email || !phone || !otp) {
+        if (!name || !email || !password) {
             return res.status(400).json({
                 success: false,
-                message: "Name, email, phone, and OTP are required"
+                message: "Name, email, and password are required"
             });
         }
         
         // Check if user already exists
-        const existingUser = await User.findOne({ 
-            $or: [{ email }, { phone }] 
-        });
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
-            console.log("❌ User already exists:", email);
             return res.status(400).json({ 
                 success: false, 
-                message: "User already exists" 
+                message: "User already exists with this email" 
             });
         }
 
-        // Verify OTP
-        const recentOtp = await Otp.findOne({ phone, type: 'phone' }).sort({createdAt:-1}).limit(1);
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
         
-        if (!recentOtp) {
-            return res.status(400).json({
-                success: false,
-                message: "OTP not found"
-            });
-        } else if (otp !== recentOtp.otp.toString()) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid OTP"
-            });
-        }
-        
-        // Check if OTP has expired (5 minutes)
-        const otpAge = Date.now() - recentOtp.createdAt.getTime();
-        const otpExpiryTime = 5 * 60 * 1000; // 5 minutes in milliseconds
-        
-        if (otpAge > otpExpiryTime) {
-            // Delete expired OTP
-            await Otp.deleteOne({ _id: recentOtp._id });
-            return res.status(400).json({
-                success: false,
-                message: "OTP has expired. Please request a new one."
-            });
-        }
-        
-        // Create user (phone verified)
+        // Create user
         const userPayload = {
             name,
             email,
-            phone,
-            isPhoneVerified: true,
-            isEmailVerified: false,
+            password: hashedPassword,
+            phone: phone || null,
+            isEmailVerified: true,
+            isPhoneVerified: false,
             profilePicture: `https://api.dicebear.com/5.x/initials/svg?seed=${name}`
         };
         
@@ -393,7 +42,7 @@ const signup = async (req, res) => {
         // Automatically log the user in after successful signup
         const payload = {
             userId: userBody._id,
-            phone: userBody.phone,
+            email: userBody.email,
             accountType: userBody.accountType,
         };
 
@@ -403,9 +52,6 @@ const signup = async (req, res) => {
         // Update user with token
         userBody.token = token;
         await userBody.save();
-        
-        // Delete the used OTP only after successful user creation and authentication
-        await Otp.deleteOne({ _id: recentOtp._id });
         
         // Set HTTP-only cookie
         res.cookie("token", token, {
@@ -443,18 +89,19 @@ const signup = async (req, res) => {
     }
 };
 
+// Simple login with email and password
 const login = async (req, res) => {
     try {
-        const { phone, otp } = req.body;
+        const { email, password } = req.body;
 
-        if (!phone || !otp) {
+        if (!email || !password) {
             return res.status(400).json({
                 success: false,
-                message: "Phone number and OTP are required"
+                message: "Email and password are required"
             });
         }
 
-        const user = await User.findOne({ phone });
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ 
                 success: false, 
@@ -462,46 +109,19 @@ const login = async (req, res) => {
             });
         }
 
-        // Check if phone is verified
-        if (!user.isPhoneVerified) {
+        // Verify password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
             return res.status(400).json({ 
                 success: false, 
-                message: "Please verify your phone number before logging in" 
-            });
-        }
-        
-        // Verify OTP
-        const recentOtp = await Otp.findOne({ phone, type: 'phone' }).sort({createdAt:-1}).limit(1);
-        
-        if (!recentOtp) {
-            return res.status(400).json({
-                success: false,
-                message: "OTP not found"
-            });
-        } else if (otp !== recentOtp.otp.toString()) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid OTP"
-            });
-        }
-        
-        // Check if OTP has expired (5 minutes)
-        const otpAge = Date.now() - recentOtp.createdAt.getTime();
-        const otpExpiryTime = 5 * 60 * 1000; // 5 minutes in milliseconds
-        
-        if (otpAge > otpExpiryTime) {
-            // Delete expired OTP
-            await Otp.deleteOne({ _id: recentOtp._id });
-            return res.status(400).json({
-                success: false,
-                message: "OTP has expired. Please request a new one."
+                message: "Invalid password" 
             });
         }
 
         // Create JWT payload
         const payload = {
             userId: user._id,
-            phone: user.phone,
+            email: user.email,
             accountType: user.accountType,
         };
 
@@ -511,9 +131,6 @@ const login = async (req, res) => {
         // Update user with token
         user.token = token;
         await user.save();
-        
-        // Delete the used OTP only after successful authentication
-        await Otp.deleteOne({ _id: recentOtp._id });
 
         // Set HTTP-only cookie
         res.cookie("token", token, {
@@ -551,15 +168,15 @@ const login = async (req, res) => {
     }
 };
 
-// Secure admin creation function - requires special secret key and OTP
+// Admin signup with email and password
 const createAdmin = async (req, res) => {
     try {
-        const { name, email, phone, adminSecret, otp } = req.body;
+        const { name, email, password, adminSecret, phone } = req.body;
         
-        if (!name || !email || !phone || !adminSecret || !otp) {
+        if (!name || !email || !password || !adminSecret) {
             return res.status(400).json({
                 success: false,
-                message: "Name, email, phone, admin secret, and OTP are required"
+                message: "Name, email, password, and admin secret are required"
             });
         }
         
@@ -572,9 +189,7 @@ const createAdmin = async (req, res) => {
         }
         
         // Check if user already exists
-        const existingUser = await User.findOne({ 
-            $or: [{ phone }, { email }] 
-        });
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ 
                 success: false, 
@@ -590,42 +205,18 @@ const createAdmin = async (req, res) => {
                 message: "Admin user already exists" 
             });
         }
-        
-        // Verify OTP
-        const recentOtp = await Otp.findOne({ phone, type: 'phone' }).sort({createdAt:-1}).limit(1);
-        
-        if (!recentOtp) {
-            return res.status(400).json({
-                success: false,
-                message: "OTP not found"
-            });
-        } else if (otp !== recentOtp.otp.toString()) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid OTP"
-            });
-        }
-        
-        // Check if OTP has expired (5 minutes)
-        const otpAge = Date.now() - recentOtp.createdAt.getTime();
-        const otpExpiryTime = 5 * 60 * 1000; // 5 minutes in milliseconds
-        
-        if (otpAge > otpExpiryTime) {
-            // Delete expired OTP
-            await Otp.deleteOne({ _id: recentOtp._id });
-            return res.status(400).json({
-                success: false,
-                message: "OTP has expired. Please request a new one."
-            });
-        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const adminPayload = {
             name,
             email,
-            phone,
+            password: hashedPassword,
+            phone: phone || null,
             accountType: "admin",
-            isPhoneVerified: true,
-            isEmailVerified: false,
+            isEmailVerified: true,
+            isPhoneVerified: false,
             profilePicture: `https://api.dicebear.com/5.x/initials/svg?seed=${name}`
         };
         
@@ -634,7 +225,7 @@ const createAdmin = async (req, res) => {
         // Automatically log the admin in after successful signup
         const payload = {
             userId: adminUser._id,
-            phone: adminUser.phone,
+            email: adminUser.email,
             accountType: adminUser.accountType,
         };
 
@@ -665,9 +256,6 @@ const createAdmin = async (req, res) => {
             createdAt: adminUser.createdAt
         };
         
-        // Delete the used OTP only after successful admin creation and authentication
-        await Otp.deleteOne({ _id: recentOtp._id });
-        
         return res.status(200).json({ 
             success: true, 
             message: "Admin account created successfully and logged in!",
@@ -684,18 +272,19 @@ const createAdmin = async (req, res) => {
     }
 };
 
+// Admin login with email and password
 const loginAdmin = async (req, res) => {
     try {
-        const { phone, otp } = req.body;
+        const { email, password } = req.body;
         
-        if (!phone || !otp) {
+        if (!email || !password) {
             return res.status(400).json({
                 success: false,
-                message: "Phone number and OTP are required"
+                message: "Email and password are required"
             });
         }
         
-        const user = await User.findOne({ phone });
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({
                 success: false,
@@ -709,54 +298,24 @@ const loginAdmin = async (req, res) => {
                 message: "User is not an admin"
             });
         }
-        
-        // Check if phone is verified
-        if (!user.isPhoneVerified) {
+
+        // Verify password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
             return res.status(400).json({ 
                 success: false, 
-                message: "Please verify your phone number before logging in" 
-            });
-        }
-        
-        // Verify OTP
-        const recentOtp = await Otp.findOne({ phone, type: 'phone' }).sort({createdAt:-1}).limit(1);
-        
-        if (!recentOtp) {
-            return res.status(400).json({
-                success: false,
-                message: "OTP not found"
-            });
-        } else if (otp !== recentOtp.otp.toString()) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid OTP"
-            });
-        }
-        
-        // Check if OTP has expired (5 minutes)
-        const otpAge = Date.now() - recentOtp.createdAt.getTime();
-        const otpExpiryTime = 5 * 60 * 1000; // 5 minutes in milliseconds
-        
-        if (otpAge > otpExpiryTime) {
-            // Delete expired OTP
-            await Otp.deleteOne({ _id: recentOtp._id });
-            return res.status(400).json({
-                success: false,
-                message: "OTP has expired. Please request a new one."
+                message: "Invalid password" 
             });
         }
 
         const payload = {
             userId: user._id,
-            phone: user.phone,
+            email: user.email,
             accountType: user.accountType,
         };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
         user.token = token;
         await user.save();
-        
-        // Delete the used OTP only after successful authentication
-        await Otp.deleteOne({ _id: recentOtp._id });
         
         res.cookie("token", token, {
             httpOnly: true,
@@ -786,7 +345,8 @@ const loginAdmin = async (req, res) => {
             message: "Admin login failed, please try again"
         });
     }
-}
+};
+
 // Function to promote existing user to admin (requires admin secret)
 const promoteToAdmin = async (req, res) => {
     try {
@@ -819,8 +379,6 @@ const promoteToAdmin = async (req, res) => {
         
         // Promote to admin
         user.accountType = "admin";
-        // Set phone as verified since admin login requires OTP verification
-        user.isPhoneVerified = true;
         await user.save();
         
         return res.status(200).json({
@@ -972,99 +530,42 @@ const updateAccountType = async (req, res) => {
     }
 };
 
-// Legacy email-based login (keeping for backward compatibility)
-const loginWithEmail = async (req, res) => {
+// Logout function
+const logout = async (req, res) => {
     try {
-        const { email, password } = req.body;
-
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "User not found" 
-            });
-        }
-
-        // Verify password
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Invalid password" 
-            });
+        const userId = req.user.userId;
+        const user = await User.findOne({ _id: userId });
+        
+        if (user) {
+            user.token = null;
+            await user.save();
         }
         
-        // Check if email is verified
-        if (!user.isEmailVerified) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Please verify your email before logging in" 
-            });
-        }
-
-        // Create JWT payload
-        const payload = {
-            userId: user._id,
-            email: user.email,
-            accountType: user.accountType,
-        };
-
-        // Generate token
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
+        // Clear cookie
+        res.clearCookie("token");
         
-        // Update user with token
-        user.token = token;
-        await user.save();
-
-        // Set HTTP-only cookie
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000) // 2 days
+        return res.status(200).json({
+            success: true,
+            message: "Logged out successfully"
         });
-
-        // Return user data without password
-        const userResponse = {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-            accountType: user.accountType,
-            isEmailVerified: user.isEmailVerified,
-            isPhoneVerified: user.isPhoneVerified,
-            profilePicture: user.profilePicture,
-            createdAt: user.createdAt
-        };
-
-        return res.status(200).json({ 
-            success: true, 
-            message: "Login successful", 
-            token, 
-            user: userResponse 
-        });
-
+        
     } catch (error) {
-        console.error("Error in login:", error);
-        return res.status(500).json({ 
-            success: false, 
-            message: "Login failed, please try again" 
+        console.error("Error in logout:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Error during logout"
         });
     }
 };
 
 module.exports = {
-    sendOtp,
-    sendPhoneOtp,
-    sendSignupOtp,
-    sendAdminSignupOtp,
-    sendAdminLoginOtp,
     signup,
     login,
-    loginWithEmail,
     createAdmin,
+    loginAdmin,
     promoteToAdmin,
     getUserDetails,
     updateUserDetails,
     updateAccountType,
-    loginAdmin
-}
+    logout
+};
